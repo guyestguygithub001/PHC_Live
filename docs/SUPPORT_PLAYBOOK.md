@@ -271,3 +271,16 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - **Pharmacy (Drug Revolving Fund):** Prescription queue, active drug stock dashboard, strict dispensing deduction (mocked offline). Built strict Lab Result Safety checks (blocks dispensing Malaria drugs without a positive lab result).
 - **Referrals:** Outgoing referral generation to General Hospitals (Kaduna, Zaria, Barau Dikko). Tracks patient status (Pending Sync, Sent, Received). Included Counter-Referral feedback loops from secondary facilities.
 - **Cross-cutting:** Added Hausa translations, dark/light theme support, and `uuidv4()` receipt generation for all modules. Wired into `App.tsx` main navigation.
+
+---
+
+### Entry 019 — Laboratory External Referral Feature
+**Date:** 2026-08-11
+**Action:** User provided a UI screenshot of external lab cards. Requested a feature to refer patients outwards if the PHC lacks testing capacity.
+**Modifications:**
+- Updated `Laboratory.tsx` to include a sub-tab system on the Result Entry panel: "Enter Results" vs "External Referral".
+- Built the External Referral UI to match the screenshot precisely, including:
+  - Search bar for filtering labs.
+  - Lab cards with purple highlighted badges, locations, and contact info.
+  - Replaced the generic "Book appointment" button with a contextually appropriate "Generate Slip" button that generates a UUID slip for the patient to take to the lab.
+- Added full EN/HA translations (`Tura zuwa Wani Dakin Gwaji`, `Fitar da Takarda`).
