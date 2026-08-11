@@ -256,3 +256,18 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - All 4 component files (`App.tsx`, `FrontDesk.tsx`, `Triage.tsx`, `Consultation.tsx`) refactored to use `var(--variable)` instead of hardcoded Tailwind colors.
 - Background gradient blobs only render in dark mode.
 - The emerald accent color is shared across both themes for brand consistency.
+
+---
+
+### Entry 018 — Sprints 7, 8 & 9 (Laboratory, Pharmacy, and Referral Modules)
+**Date:** 2026-08-11
+**Action:** Built and integrated the remaining clinical workflow modules.
+**Files Created:**
+- `clinic-app/src/components/Laboratory.tsx`
+- `clinic-app/src/components/Pharmacy.tsx`
+- `clinic-app/src/components/Referral.tsx`
+**Key Features Implemented:**
+- **Laboratory:** Request queue, dynamic result entry forms (Malaria RDT, Widal, Full Blood Count). Implemented visual mandatory testing badges for Malaria.
+- **Pharmacy (Drug Revolving Fund):** Prescription queue, active drug stock dashboard, strict dispensing deduction (mocked offline). Built strict Lab Result Safety checks (blocks dispensing Malaria drugs without a positive lab result).
+- **Referrals:** Outgoing referral generation to General Hospitals (Kaduna, Zaria, Barau Dikko). Tracks patient status (Pending Sync, Sent, Received). Included Counter-Referral feedback loops from secondary facilities.
+- **Cross-cutting:** Added Hausa translations, dark/light theme support, and `uuidv4()` receipt generation for all modules. Wired into `App.tsx` main navigation.
