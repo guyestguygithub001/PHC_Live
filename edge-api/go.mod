@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	golang.org/x/time v0.5.0
 	gorm.io/gorm v1.25.7
 	gorm.io/driver/postgres v1.5.7
 )

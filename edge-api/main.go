@@ -17,6 +17,9 @@ func main() {
 
 	r := gin.Default()
 
+	// Apply Rate Limiting: 100 requests per second, max burst of 50
+	r.Use(auth.RateLimitMiddleware(100.0, 50))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong from the Edge Server",
