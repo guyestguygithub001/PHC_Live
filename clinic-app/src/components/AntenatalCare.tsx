@@ -1,0 +1,420 @@
+import React, { useState, useEffect } from 'react';
+import { Baby, Activity, Calendar, HeartPulse, FileText, CheckCircle } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+
+interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  gestationalAge: string; // e.g., '24 weeks'
+  status: 'waiting' | 'in-progress' | 'completed';
+}
+
+interface AntenatalCareProps {
+  language: 'EN' | 'HA';
+  theme: 'light' | 'dark';
+}
+
+// Translations dictionary
+const translations = {
+  EN: {
+    title: 'Antenatal Care & Delivery',
+    ancQueue: 'ANC Queue',
+    ancVisit: 'ANC Visit',
+    deliveryRegister: 'Delivery Register',
+    waiting: 'Waiting',
+    inProgress: 'In Progress',
+    completed: 'Completed',
+    selectPatient: 'Select a patient from the queue to view details',
+    recordVisit: 'Record Visit',
+    vitals: 'Vitals',
+    weight: 'Weight (kg)',
+    bloodPressure: 'Blood Pressure (mmHg)',
+    foetalTracking: 'Foetal Tracking',
+    fhr: 'Foetal Heart Rate (bpm)',
+    presentation: 'Presentation / Position',
+    scanNotes: 'Scan Notes',
+    submitDelivery: 'Submit Delivery Record',
+    liveBirth: 'Live Birth',
+    yes: 'Yes',
+    no: 'No',
+    stillbirthType: 'Stillbirth Type',
+    macerated: 'Macerated',
+    fresh: 'Fresh',
+    apgarScore: 'APGAR Score (0-10)',
+    birthWeight: 'Birth Weight (kg)',
+    gender: 'Gender',
+    male: 'Male',
+    female: 'Female',
+    successAnc: 'ANC Visit recorded successfully',
+    successDelivery: 'Delivery recorded with ID:',
+    gestationalAge: 'Gestational Age',
+  },
+  HA: {
+    title: 'Awo & Haihuwa (ANC & Delivery)',
+    ancQueue: 'Jerin Masu Jiran Awo',
+    ancVisit: 'Awo (ANC Visit)',
+    deliveryRegister: 'Rijistar Haihuwa',
+    waiting: 'Suna Jiran',
+    inProgress: 'Ana Dubawa',
+    completed: 'An Kammala',
+    selectPatient: 'Zabi mara lafiya daga jerin domin ganin bayanai',
+    recordVisit: 'Yi Rikodin Awo',
+    vitals: 'Auna Jiki',
+    weight: 'Nauyi (kg)',
+    bloodPressure: 'Hawan Jini (mmHg)',
+    foetalTracking: 'Ganin Jariri',
+    fhr: 'Bugun Zuciyar Jariri (bpm)',
+    presentation: 'Yadda Jariri Yake',
+    scanNotes: 'Karin Bayani',
+    submitDelivery: 'Tura Bayanin Haihuwa',
+    liveBirth: 'Rayayye (Live Birth)',
+    yes: 'Eh',
+    no: 'A\'a',
+    stillbirthType: 'Nau\'in Mutuwar Ciki',
+    macerated: 'Macerated',
+    fresh: 'Fresh',
+    apgarScore: 'Makin APGAR (0-10)',
+    birthWeight: 'Nauyin Jariri (kg)',
+    gender: 'Jinsi',
+    male: 'Namiji',
+    female: 'Mace',
+    successAnc: 'An yi rikodin Awo cikin nasara',
+    successDelivery: 'An yi rikodin Haihuwa mai Lamba:',
+    gestationalAge: 'Adadin Makonnin Ciki',
+  }
+};
+
+// Mock data to be replaced with API fetch later
+const mockQueue: Patient[] = [
+  { id: '1', name: 'Amina Yusuf', age: 26, gestationalAge: '32 weeks', status: 'waiting' },
+  { id: '2', name: 'Fatima Ali', age: 30, gestationalAge: '38 weeks', status: 'in-progress' },
+  { id: '3', name: 'Zainab Umar', age: 22, gestationalAge: '14 weeks', status: 'waiting' },
+  { id: '4', name: 'Hauwa Musa', age: 28, gestationalAge: '40 weeks', status: 'waiting' },
+];
+
+export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme }) => {
+  const t = translations[language];
+  
+  const [queue, setQueue] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [activeTab, setActiveTab] = useState<'anc' | 'delivery'>('anc');
+  
+  // Clean component state for forms
+  const [ancForm, setAncForm] = useState({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
+  const [deliveryForm, setDeliveryForm] = useState({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Initialize data - easily swappable for real data fetching later
+  useEffect(() => {
+    setQueue(mockQueue);
+  }, []);
+
+  const handlePatientSelect = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setActiveTab('anc'); // Reset to default tab
+    // Reset forms when switching patient
+    setAncForm({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
+    setDeliveryForm({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
+    setToastMessage(null);
+  };
+
+  const handleAncSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Replace with actual save to DB/API
+    console.log('Submitting ANC Visit:', ancForm, 'for Patient:', selectedPatient?.id);
+    
+    setToastMessage(t.successAnc);
+    setTimeout(() => setToastMessage(null), 3000);
+    setAncForm({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
+  };
+
+  const handleDeliverySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const recordId = uuidv4();
+    
+    // TODO: Replace with actual save to DB/API
+    console.log('Submitting Delivery:', deliveryForm, 'Record ID:', recordId, 'for Patient:', selectedPatient?.id);
+    
+    setToastMessage(`${t.successDelivery} ${recordId.split('-')[0]}`);
+    setTimeout(() => setToastMessage(null), 4000);
+    setDeliveryForm({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
+  };
+
+  const getStatusColor = (status: Patient['status']) => {
+    switch (status) {
+      case 'waiting': return 'text-orange-500 bg-orange-500/10';
+      case 'in-progress': return 'text-indigo-500 bg-indigo-500/10';
+      case 'completed': return 'text-emerald-500 bg-emerald-500/10';
+      default: return 'text-gray-500 bg-gray-500/10';
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden" style={{ color: 'var(--text-primary)' }}>
+      {/* Header Area */}
+      <div className="px-6 py-4 flex items-center gap-3 border-b" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)' }}>
+        <div className="p-2 bg-purple-500/10 rounded-lg">
+          <Baby className="w-6 h-6 text-purple-500" />
+        </div>
+        <h1 className="text-xl font-bold">{t.title}</h1>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Panel: ANC Queue */}
+        <div className="w-1/3 border-r overflow-y-auto" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--queue-bg)' }}>
+          <div className="p-4 border-b sticky top-0 z-10" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--queue-bg)' }}>
+            <h2 className="font-semibold">{t.ancQueue}</h2>
+          </div>
+          <div className="p-2 space-y-2">
+            {queue.map(patient => (
+              <button
+                key={patient.id}
+                onClick={() => handlePatientSelect(patient)}
+                className="w-full text-left p-3 rounded-lg border transition-all duration-200"
+                style={{ 
+                  backgroundColor: selectedPatient?.id === patient.id ? 'var(--queue-item-hover)' : 'var(--queue-item-bg)',
+                  borderColor: selectedPatient?.id === patient.id ? 'var(--border-default)' : 'transparent',
+                }}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className="font-medium">{patient.name}</span>
+                  <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(patient.status)}`}>
+                    {t[patient.status === 'in-progress' ? 'inProgress' : patient.status]}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    <span>{patient.age} yrs</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Baby className="w-3 h-3" />
+                    <span>{patient.gestationalAge}</span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Panel: Main Content View */}
+        <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--card-bg)' }}>
+          {selectedPatient ? (
+            <>
+              {/* Patient Info Header & Tabs */}
+              <div className="p-6 border-b" style={{ borderColor: 'var(--border-default)' }}>
+                <div className="flex justify-between items-center mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold">{selectedPatient.name}</h2>
+                    <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                      ID: {selectedPatient.id} • {selectedPatient.age} yrs • {t.gestationalAge}: {selectedPatient.gestationalAge}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setActiveTab('anc')}
+                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'anc' ? 'border-purple-500 text-purple-500' : 'border-transparent hover:border-gray-300'}`}
+                    style={{ color: activeTab === 'anc' ? undefined : 'var(--text-secondary)' }}
+                  >
+                    {t.ancVisit}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('delivery')}
+                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'delivery' ? 'border-purple-500 text-purple-500' : 'border-transparent hover:border-gray-300'}`}
+                    style={{ color: activeTab === 'delivery' ? undefined : 'var(--text-secondary)' }}
+                  >
+                    {t.deliveryRegister}
+                  </button>
+                </div>
+              </div>
+
+              {/* Tab Form Content */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {toastMessage && (
+                  <div className="mb-6 p-4 bg-emerald-500/10 text-emerald-500 rounded-lg flex items-center gap-2 border border-emerald-500/20">
+                    <CheckCircle className="w-5 h-5" />
+                    {toastMessage}
+                  </div>
+                )}
+
+                {/* ANC Visit Tab */}
+                {activeTab === 'anc' && (
+                  <form onSubmit={handleAncSubmit} className="space-y-6 max-w-2xl">
+                    <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-purple-500" />
+                        {t.vitals}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{t.weight}</label>
+                          <input 
+                            type="number" step="0.1" required
+                            value={ancForm.weight} onChange={e => setAncForm({...ancForm, weight: e.target.value})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{t.bloodPressure}</label>
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="number" placeholder="Sys" required
+                              value={ancForm.bpSys} onChange={e => setAncForm({...ancForm, bpSys: e.target.value})}
+                              className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                              style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                            />
+                            <span style={{ color: 'var(--text-secondary)' }}>/</span>
+                            <input 
+                              type="number" placeholder="Dia" required
+                              value={ancForm.bpDia} onChange={e => setAncForm({...ancForm, bpDia: e.target.value})}
+                              className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                              style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <HeartPulse className="w-5 h-5 text-purple-500" />
+                        {t.foetalTracking}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{t.fhr}</label>
+                          <input 
+                            type="number"
+                            value={ancForm.fhr} onChange={e => setAncForm({...ancForm, fhr: e.target.value})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{t.presentation}</label>
+                          <input 
+                            type="text" placeholder="e.g. Cephalic"
+                            value={ancForm.presentation} onChange={e => setAncForm({...ancForm, presentation: e.target.value})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{t.scanNotes}</label>
+                        <textarea 
+                          rows={3}
+                          value={ancForm.notes} onChange={e => setAncForm({...ancForm, notes: e.target.value})}
+                          className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none resize-none"
+                          style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                        />
+                      </div>
+                    </div>
+
+                    <button 
+                      type="submit"
+                      className="w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-xl transition-colors flex justify-center items-center gap-2 shadow-sm"
+                    >
+                      <FileText className="w-5 h-5" />
+                      {t.recordVisit}
+                    </button>
+                  </form>
+                )}
+
+                {/* Delivery Register Tab */}
+                {activeTab === 'delivery' && (
+                  <form onSubmit={handleDeliverySubmit} className="space-y-6 max-w-2xl">
+                    <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.liveBirth}</label>
+                          <select 
+                            value={deliveryForm.liveBirth} 
+                            onChange={e => setDeliveryForm({...deliveryForm, liveBirth: e.target.value, stillbirthType: e.target.value === 'Yes' ? '' : deliveryForm.stillbirthType})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          >
+                            <option value="Yes">{t.yes}</option>
+                            <option value="No">{t.no}</option>
+                          </select>
+                        </div>
+
+                        {deliveryForm.liveBirth === 'No' && (
+                          <div>
+                            <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.stillbirthType}</label>
+                            <select 
+                              required
+                              value={deliveryForm.stillbirthType} onChange={e => setDeliveryForm({...deliveryForm, stillbirthType: e.target.value})}
+                              className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                              style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                            >
+                              <option value="">-- Select --</option>
+                              <option value="Macerated">{t.macerated}</option>
+                              <option value="Fresh">{t.fresh}</option>
+                            </select>
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.apgarScore}</label>
+                          <input 
+                            type="number" min="0" max="10" required
+                            value={deliveryForm.apgar} onChange={e => setDeliveryForm({...deliveryForm, apgar: e.target.value})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.birthWeight}</label>
+                          <input 
+                            type="number" step="0.1" required
+                            value={deliveryForm.birthWeight} onChange={e => setDeliveryForm({...deliveryForm, birthWeight: e.target.value})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.gender}</label>
+                          <select 
+                            value={deliveryForm.gender} onChange={e => setDeliveryForm({...deliveryForm, gender: e.target.value})}
+                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          >
+                            <option value="Male">{t.male}</option>
+                            <option value="Female">{t.female}</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      type="submit"
+                      className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors flex justify-center items-center gap-2 shadow-sm"
+                    >
+                      <Baby className="w-5 h-5" />
+                      {t.submitDelivery}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center" style={{ color: 'var(--text-muted)' }}>
+              <div className="p-6 bg-purple-500/5 rounded-full mb-4">
+                <Baby className="w-16 h-16 opacity-40 text-purple-500" />
+              </div>
+              <p className="text-lg">{t.selectPatient}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

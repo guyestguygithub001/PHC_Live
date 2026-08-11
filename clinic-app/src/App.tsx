@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon, FlaskConical, Pill, Send } from 'lucide-react';
+import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon, FlaskConical, Pill, Send, Baby, BedDouble } from 'lucide-react';
 import FrontDesk from './components/FrontDesk';
 import Triage from './components/Triage';
 import Consultation from './components/Consultation';
 import Laboratory from './components/Laboratory';
 import Pharmacy from './components/Pharmacy';
 import Referral from './components/Referral';
+import AntenatalCare from './components/AntenatalCare';
+import InpatientWard from './components/InpatientWard';
 
-type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION' | 'LABORATORY' | 'PHARMACY' | 'REFERRAL';
+type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION' | 'LABORATORY' | 'PHARMACY' | 'REFERRAL' | 'ANC' | 'IPD';
 type Language = 'EN' | 'HA';
 type Theme = 'light' | 'dark';
 
@@ -36,6 +38,8 @@ function App() {
       labTab: "Laboratory",
       pharmacyTab: "Pharmacy",
       referralTab: "Referral",
+      ancTab: "Antenatal Care",
+      ipdTab: "Inpatient Ward",
       syncPending: "3 Pending Syncs"
     },
     HA: {
@@ -53,6 +57,8 @@ function App() {
       labTab: "Dakin Gwaji",
       pharmacyTab: "Kantin Magani",
       referralTab: "Tura Mara Lafiya",
+      ancTab: "Awo (ANC)",
+      ipdTab: "Kwanciya a Asibiti",
       syncPending: "Ana Jiran Tura (3)"
     }
   };
@@ -218,6 +224,24 @@ function App() {
             <Send className="w-4 h-4" />
             <span>{t[language].referralTab}</span>
           </button>
+          <button 
+            onClick={() => setCurrentScreen('ANC')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+              currentScreen === 'ANC' ? tabActive : tabInactive
+            }`}
+          >
+            <Baby className="w-4 h-4" />
+            <span>{t[language].ancTab}</span>
+          </button>
+          <button 
+            onClick={() => setCurrentScreen('IPD')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+              currentScreen === 'IPD' ? tabActive : tabInactive
+            }`}
+          >
+            <BedDouble className="w-4 h-4" />
+            <span>{t[language].ipdTab}</span>
+          </button>
         </div>
 
         <div className="flex items-center space-x-3 mt-4 md:mt-0 px-2">
@@ -256,6 +280,8 @@ function App() {
         {currentScreen === 'LABORATORY' && <Laboratory language={language} theme={theme} />}
         {currentScreen === 'PHARMACY' && <Pharmacy language={language} theme={theme} />}
         {currentScreen === 'REFERRAL' && <Referral language={language} theme={theme} />}
+        {currentScreen === 'ANC' && <AntenatalCare language={language} theme={theme} />}
+        {currentScreen === 'IPD' && <InpatientWard language={language} theme={theme} />}
       </div>
     </div>
   );
