@@ -24,18 +24,19 @@ We do not update/mutate records. We only **append new events**.
 
 ---
 
-## 2. NoSQL vs. SQL in the Wilderness
+## 2. SQL in the Wilderness (PostgreSQL + WatermelonDB)
 
-We are using **CouchDB (Server)** and **PouchDB (Client Edge Device)**. These are NoSQL Document databases.
+The user requested **PostgreSQL (Neon)** for the central cloud due to its generous free tier and serverless scaling. However, standard SQL fails in offline environments because it requires constant network connections to maintain ACID compliance.
 
-### 2.1 Why SQL Fails Here
-Relational databases (like PostgreSQL or MySQL) require strict schemas, foreign keys, and constant network connections to a central server to ensure ACID compliance. If the network drops during a complex multi-table SQL transaction, the database locks up or the transaction fails entirely.
+### 2.1 Why Standard SQL Fails Here
+If a standard React app talks directly to a PostgreSQL database via an API, a network drop during a transaction will cause the app to hang, crash, or lose the patient's data.
 
-### 2.2 Why CouchDB Succeeds
-CouchDB was literally invented for offline replication. 
-* Every patient record or encounter is saved as an independent JSON Document.
-* It uses **Multi-Version Concurrency Control (MVCC)**. Every document has a revision hash (like a Git commit). 
-* If the network drops, the tablet saves the JSON document locally. When the network returns, the tablet throws the document over the wall to the local server. The server seamlessly merges the revision trees. It is built to survive extreme latency.
+### 2.2 The Solution: WatermelonDB Sync Protocol
+To use PostgreSQL without losing offline capabilities, we decouple the UI from the network:
+* **The Client (Tablet):** Uses **WatermelonDB** (an offline-first React database built on local SQLite). The app *never* talks to the cloud database directly. It only talks to the local SQLite database, meaning it is always 100% fast and available.
+* **The Background Sync:** When the tablet detects Wi-Fi, WatermelonDB's built-in sync engine packages all local changes into a JSON payload and pushes it to a Node.js API on the local server.
+* **The Aggregation:** The local API translates the JSON payload into standard SQL `INSERT` commands and executes them against the **Local PostgreSQL Database**.
+* **The Cloud Sync:** The Local Postgres periodically replicates to the **Neon PostgreSQL Cloud**.
 
 ---
 
@@ -56,13 +57,16 @@ This ensures the tablet's database remains tiny, lightning-fast, and crash-proof
 
 ## 4. Guaranteeing Data Integrity
 
-Because we are using a NoSQL database (which technically allows you to save any random JSON data), we risk the database becoming a swamp of corrupt data if a tablet has a software bug.
+Because we are using PostgreSQL, we gain the massive advantage of strict relational schemas.
 
-### 4.1 Application-Layer Schema Validation
-We will not rely on the database to reject bad data. The **React/Vite Frontend** and the **Zustand State Manager** will use strict validation libraries (like Zod).
-* Before the tablet ever attempts to save a record to the local PouchDB, it runs a schema check.
-* If a Nurse accidentally enters a blood pressure of `999/80`, the UI blocks the save entirely. 
-* Only perfectly structured, validated JSON documents are allowed to be written to the local database, ensuring the sync engine never chokes on malformed data.
+### 4.1 Database-Layer Schema Validation
+Unlike NoSQL where any random JSON can be saved, PostgreSQL enforces strict data types, foreign keys, and constraints.
+* If a tablet attempts to sync a record with a missing `patient_id` or an invalid date format, PostgreSQL will reject the transaction at the API boundary.
+
+### 4.2 Application-Layer Validation
+To prevent the user from ever facing a "Sync Failed" error due to bad data, the **React/Vite Frontend** uses strict validation libraries (like Zod) *before* writing to the local WatermelonDB.
+* If a Nurse accidentally enters a blood pressure of `999/80`, the UI blocks the save locally.
+* This ensures only perfectly structured data is allowed to enter the offline queue, ensuring the eventual sync to Neon PostgreSQL never chokes.
 
 ---
 *Last Updated: 2026-08-11 | Chunk 3*

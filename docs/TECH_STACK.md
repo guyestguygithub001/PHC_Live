@@ -19,12 +19,12 @@ To achieve both offline capabilities and cross-device compatibility (Android pho
 
 ## 2. The Offline-First Database Tier
 
-The core of the system relies on the database being able to live on the device itself.
+The core of the system relies on the database being able to live on the device itself, while eventually syncing to a standard relational database (PostgreSQL).
 
-* **Client Database (In-Browser):** PouchDB
-  * *Rationale:* PouchDB runs inside the browser (using IndexedDB). It allows the app to query, save, and update patient records instantly without any internet connection. It is the industry standard for offline-first web apps.
-* **Local Facility Server / Cloud Database:** CouchDB
-  * *Rationale:* PouchDB was built specifically to sync flawlessly with CouchDB. CouchDB handles the complex conflict resolution (if two nurses edit the same patient offline) using a robust Multi-Version Concurrency Control (MVCC) system.
+* **Client Database (In-Browser/On-Device):** WatermelonDB (backed by SQLite/IndexedDB)
+  * *Rationale:* WatermelonDB is specifically built for React apps to handle tens of thousands of records offline without slowing down the UI. It inherently understands how to queue actions while offline and sync them to a SQL backend when online.
+* **Local Facility Server Database:** Local PostgreSQL
+  * *Rationale:* A lightweight PostgreSQL instance running on the local edge server to act as the intermediary aggregation point for the clinic's tablets.
 
 ---
 
@@ -50,8 +50,10 @@ Every PHC will be equipped with a low-cost, low-power local edge server.
 
 ## 4. The Cloud Tier (Aggregation & Backup)
 
-* **State/National Server:** A centralized CouchDB instance hosted on AWS/Azure or local government data center.
-* **Interoperability Engine:** A Node.js middleware service that translates our CouchDB patient encounters into the standard **DHIS2** API format, pushing aggregate statistics (e.g., "50 Malaria cases this month") to the government automatically.
+* **Central Database:** PostgreSQL hosted on **Neon (Serverless Postgres)**.
+  * *Rationale:* Neon provides a generous free tier, serverless scaling (scales to zero when not used to save money), and instant branching (great for testing features without breaking the production hospital data).
+* **Sync Engine:** A Node.js middleware service that facilitates the WatermelonDB Sync Protocol between the local tablets, the local Pi server, and the central Neon PostgreSQL database.
+* **Interoperability Engine:** Pushes aggregate statistics to the government's DHIS2 servers automatically.
 
 ---
 *Last Updated: 2026-08-11 | Chunk 3*

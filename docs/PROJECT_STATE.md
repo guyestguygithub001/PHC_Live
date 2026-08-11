@@ -80,9 +80,10 @@
 | D-005 | Append-only documentation | User requirement: never rewrite, only append. 1 blueprint | 2026-08-11 |
 | D-006 | Global research informs architecture | 7-country survey (KE, ET, SL, MW, CD, HT, IN) reveals universal patterns | 2026-08-11 |
 | D-007 | 15 Architecture Requirements (AR-01 to AR-15) | Extracted from cross-country evidence — see GLOBAL_PHC_RESEARCH.md | 2026-08-11 |
-| D-008 | Open-source stack preferred | DHIS2 + OpenMRS dominant globally; prevents vendor lock-in | 2026-08-11 |
+| D-008 | Open-source stack preferred | DHIS2 interoperability; prevents vendor lock-in | 2026-08-11 |
 | D-009 | Single unified app (no vertical silos) | India's fragmented app approach proven to fail at scale | 2026-08-11 |
 | D-010 | SMS/USSD fallback required | Malawi cStock proves >85% compliance via basic phones | 2026-08-11 |
+| D-011 | PostgreSQL (Neon) for Database | User requested Neon Free Tier. Shift from NoSQL to SQL (WatermelonDB/PowerSync for offline-first) | 2026-08-11 |
 
 ---
 

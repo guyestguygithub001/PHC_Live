@@ -10,18 +10,18 @@ Data flows through three distinct tiers, ensuring the clinic never stops functio
 
 ### Tier 1: The Edge Device (Tablet / Smartphone / PC)
 * Every device runs the app from its browser cache (Service Workers).
-* Data is written to **PouchDB** (IndexedDB) locally on the device.
+* Data is written to **WatermelonDB** (SQLite/IndexedDB) locally on the device.
 * **Result:** The UI updates instantly (0ms latency). The Nurse feels like they are using a hyper-fast app, completely unaware of network status.
 
 ### Tier 2: The Local Facility Server (Raspberry Pi on UPS)
-* The device silently attempts to sync its PouchDB instance to the **Local CouchDB Server** over the clinic's local Wi-Fi router.
-* If Wi-Fi is down, the device holds the data.
-* As soon as Wi-Fi connects, it performs a continuous, two-way replication. 
+* The device silently attempts to push its WatermelonDB action queue to the **Local PostgreSQL Server** (via a Node API) over the clinic's local Wi-Fi router.
+* If Wi-Fi is down, WatermelonDB holds the changes in a local sync queue.
+* As soon as Wi-Fi connects, it performs a pull/push sync based on `updated_at` timestamps.
 * **Result:** The CHO in consultation instantly sees the Vitals just taken by the Nurse in Triage, without any data leaving the physical building.
 
-### Tier 3: The Central Cloud (State/National Server)
-* The Local CouchDB Server constantly pings for internet access (via a cellular 4G dongle or Starlink).
-* When a connection is found (e.g., cell service returns at 2 AM), the Local Server initiates a robust bulk replication up to the **Central Cloud CouchDB**.
+### Tier 3: The Central Cloud (Neon PostgreSQL)
+* The Local Postgres Server constantly pings for internet access (via a cellular 4G dongle or Starlink).
+* When a connection is found, the Local Server pushes the aggregated clinic data up to the **Neon Serverless PostgreSQL Database**.
 * **Result:** Data is backed up, referrals are dispatched to the General Hospital, and DHIS2 aggregates are populated.
 
 ---
@@ -30,16 +30,12 @@ Data flows through three distinct tiers, ensuring the clinic never stops functio
 
 What happens if Nurse A and Doctor B edit the same patient's record at the exact same time while the local Wi-Fi is down?
 
-### 2.1 Multi-Version Concurrency Control
-CouchDB/PouchDB does not lock rows. Instead, every document has a `_rev` (revision) token.
-1. Nurse A updates patient `weight` to 65kg. Record becomes revision `2-A`.
-2. Doctor B updates patient `blood_pressure` to 120/80. Record becomes revision `2-B`.
-3. When the network restores, both devices push to the Local Server.
-
-### 2.2 Deterministic Resolution
-* The database recognizes a conflict.
-* It deterministically chooses a "winning" revision based on a hash algorithm so all nodes agree on the same winner.
-* However, the "losing" revision is **not deleted**. It is saved as a historical leaf in the document's revision tree.
+### 2.1 Timestamp-Based Conflict Resolution
+Unlike standard SQL apps that just overwrite rows, WatermelonDB uses a strict sync protocol.
+1. Nurse A updates patient `weight` to 65kg while offline.
+2. Doctor B updates patient `blood_pressure` to 120/80 while offline.
+3. When both reconnect, WatermelonDB compares the local changes against the server's `last_pulled_at` timestamp.
+4. Because we are using an **append-only event ledger** (creating new records instead of mutating existing ones), both the weight event and blood pressure event are simply inserted into PostgreSQL chronologically. No data is lost.
 
 ### 2.3 Application-Level Merging
 * Our React app will detect conflicted documents.

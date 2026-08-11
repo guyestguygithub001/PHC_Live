@@ -136,3 +136,13 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - 3.3 ✅ Created `SECURITY_AND_COMPLIANCE.md` (Defining TLS 1.3, Local DB encryption via PIN, RBAC, and immutable audit trails).
 - 3.4 ✅ Created `DATABASE_ARCHITECTURE.md` (Defining the append-only ledger, CouchDB MVCC, smart sharding, and Zod schema validation).
 - 3.5 🟢 CHECKPOINT — User review of Systems Architecture.
+
+---
+
+### Entry 007 — Architectural Pivot to PostgreSQL (Neon)
+**Date:** 2026-08-11  
+**Action:** User requested switching to PostgreSQL because of the Neon Free Tier.  
+**Details:**  
+- Switched Cloud Database from CouchDB to **Neon Serverless PostgreSQL**.
+- Switched Client Database from PouchDB to **WatermelonDB** (which handles offline-first sync specifically for SQL backends in React).
+- Updated `TECH_STACK.md`, `SYNC_ARCHITECTURE.md`, and `DATABASE_ARCHITECTURE.md` to reflect this new robust SQL pipeline while maintaining the 100% offline-first requirement.
