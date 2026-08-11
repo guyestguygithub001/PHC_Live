@@ -189,3 +189,34 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 **Steps Completed:**
 - 6.1 ✅ Created `IMPLEMENTATION_ROADMAP.md` (Translated the entire architectural blueprint into a 4-Sprint execution plan mapping out Infrastructure, Offline-First Engine, Core Modules, and Advanced Routing).
 - 6.2 🟢 FINAL CHECKPOINT — System Design Phase officially concluded. Ready for Development.
+
+---
+
+## Session 2: API Maturity & UI Execution (2026-08-11)
+
+### Entry 012 — Backend Hardening & API Maturity
+**Date:** 2026-08-11
+**Action:** Re-engineered the Golang Edge Server for Enterprise API standards (Sprint 4).
+**Key Decisions:**
+- **API Versioning:** Moved all endpoints to `/api/v1/` to ensure future backward compatibility.
+- **UUID Enforcement:** Eradicated sequential integer IDs from all models (`User`, `Patient`, `Encounter`, `Vital`, `Inventory`) in favor of globally unique `UUID`s to mathematically prevent ID enumeration scraping attacks.
+- **Data Minimization (DTOs):** Engineered strict Data Transfer Objects in `sync/handler.go` to explicitly strip PII (like phone numbers and PIN hashes) before JSON payloads leave the server during offline syncs.
+
+---
+
+### Entry 013 — Front-Desk & Triage Workflows (Sprint 5)
+**Date:** 2026-08-11
+**Action:** Built the core React UI for Front-Desk and Triage modules.
+**Key Decisions:**
+- **Offline LAN Architecture:** Recognized the "Offline Queue" blind spot. Resolved by designing the tablets to communicate via a local Wi-Fi router to the in-clinic Edge Server (Raspberry Pi), allowing queues to function without internet.
+- **Fast-Switch PIN Auth:** Implemented a 4-digit PIN lock screen in the Triage module to allow shared tablet usage without typing emails/passwords, ensuring vitals are cryptographically tied to specific nurses.
+- **Urgency Flagging:** Hardcoded alerts for high BP (>= 180/110) to visually tag patients as URGENT.
+- **Fat-Finger Validation:** Added min/max bounds (e.g., Temperature 30-45°C) to prevent dirty clinical data.
+
+---
+
+### Entry 014 — OPD Consultation & ICD-11 Engine (Sprint 6 Initiation)
+**Date:** 2026-08-11
+**Action:** Initiating the Consultation dashboard for doctors.
+**Key Decisions:**
+- **ICD-11 Auto-Suggest:** Decided against loading all 17,000+ codes into memory to prevent crashing Android tablets. Implementing a curated "Primary Care Subset" JSON list powered by `fuse.js` for fast offline fuzzy-searching.

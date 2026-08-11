@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff } from 'lucide-react';
+import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText } from 'lucide-react';
 import FrontDesk from './components/FrontDesk';
 import Triage from './components/Triage';
+import Consultation from './components/Consultation';
 
-type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE';
+type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION';
 type Language = 'EN' | 'HA';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
       portalTab: "Patient Portal",
       frontDeskTab: "Front Desk",
       triageTab: "Triage",
+      consultationTab: "OPD Consultation",
       syncPending: "3 Pending Syncs"
     },
     HA: {
@@ -39,6 +41,7 @@ function App() {
       portalTab: "Tashar Mara Lafiya",
       frontDeskTab: "Karbar Marasa Lafiya",
       triageTab: "Gwajin Farko",
+      consultationTab: "Duba Marasa Lafiya (OPD)",
       syncPending: "Ana Jiran Tura (3)"
     }
   };
@@ -160,6 +163,15 @@ function App() {
             <Stethoscope className="w-4 h-4" />
             <span>{t[language].triageTab}</span>
           </button>
+          <button 
+            onClick={() => setCurrentScreen('CONSULTATION')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+              currentScreen === 'CONSULTATION' ? 'bg-emerald-500 text-white shadow-lg' : 'text-white/60 hover:bg-white/10'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>{t[language].consultationTab}</span>
+          </button>
         </div>
 
         <div className="flex items-center space-x-4 mt-4 md:mt-0 px-2">
@@ -184,6 +196,7 @@ function App() {
         {currentScreen === 'PORTAL' && renderPortal()}
         {currentScreen === 'FRONT_DESK' && <FrontDesk language={language} />}
         {currentScreen === 'TRIAGE' && <Triage language={language} />}
+        {currentScreen === 'CONSULTATION' && <Consultation language={language} />}
       </div>
     </div>
   );
