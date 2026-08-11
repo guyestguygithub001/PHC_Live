@@ -1,0 +1,499 @@
+import React, { useState } from 'react';
+import {
+  FlaskConical, User, ClipboardList, CheckCircle2,
+  AlertTriangle, Send, FileText, Microscope
+} from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+
+// ============================================================
+// Laboratory Module — PHC Lab Technician Workspace
+//
+// Features:
+// 1. Lab Request Queue (left panel) — patients awaiting tests
+// 2. Result Entry Form (right panel) — dynamic per test type
+// 3. Mandatory Testing Badge on Malaria tests
+// 4. Full EN/HA translation support
+// ============================================================
+
+interface LaboratoryProps {
+  language: 'EN' | 'HA';
+  theme: 'light' | 'dark';
+}
+
+// Supported test types and their possible result options
+type TestType = 'Malaria RDT' | 'Widal Test' | 'Full Blood Count';
+
+interface LabRequest {
+  id: string;
+  patientName: string;
+  patientId: string;
+  testType: TestType;
+  orderedBy: string;
+  orderedAt: string;
+  priority: 'normal' | 'urgent';
+}
+
+// Full Blood Count numeric fields
+interface FBCValues {
+  wbc: string;
+  rbc: string;
+  hemoglobin: string;
+  platelets: string;
+}
+
+// ---- Bilingual translations ----
+const t = {
+  EN: {
+    title: 'Laboratory',
+    queue: 'Lab Request Queue',
+    selectPatient: 'Select a request from the queue to enter results',
+    resultEntry: 'Test Result Entry',
+    testResult: 'Test Result',
+    submit: 'Submit Result',
+    notes: 'Additional notes (optional)...',
+    orderedBy: 'Ordered by',
+    mandatoryBadge: 'Required before Pharmacy',
+    positive: 'Positive',
+    negative: 'Negative',
+    invalid: 'Invalid',
+    malaria: 'Malaria RDT',
+    widal: 'Widal Test',
+    fbc: 'Full Blood Count',
+    wbc: 'WBC (×10⁹/L)',
+    rbc: 'RBC (×10¹²/L)',
+    hemoglobin: 'Hemoglobin (g/dL)',
+    platelets: 'Platelets (×10⁹/L)',
+    selectResult: 'Select a result...',
+    successAlert: 'Result submitted successfully!',
+    resultId: 'Result ID',
+    technician: 'Lab Tech',
+  },
+  HA: {
+    title: 'Dakin Gwaji',
+    queue: 'Jerin Masu Jiran Gwaji',
+    selectPatient: 'Zabi gwaji daga jerin don shigar da sakamako',
+    resultEntry: 'Shigar da Sakamakon Gwaji',
+    testResult: 'Sakamakon Gwaji',
+    submit: 'Tura Sakamako',
+    notes: 'Bayani na ƙari (na zaɓi)...',
+    orderedBy: 'Wanda ya umarci',
+    mandatoryBadge: 'Ana buƙata kafin Kantin Magani',
+    positive: 'Akwai',
+    negative: 'Babu',
+    invalid: 'Ba shi da inganci',
+    malaria: 'Zazzabin Cizon Sauro (RDT)',
+    widal: 'Gwajin Widal',
+    fbc: 'Ƙididdiga Cikakkiyar Jini',
+    wbc: 'WBC (×10⁹/L)',
+    rbc: 'RBC (×10¹²/L)',
+    hemoglobin: 'Hemoglobin (g/dL)',
+    platelets: 'Platelets (×10⁹/L)',
+    selectResult: 'Zaɓi sakamako...',
+    successAlert: 'An tura sakamako cikin nasara!',
+    resultId: 'Lambar Sakamako',
+    technician: 'Ɗan Gwaji',
+  },
+};
+
+// ---- Mock lab request data ----
+const mockRequests: LabRequest[] = [
+  {
+    id: 'LR-001',
+    patientName: 'Halima Yusuf',
+    patientId: 'PHC-KAN-1201',
+    testType: 'Malaria RDT',
+    orderedBy: 'Dr. Ibrahim',
+    orderedAt: '09:12 AM',
+    priority: 'urgent',
+  },
+  {
+    id: 'LR-002',
+    patientName: 'Abdullahi Musa',
+    patientId: 'PHC-KAN-1143',
+    testType: 'Widal Test',
+    orderedBy: 'Dr. Ibrahim',
+    orderedAt: '09:30 AM',
+    priority: 'normal',
+  },
+  {
+    id: 'LR-003',
+    patientName: 'Aisha Bello',
+    patientId: 'PHC-KAN-1089',
+    testType: 'Full Blood Count',
+    orderedBy: 'CHO Fatima',
+    orderedAt: '10:05 AM',
+    priority: 'normal',
+  },
+  {
+    id: 'LR-004',
+    patientName: 'Musa Garba',
+    patientId: 'PHC-KAN-1210',
+    testType: 'Malaria RDT',
+    orderedBy: 'Dr. Ibrahim',
+    orderedAt: '10:22 AM',
+    priority: 'normal',
+  },
+];
+
+export default function Laboratory({ language }: LaboratoryProps) {
+  // Currently selected lab request
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Result form state
+  const [qualitativeResult, setQualitativeResult] = useState('');
+  const [fbcValues, setFbcValues] = useState<FBCValues>({
+    wbc: '',
+    rbc: '',
+    hemoglobin: '',
+    platelets: '',
+  });
+  const [notes, setNotes] = useState('');
+
+  const lang = t[language];
+  const selectedRequest = mockRequests.find((r) => r.id === selectedId) || null;
+
+  // ---- Reset form when switching patients ----
+  const handleSelectRequest = (id: string) => {
+    setSelectedId(id);
+    setQualitativeResult('');
+    setFbcValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '' });
+    setNotes('');
+  };
+
+  // ---- Submit result with UUID ----
+  const handleSubmit = () => {
+    if (!selectedRequest) return;
+
+    const resultUUID = uuidv4();
+    const resultPayload = {
+      resultId: resultUUID,
+      requestId: selectedRequest.id,
+      patientId: selectedRequest.patientId,
+      testType: selectedRequest.testType,
+      result:
+        selectedRequest.testType === 'Full Blood Count'
+          ? fbcValues
+          : qualitativeResult,
+      notes,
+      submittedAt: new Date().toISOString(),
+    };
+
+    // Log payload for debugging; in production this would POST to a local DB
+    console.log('[Lab Result Submitted]', resultPayload);
+
+    alert(
+      `${lang.successAlert}\n${lang.resultId}: ${resultUUID}\n${selectedRequest.patientName} — ${selectedRequest.testType}`
+    );
+
+    // Reset after submission
+    setSelectedId(null);
+    setQualitativeResult('');
+    setFbcValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '' });
+    setNotes('');
+  };
+
+  // ---- Determine if the submit button should be disabled ----
+  const isSubmitDisabled = (): boolean => {
+    if (!selectedRequest) return true;
+    if (selectedRequest.testType === 'Full Blood Count') {
+      return !fbcValues.wbc || !fbcValues.rbc || !fbcValues.hemoglobin || !fbcValues.platelets;
+    }
+    return !qualitativeResult;
+  };
+
+  // ---- Render the correct result input based on test type ----
+  const renderResultInput = (testType: TestType) => {
+    switch (testType) {
+      // Malaria RDT — simple dropdown with 3 options
+      case 'Malaria RDT': {
+        const options = [
+          { value: 'Positive', label: lang.positive },
+          { value: 'Negative', label: lang.negative },
+          { value: 'Invalid', label: lang.invalid },
+        ];
+        return (
+          <div>
+            <label className="block text-[var(--text-secondary)] text-sm font-semibold mb-2">
+              {lang.testResult}
+            </label>
+            <select
+              value={qualitativeResult}
+              onChange={(e) => setQualitativeResult(e.target.value)}
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer"
+            >
+              <option value="">{lang.selectResult}</option>
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      }
+
+      // Widal Test — dropdown with titre-based results
+      case 'Widal Test': {
+        const options = [
+          { value: 'Positive (1:80)', label: `${lang.positive} (1:80)` },
+          { value: 'Positive (1:160)', label: `${lang.positive} (1:160)` },
+          { value: 'Positive (1:320)', label: `${lang.positive} (1:320)` },
+          { value: 'Negative', label: lang.negative },
+        ];
+        return (
+          <div>
+            <label className="block text-[var(--text-secondary)] text-sm font-semibold mb-2">
+              {lang.testResult}
+            </label>
+            <select
+              value={qualitativeResult}
+              onChange={(e) => setQualitativeResult(e.target.value)}
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer"
+            >
+              <option value="">{lang.selectResult}</option>
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      }
+
+      // Full Blood Count — numeric inputs for 4 parameters
+      case 'Full Blood Count':
+        return (
+          <div className="space-y-3">
+            <label className="block text-[var(--text-secondary)] text-sm font-semibold">
+              {lang.testResult}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* WBC */}
+              <div>
+                <label className="text-[var(--text-muted)] text-xs mb-1 block">{lang.wbc}</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={fbcValues.wbc}
+                  onChange={(e) => setFbcValues({ ...fbcValues, wbc: e.target.value })}
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  placeholder="e.g. 7.5"
+                />
+              </div>
+              {/* RBC */}
+              <div>
+                <label className="text-[var(--text-muted)] text-xs mb-1 block">{lang.rbc}</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={fbcValues.rbc}
+                  onChange={(e) => setFbcValues({ ...fbcValues, rbc: e.target.value })}
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  placeholder="e.g. 4.8"
+                />
+              </div>
+              {/* Hemoglobin */}
+              <div>
+                <label className="text-[var(--text-muted)] text-xs mb-1 block">{lang.hemoglobin}</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={fbcValues.hemoglobin}
+                  onChange={(e) => setFbcValues({ ...fbcValues, hemoglobin: e.target.value })}
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  placeholder="e.g. 13.5"
+                />
+              </div>
+              {/* Platelets */}
+              <div>
+                <label className="text-[var(--text-muted)] text-xs mb-1 block">{lang.platelets}</label>
+                <input
+                  type="number"
+                  step="1"
+                  value={fbcValues.platelets}
+                  onChange={(e) => setFbcValues({ ...fbcValues, platelets: e.target.value })}
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  placeholder="e.g. 250"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // ---- Translate test type name for display ----
+  const getTestLabel = (testType: TestType): string => {
+    if (language === 'HA') {
+      switch (testType) {
+        case 'Malaria RDT':
+          return lang.malaria;
+        case 'Widal Test':
+          return lang.widal;
+        case 'Full Blood Count':
+          return lang.fbc;
+      }
+    }
+    return testType;
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col space-y-6">
+      {/* ===== Header Bar ===== */}
+      <div
+        className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md"
+        style={{ boxShadow: 'var(--shadow-card)' }}
+      >
+        <div className="flex items-center space-x-3">
+          <FlaskConical className="w-8 h-8 text-indigo-500" />
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{lang.title}</h2>
+        </div>
+        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-xl border border-[var(--border-default)]">
+          <User className="w-5 h-5 text-indigo-500" />
+          <span>{lang.technician}: Yakubu Sani</span>
+        </div>
+      </div>
+
+      {/* ===== Main Content: Queue + Result Entry ===== */}
+      <div className="flex flex-col md:flex-row gap-6 flex-1 h-0">
+
+        {/* ---- Left Panel: Lab Request Queue ---- */}
+        <div
+          className="w-full md:w-1/3 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-4 overflow-y-auto"
+          style={{ boxShadow: 'var(--shadow-card)' }}
+        >
+          <h3 className="text-[var(--text-secondary)] font-semibold mb-4 pl-2 flex items-center space-x-2">
+            <ClipboardList className="w-5 h-5" />
+            <span>{lang.queue}</span>
+          </h3>
+
+          <div className="space-y-2">
+            {mockRequests.map((req) => {
+              const isSelected = selectedId === req.id;
+              const isMalaria = req.testType === 'Malaria RDT';
+              const isUrgent = req.priority === 'urgent';
+
+              return (
+                <div
+                  key={req.id}
+                  onClick={() => handleSelectRequest(req.id)}
+                  className={`p-4 rounded-xl cursor-pointer transition border ${
+                    isSelected
+                      ? 'bg-indigo-500/20 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
+                      : isUrgent
+                      ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20'
+                      : 'bg-[var(--queue-item-bg)] border-transparent hover:bg-[var(--queue-item-hover)]'
+                  }`}
+                >
+                  {/* Patient name + urgent pulse dot */}
+                  <div className="flex justify-between items-start mb-1">
+                    <p className="text-[var(--text-primary)] font-bold">{req.patientName}</p>
+                    {isUrgent && (
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mt-1" />
+                    )}
+                  </div>
+
+                  {/* Test type + mandatory malaria badge */}
+                  <div className="flex items-center space-x-2 mb-1">
+                    <p className="text-[var(--text-secondary)] text-sm">{getTestLabel(req.testType)}</p>
+                    {isMalaria && (
+                      <span className="inline-flex items-center space-x-1 bg-orange-500/15 border border-orange-500/30 text-orange-500 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
+                        <AlertTriangle className="w-3 h-3" />
+                        <span>{lang.mandatoryBadge}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Ordered by + time */}
+                  <p className="text-[var(--text-muted)] text-xs">
+                    {lang.orderedBy}: {req.orderedBy} • {req.orderedAt}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ---- Right Panel: Result Entry or Empty State ---- */}
+        {selectedRequest ? (
+          <div
+            className="w-full md:w-2/3 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-6 flex flex-col space-y-6 overflow-y-auto backdrop-blur-xl"
+            style={{ boxShadow: 'var(--shadow-card)' }}
+          >
+            {/* Patient header for selected request */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+                  {selectedRequest.patientName}
+                </h3>
+                <p className="text-[var(--text-secondary)]">
+                  ID: {selectedRequest.patientId} • {getTestLabel(selectedRequest.testType)}
+                </p>
+              </div>
+              {/* Mandatory testing badge (header-level, malaria only) */}
+              {selectedRequest.testType === 'Malaria RDT' && (
+                <div className="flex items-center space-x-1 bg-orange-500/15 border border-orange-500/30 text-orange-500 text-xs font-bold px-3 py-1.5 rounded-xl">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>{lang.mandatoryBadge}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Section title */}
+            <div className="flex items-center space-x-2">
+              <Microscope className="w-5 h-5 text-indigo-500" />
+              <h4 className="text-lg font-bold text-[var(--text-primary)]">{lang.resultEntry}</h4>
+            </div>
+
+            {/* Dynamic result input based on test type */}
+            <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-2xl p-5">
+              {renderResultInput(selectedRequest.testType)}
+            </div>
+
+            {/* Notes field */}
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 mb-2">
+                <FileText className="w-4 h-4 text-[var(--text-muted)]" />
+                <label className="text-[var(--text-secondary)] text-sm font-semibold">
+                  {language === 'EN' ? 'Notes' : 'Bayani'}
+                </label>
+              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={lang.notes}
+                className="w-full h-full min-h-[100px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-4 text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition resize-none"
+              />
+            </div>
+
+            {/* Submit button */}
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitDisabled()}
+              className={`w-full font-bold py-4 rounded-xl flex justify-center items-center space-x-2 transition shrink-0 ${
+                isSubmitDisabled()
+                  ? 'bg-indigo-500/30 text-indigo-300 cursor-not-allowed'
+                  : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+              }`}
+            >
+              <Send className="w-5 h-5" />
+              <span>{lang.submit}</span>
+            </button>
+          </div>
+        ) : (
+          /* Empty state — no request selected */
+          <div className="w-full md:w-2/3 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-3xl flex items-center justify-center text-[var(--text-muted)]">
+            <div className="text-center">
+              <FlaskConical className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p>{lang.selectPatient}</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

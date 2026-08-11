@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon } from 'lucide-react';
+import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon, FlaskConical, Pill, Send } from 'lucide-react';
 import FrontDesk from './components/FrontDesk';
 import Triage from './components/Triage';
 import Consultation from './components/Consultation';
+import Laboratory from './components/Laboratory';
+import Pharmacy from './components/Pharmacy';
+import Referral from './components/Referral';
 
-type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION';
+type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION' | 'LABORATORY' | 'PHARMACY' | 'REFERRAL';
 type Language = 'EN' | 'HA';
 type Theme = 'light' | 'dark';
 
@@ -30,6 +33,9 @@ function App() {
       frontDeskTab: "Front Desk",
       triageTab: "Triage",
       consultationTab: "OPD Consultation",
+      labTab: "Laboratory",
+      pharmacyTab: "Pharmacy",
+      referralTab: "Referral",
       syncPending: "3 Pending Syncs"
     },
     HA: {
@@ -44,6 +50,9 @@ function App() {
       frontDeskTab: "Karbar Marasa Lafiya",
       triageTab: "Gwajin Farko",
       consultationTab: "Duba Marasa Lafiya (OPD)",
+      labTab: "Dakin Gwaji",
+      pharmacyTab: "Kantin Magani",
+      referralTab: "Tura Mara Lafiya",
       syncPending: "Ana Jiran Tura (3)"
     }
   };
@@ -182,6 +191,33 @@ function App() {
             <FileText className="w-4 h-4" />
             <span>{t[language].consultationTab}</span>
           </button>
+          <button 
+            onClick={() => setCurrentScreen('LABORATORY')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+              currentScreen === 'LABORATORY' ? tabActive : tabInactive
+            }`}
+          >
+            <FlaskConical className="w-4 h-4" />
+            <span>{t[language].labTab}</span>
+          </button>
+          <button 
+            onClick={() => setCurrentScreen('PHARMACY')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+              currentScreen === 'PHARMACY' ? tabActive : tabInactive
+            }`}
+          >
+            <Pill className="w-4 h-4" />
+            <span>{t[language].pharmacyTab}</span>
+          </button>
+          <button 
+            onClick={() => setCurrentScreen('REFERRAL')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
+              currentScreen === 'REFERRAL' ? tabActive : tabInactive
+            }`}
+          >
+            <Send className="w-4 h-4" />
+            <span>{t[language].referralTab}</span>
+          </button>
         </div>
 
         <div className="flex items-center space-x-3 mt-4 md:mt-0 px-2">
@@ -217,6 +253,9 @@ function App() {
         {currentScreen === 'FRONT_DESK' && <FrontDesk language={language} theme={theme} />}
         {currentScreen === 'TRIAGE' && <Triage language={language} theme={theme} />}
         {currentScreen === 'CONSULTATION' && <Consultation language={language} theme={theme} />}
+        {currentScreen === 'LABORATORY' && <Laboratory language={language} theme={theme} />}
+        {currentScreen === 'PHARMACY' && <Pharmacy language={language} theme={theme} />}
+        {currentScreen === 'REFERRAL' && <Referral language={language} theme={theme} />}
       </div>
     </div>
   );
