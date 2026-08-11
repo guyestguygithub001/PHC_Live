@@ -176,4 +176,5 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 **Steps Completed:**
 - 5.1 ✅ Created `DESIGN_SYSTEM.md` (Defined a premium aesthetic using Vanilla CSS, Glassmorphism, Google Fonts like Inter/JetBrains Mono, and a clinical color palette to bridge the gap between "scared of tech" and "modern UI").
 - 5.2 ✅ Created `MOTION_AND_INTERACTION.md` (Defined psychological safety mechanisms: Optimistic UI for zero latency, "Undo" Toasts instead of deletion popups, and Skeuomorphic Draft Auto-saves).
-- 5.3 🟢 CHECKPOINT — User review of UI/UX Design.
+- 5.3 ✅ Created `WORKFLOW_SIMULATION.md` (Measured exact tap counts and time required for Triage, Consultation, and Pharmacy. Proved that core tasks can be completed in under 10 seconds with zero standard typing).
+- 5.4 🟢 CHECKPOINT — User review of UI/UX Design & Workflow Simulations.
