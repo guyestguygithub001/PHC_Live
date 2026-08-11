@@ -10,10 +10,18 @@ export default function FrontDesk({ language }: FrontDeskProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   
-  // Registration Form State
+  // Registration Form State — matches the Data Dictionary from field survey
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [gender, setGender] = useState('');
+  const [age, setAge] = useState('');
+  const [tribe, setTribe] = useState('');
+  const [religion, setReligion] = useState('');
+  const [occupation, setOccupation] = useState('');
+  const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
+  const [nextOfKin, setNextOfKin] = useState('');
+  const [nextOfKinPhone, setNextOfKinPhone] = useState('');
 
   const t = {
     EN: {
@@ -24,11 +32,27 @@ export default function FrontDesk({ language }: FrontDeskProps) {
       registerTitle: "Register New Patient",
       firstName: "First Name",
       lastName: "Last Name",
+      gender: "Gender",
+      age: "Age",
+      tribe: "Tribe / Ethnicity",
+      religion: "Religion",
+      occupation: "Occupation",
+      address: "Address (Village / Town / LGA)",
       phone: "Phone Number",
+      nextOfKin: "Next of Kin (Name)",
+      nextOfKinPhone: "Next of Kin (Phone)",
       registerBtn: "Register & Send to Triage",
       cancel: "Cancel",
       offlineMode: "Offline Mode (LAN Active)",
-      queue: "Waiting List"
+      queue: "Waiting List",
+      selectGender: "Select Gender",
+      male: "Male",
+      female: "Female",
+      selectReligion: "Select Religion",
+      islam: "Islam",
+      christianity: "Christianity",
+      traditional: "Traditional",
+      other: "Other"
     },
     HA: {
       title: "Karbar Marasa Lafiya",
@@ -38,24 +62,49 @@ export default function FrontDesk({ language }: FrontDeskProps) {
       registerTitle: "Yi Sabuwar Rijista",
       firstName: "Sunan Farko",
       lastName: "Sunan Mahaifi",
+      gender: "Jinsi",
+      age: "Shekaru",
+      tribe: "Kabila",
+      religion: "Addini",
+      occupation: "Sana'a / Aiki",
+      address: "Adireshin Gida (Ƙauye / Gari / LGA)",
       phone: "Lambar Waya",
+      nextOfKin: "Dangi Mafi Kusa (Suna)",
+      nextOfKinPhone: "Lambar Waya (Dangi)",
       registerBtn: "Yi Rijista & Tura Triage",
       cancel: "Soke",
       offlineMode: "Babu Intanet (LAN Na Aiki)",
-      queue: "Sufar Masu Jiran"
+      queue: "Sufar Masu Jiran",
+      selectGender: "Zaɓi Jinsi",
+      male: "Namiji",
+      female: "Mace",
+      selectReligion: "Zaɓi Addini",
+      islam: "Musulunci",
+      christianity: "Kirista",
+      traditional: "Gargajiya",
+      other: "Wani"
     }
+  };
+
+  /** Resets every form field after successful registration */
+  const resetForm = () => {
+    setFirstName(''); setLastName(''); setGender(''); setAge('');
+    setTribe(''); setReligion(''); setOccupation(''); setAddress('');
+    setPhone(''); setNextOfKin(''); setNextOfKinPhone('');
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = uuidv4(); // Offline-safe UUID
-    const humanId = `PHC-KAN-${Math.floor(Math.random() * 10000)}`;
+    const newId = uuidv4(); // Offline-safe UUID — no internet needed
+    const humanId = `PHC-KAN-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
     alert(`Patient Registered!\nUUID: ${newId}\nCard ID: ${humanId}\nRouted to Triage Queue.`);
     setIsRegistering(false);
-    setFirstName('');
-    setLastName('');
-    setPhone('');
+    resetForm();
   };
+
+  /** Shared CSS for input fields to avoid repetition */
+  const inputClass = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition";
+  const selectClass = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition appearance-none";
 
   return (
     <div className="w-full h-full flex flex-col space-y-6">
@@ -85,16 +134,18 @@ export default function FrontDesk({ language }: FrontDeskProps) {
 
       {/* Main Content Area */}
       {isRegistering ? (
-        <div className="bg-white/10 border border-white/20 rounded-3xl p-8 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4">
+        <div className="bg-white/10 border border-white/20 rounded-3xl p-8 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 overflow-y-auto max-h-[calc(100vh-200px)]">
           <h3 className="text-xl font-bold text-white mb-6">{t[language].registerTitle}</h3>
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleRegister} className="space-y-5">
+            
+            {/* Row 1: First Name, Last Name */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-white/70 text-sm mb-1">{t[language].firstName}</label>
                 <input 
                   type="text" required
                   value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition"
+                  className={inputClass}
                 />
               </div>
               <div>
@@ -102,18 +153,119 @@ export default function FrontDesk({ language }: FrontDeskProps) {
                 <input 
                   type="text" required
                   value={lastName} onChange={(e) => setLastName(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition"
+                  className={inputClass}
                 />
               </div>
             </div>
+
+            {/* Row 2: Gender, Age */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].gender}</label>
+                <select 
+                  required
+                  value={gender} onChange={(e) => setGender(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="" disabled>{t[language].selectGender}</option>
+                  <option value="Male">{t[language].male}</option>
+                  <option value="Female">{t[language].female}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].age}</label>
+                <input 
+                  type="number" required min="0" max="150"
+                  value={age} onChange={(e) => setAge(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. 34"
+                />
+              </div>
+            </div>
+
+            {/* Row 3: Tribe, Religion */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].tribe}</label>
+                <input 
+                  type="text" required
+                  value={tribe} onChange={(e) => setTribe(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Hausa, Yoruba, Igbo"
+                />
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].religion}</label>
+                <select 
+                  required
+                  value={religion} onChange={(e) => setReligion(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="" disabled>{t[language].selectReligion}</option>
+                  <option value="Islam">{t[language].islam}</option>
+                  <option value="Christianity">{t[language].christianity}</option>
+                  <option value="Traditional">{t[language].traditional}</option>
+                  <option value="Other">{t[language].other}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Row 4: Occupation, Phone */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].occupation}</label>
+                <input 
+                  type="text"
+                  value={occupation} onChange={(e) => setOccupation(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Farmer, Trader, Student"
+                />
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].phone}</label>
+                <input 
+                  type="tel"
+                  value={phone} onChange={(e) => setPhone(e.target.value)}
+                  className={inputClass}
+                  placeholder="+234 800 000 0000"
+                />
+              </div>
+            </div>
+
+            {/* Row 5: Address (Full Width) */}
             <div>
-              <label className="block text-white/70 text-sm mb-1">{t[language].phone}</label>
+              <label className="block text-white/70 text-sm mb-1">{t[language].address}</label>
               <input 
-                type="tel"
-                value={phone} onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition"
+                type="text" required
+                value={address} onChange={(e) => setAddress(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. Ungwan Rimi, Kaduna North LGA"
               />
             </div>
+
+            {/* Row 6: Next of Kin */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].nextOfKin}</label>
+                <input 
+                  type="text"
+                  value={nextOfKin} onChange={(e) => setNextOfKin(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Halima Abubakar"
+                />
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">{t[language].nextOfKinPhone}</label>
+                <input 
+                  type="tel"
+                  value={nextOfKinPhone} onChange={(e) => setNextOfKinPhone(e.target.value)}
+                  className={inputClass}
+                  placeholder="+234 800 000 0000"
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
             <div className="flex space-x-4 pt-4">
               <button 
                 type="button" 

@@ -4,7 +4,8 @@ import {
   ArrowRight, Search, History, User, CheckCircle2, ChevronRight, X 
 } from 'lucide-react';
 import Fuse from 'fuse.js';
-import { primaryCareICD11, ICD11Code } from '../utils/icd11Data';
+import { primaryCareICD11 } from '../utils/icd11Data';
+import type { ICD11Code } from '../utils/icd11Data';
 
 interface ConsultationProps {
   language: 'EN' | 'HA';
