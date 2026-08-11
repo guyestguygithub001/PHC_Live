@@ -4,9 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface FrontDeskProps {
   language: 'EN' | 'HA';
+  theme: 'light' | 'dark';
 }
 
-export default function FrontDesk({ language }: FrontDeskProps) {
+export default function FrontDesk({ language, theme }: FrontDeskProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   
@@ -102,23 +103,24 @@ export default function FrontDesk({ language }: FrontDeskProps) {
     resetForm();
   };
 
-  /** Shared CSS for input fields to avoid repetition */
-  const inputClass = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition";
-  const selectClass = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition appearance-none";
+  /** Shared CSS classes that respond to the theme via CSS custom properties */
+  const inputClass = "w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition";
+  const selectClass = inputClass + " appearance-none";
+  const labelClass = "block text-[var(--text-secondary)] text-sm mb-1";
 
   return (
     <div className="w-full h-full flex flex-col space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white/10 p-4 rounded-2xl border border-white/20 backdrop-blur-md">
+      <div className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div>
-          <h2 className="text-2xl font-bold text-white">{t[language].title}</h2>
-          <div className="flex items-center space-x-2 text-emerald-400 mt-1">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t[language].title}</h2>
+          <div className="flex items-center space-x-2 text-emerald-500 mt-1">
             <Wifi className="w-4 h-4" />
             <span className="text-sm">{t[language].offlineMode}</span>
           </div>
         </div>
         <div className="flex space-x-3">
-          <button className="flex items-center space-x-2 bg-indigo-500/30 hover:bg-indigo-500/50 text-white px-4 py-2 rounded-xl transition">
+          <button className="flex items-center space-x-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-500 px-4 py-2 rounded-xl transition border border-indigo-500/20">
             <QrCode className="w-5 h-5" />
             <span>{t[language].scanCard}</span>
           </button>
@@ -134,73 +136,47 @@ export default function FrontDesk({ language }: FrontDeskProps) {
 
       {/* Main Content Area */}
       {isRegistering ? (
-        <div className="bg-white/10 border border-white/20 rounded-3xl p-8 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 overflow-y-auto max-h-[calc(100vh-200px)]">
-          <h3 className="text-xl font-bold text-white mb-6">{t[language].registerTitle}</h3>
+        <div className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-8 backdrop-blur-xl overflow-y-auto max-h-[calc(100vh-200px)]" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6">{t[language].registerTitle}</h3>
           <form onSubmit={handleRegister} className="space-y-5">
             
             {/* Row 1: First Name, Last Name */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].firstName}</label>
-                <input 
-                  type="text" required
-                  value={firstName} onChange={(e) => setFirstName(e.target.value)}
-                  className={inputClass}
-                />
+                <label className={labelClass}>{t[language].firstName}</label>
+                <input type="text" required value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} />
               </div>
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].lastName}</label>
-                <input 
-                  type="text" required
-                  value={lastName} onChange={(e) => setLastName(e.target.value)}
-                  className={inputClass}
-                />
+                <label className={labelClass}>{t[language].lastName}</label>
+                <input type="text" required value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} />
               </div>
             </div>
 
             {/* Row 2: Gender, Age */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].gender}</label>
-                <select 
-                  required
-                  value={gender} onChange={(e) => setGender(e.target.value)}
-                  className={selectClass}
-                >
+                <label className={labelClass}>{t[language].gender}</label>
+                <select required value={gender} onChange={(e) => setGender(e.target.value)} className={selectClass}>
                   <option value="" disabled>{t[language].selectGender}</option>
                   <option value="Male">{t[language].male}</option>
                   <option value="Female">{t[language].female}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].age}</label>
-                <input 
-                  type="number" required min="0" max="150"
-                  value={age} onChange={(e) => setAge(e.target.value)}
-                  className={inputClass}
-                  placeholder="e.g. 34"
-                />
+                <label className={labelClass}>{t[language].age}</label>
+                <input type="number" required min="0" max="150" value={age} onChange={(e) => setAge(e.target.value)} className={inputClass} placeholder="e.g. 34" />
               </div>
             </div>
 
             {/* Row 3: Tribe, Religion */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].tribe}</label>
-                <input 
-                  type="text" required
-                  value={tribe} onChange={(e) => setTribe(e.target.value)}
-                  className={inputClass}
-                  placeholder="e.g. Hausa, Yoruba, Igbo"
-                />
+                <label className={labelClass}>{t[language].tribe}</label>
+                <input type="text" required value={tribe} onChange={(e) => setTribe(e.target.value)} className={inputClass} placeholder="e.g. Hausa, Yoruba, Igbo" />
               </div>
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].religion}</label>
-                <select 
-                  required
-                  value={religion} onChange={(e) => setReligion(e.target.value)}
-                  className={selectClass}
-                >
+                <label className={labelClass}>{t[language].religion}</label>
+                <select required value={religion} onChange={(e) => setReligion(e.target.value)} className={selectClass}>
                   <option value="" disabled>{t[language].selectReligion}</option>
                   <option value="Islam">{t[language].islam}</option>
                   <option value="Christianity">{t[language].christianity}</option>
@@ -213,55 +189,30 @@ export default function FrontDesk({ language }: FrontDeskProps) {
             {/* Row 4: Occupation, Phone */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].occupation}</label>
-                <input 
-                  type="text"
-                  value={occupation} onChange={(e) => setOccupation(e.target.value)}
-                  className={inputClass}
-                  placeholder="e.g. Farmer, Trader, Student"
-                />
+                <label className={labelClass}>{t[language].occupation}</label>
+                <input type="text" value={occupation} onChange={(e) => setOccupation(e.target.value)} className={inputClass} placeholder="e.g. Farmer, Trader" />
               </div>
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].phone}</label>
-                <input 
-                  type="tel"
-                  value={phone} onChange={(e) => setPhone(e.target.value)}
-                  className={inputClass}
-                  placeholder="+234 800 000 0000"
-                />
+                <label className={labelClass}>{t[language].phone}</label>
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} placeholder="+234 800 000 0000" />
               </div>
             </div>
 
             {/* Row 5: Address (Full Width) */}
             <div>
-              <label className="block text-white/70 text-sm mb-1">{t[language].address}</label>
-              <input 
-                type="text" required
-                value={address} onChange={(e) => setAddress(e.target.value)}
-                className={inputClass}
-                placeholder="e.g. Ungwan Rimi, Kaduna North LGA"
-              />
+              <label className={labelClass}>{t[language].address}</label>
+              <input type="text" required value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} placeholder="e.g. Ungwan Rimi, Kaduna North LGA" />
             </div>
 
             {/* Row 6: Next of Kin */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].nextOfKin}</label>
-                <input 
-                  type="text"
-                  value={nextOfKin} onChange={(e) => setNextOfKin(e.target.value)}
-                  className={inputClass}
-                  placeholder="e.g. Halima Abubakar"
-                />
+                <label className={labelClass}>{t[language].nextOfKin}</label>
+                <input type="text" value={nextOfKin} onChange={(e) => setNextOfKin(e.target.value)} className={inputClass} placeholder="e.g. Halima Abubakar" />
               </div>
               <div>
-                <label className="block text-white/70 text-sm mb-1">{t[language].nextOfKinPhone}</label>
-                <input 
-                  type="tel"
-                  value={nextOfKinPhone} onChange={(e) => setNextOfKinPhone(e.target.value)}
-                  className={inputClass}
-                  placeholder="+234 800 000 0000"
-                />
+                <label className={labelClass}>{t[language].nextOfKinPhone}</label>
+                <input type="tel" value={nextOfKinPhone} onChange={(e) => setNextOfKinPhone(e.target.value)} className={inputClass} placeholder="+234 800 000 0000" />
               </div>
             </div>
 
@@ -270,7 +221,7 @@ export default function FrontDesk({ language }: FrontDeskProps) {
               <button 
                 type="button" 
                 onClick={() => setIsRegistering(false)}
-                className="w-1/3 bg-white/10 text-white py-3 rounded-xl hover:bg-white/20 transition"
+                className="w-1/3 bg-[var(--input-bg)] text-[var(--text-primary)] py-3 rounded-xl hover:opacity-80 transition border border-[var(--border-default)]"
               >
                 {t[language].cancel}
               </button>
@@ -287,26 +238,27 @@ export default function FrontDesk({ language }: FrontDeskProps) {
       ) : (
         <div className="flex-1 flex flex-col space-y-6">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-white/50" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-[var(--text-muted)]" />
             <input 
               type="text" 
               placeholder={t[language].searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-2xl pl-12 pr-4 py-4 text-white text-lg focus:outline-none focus:border-emerald-500 transition backdrop-blur-md shadow-inner"
+              className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] rounded-2xl pl-12 pr-4 py-4 text-[var(--text-primary)] text-lg focus:outline-none focus:border-emerald-500 transition backdrop-blur-md"
+              style={{ boxShadow: 'var(--shadow-card)' }}
             />
           </div>
           
-          <div className="flex-1 bg-black/20 rounded-3xl border border-white/10 p-6">
-            <h3 className="text-white/70 font-semibold mb-4">{t[language].queue} (3)</h3>
+          <div className="flex-1 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <h3 className="text-[var(--text-secondary)] font-semibold mb-4">{t[language].queue} (3)</h3>
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex justify-between items-center bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 transition cursor-pointer">
+                <div key={i} className="flex justify-between items-center bg-[var(--queue-item-bg)] border border-[var(--border-default)] p-4 rounded-xl hover:bg-[var(--queue-item-hover)] transition cursor-pointer">
                   <div>
-                    <p className="text-white font-semibold">Fatima Abubakar</p>
-                    <p className="text-white/50 text-sm">PHC-KAN-082{i} • +234 803 000 000{i}</p>
+                    <p className="text-[var(--text-primary)] font-semibold">Fatima Abubakar</p>
+                    <p className="text-[var(--text-muted)] text-sm">PHC-KAN-082{i} • +234 803 000 000{i}</p>
                   </div>
-                  <button className="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white transition">
+                  <button className="bg-[var(--input-bg)] hover:bg-emerald-500/20 p-2 rounded-lg text-[var(--text-secondary)] hover:text-emerald-500 transition">
                     <ArrowRight className="w-5 h-5" />
                   </button>
                 </div>

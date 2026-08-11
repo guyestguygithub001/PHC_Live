@@ -2,16 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  .glass-panel {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl;
-  }
+/* ============================================================
+   PHC_Live Theme System
+   
+   Two themes: "light" (clean white) and "dark" (soft ash gray).
+   Both themes share the same emerald accent color for 
+   consistency. Variables are consumed via Tailwind arbitrary 
+   value syntax: bg-[var(--page-bg)], text-[var(--text-primary)].
+   ============================================================ */
+
+/* --- Light Theme (Default) --- */
+[data-theme="light"] {
+  --page-bg: #f5f7fa;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-bg-hover: rgba(0, 0, 0, 0.03);
+  --card-bg-secondary: #ffffff;
+  --input-bg: #f1f5f9;
+  --input-border: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --border-default: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --queue-bg: #f8fafc;
+  --queue-item-bg: #ffffff;
+  --queue-item-hover: #f1f5f9;
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --timeline-bg: #fdfbf7;
+  --timeline-border: #e5e0d8;
+}
+
+/* --- Dark Theme (Ash Gray — NOT pure black) --- */
+[data-theme="dark"] {
+  --page-bg: #3a3f4a;
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --card-bg-hover: rgba(255, 255, 255, 0.04);
+  --card-bg-secondary: rgba(0, 0, 0, 0.15);
+  --input-bg: rgba(0, 0, 0, 0.2);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f1f5f9;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --queue-bg: rgba(0, 0, 0, 0.15);
+  --queue-item-bg: rgba(255, 255, 255, 0.05);
+  --queue-item-hover: rgba(255, 255, 255, 0.1);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.2);
+  --timeline-bg: #fdfbf7;
+  --timeline-border: #e5e0d8;
 }
 
 body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: white;
+  background: var(--page-bg);
+  color: var(--text-primary);
   min-height: 100vh;
   margin: 0;
   font-family: 'Inter', sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
