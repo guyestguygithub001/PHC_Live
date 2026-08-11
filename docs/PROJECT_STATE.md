@@ -8,10 +8,10 @@
 
 | Field | Value |
 |---|---|
-| **Current Chunk** | Chunk 1: Foundation — Meta-Process & Project Scaffolding |
-| **Current Step** | 1.7 / 1.7 (CHECKPOINT) |
+| **Current Chunk** | Chunk 2: Domain Analysis — Stakeholder Mapping & Workflow Discovery |
+| **Current Step** | 2.4 / 2.4 (CHECKPOINT) |
 | **Status** | 🟢 CHECKPOINT — Awaiting user review |
-| **Last Updated** | 2026-08-11 12:53 WAT |
+| **Last Updated** | 2026-08-11 12:00 WAT |
 | **Blockers** | None currently |
 | **Awaiting Data** | Additional field survey data from user |
 
@@ -21,8 +21,8 @@
 
 | Chunk | Description | Status |
 |---|---|---|
-| Chunk 1 | Foundation — Meta-Process & Project Scaffolding | 🟡 IN PROGRESS |
-| Chunk 2 | Domain Analysis — Stakeholder Mapping & Workflow Discovery | ⬜ NOT STARTED |
+| Chunk 1 | Foundation — Meta-Process & Project Scaffolding | ✅ DONE |
+| Chunk 2 | Domain Analysis — Stakeholder Mapping & Workflow Discovery | 🟡 IN PROGRESS |
 | Chunk 3 | Systems Architecture — Technical Design | ⬜ NOT STARTED |
 | Chunk 4 | Module Design — Feature Specifications | ⬜ NOT STARTED |
 | Chunk 5 | UI/UX Design — Interface & Experience | ⬜ NOT STARTED |
@@ -41,7 +41,18 @@
 | 1.5 | Create README.md | ✅ DONE | 2026-08-11 11:46 |
 | 1.6 | Create ARCHITECTURE_DECISIONS.md | ✅ DONE | 2026-08-11 11:46 |
 | 1.6b | Global PHC Research (7 countries) | ✅ DONE | 2026-08-11 12:52 |
-| 1.7 | CHECKPOINT — User review | 🟢 AWAITING REVIEW | 2026-08-11 12:53 |
+| 1.7 | CHECKPOINT — User review | ✅ DONE | 2026-08-11 12:53 |
+
+---
+
+## Step Log (Chunk 2)
+
+| Step | Description | Status | Timestamp |
+|---|---|---|---|
+| 2.1 | Create STAKEHOLDER_MAP.md | ✅ DONE | 2026-08-11 11:56 |
+| 2.2 | Create CLINICAL_WORKFLOWS.md (Patient journeys, ANC, referrals) | ✅ DONE | 2026-08-11 11:56 |
+| 2.3 | Create DATA_DICTIONARY.md (Variables and data structures) | ✅ DONE | 2026-08-11 11:56 |
+| 2.4 | CHECKPOINT — User review | 🟢 AWAITING REVIEW | 2026-08-11 11:57 |
 
 ---
 

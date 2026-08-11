@@ -101,3 +101,25 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 ---
 
 *APPEND NEW ENTRIES BELOW THIS LINE*
+
+---
+
+### Entry 004 — Chunk 1 Completion & Global Research Phase
+**Date:** 2026-08-11  
+**Action:** Completed all Chunk 1 Meta-Process Foundation documents. Conducted a 7-country global PHC research survey.  
+**Details:**  
+- Research spanned Kenya, Ethiopia, Sierra Leone, Malawi, DRC, Haiti, and India.
+- Extracted 12 Universal Truths and 15 Architecture Requirements (AR-01 to AR-15).
+- Key findings confirmed: offline-first is mandatory globally, paper dual-entry causes burnout, simple UI is critical, open-source (DHIS2/OpenMRS) is standard.
+- Created `docs/research/GLOBAL_PHC_RESEARCH.md`.
+
+---
+
+### Entry 005 — Chunk 2 Execution Started
+**Date:** 2026-08-11  
+**Action:** Executed Chunk 2 — Domain Analysis (Stakeholder Mapping & Workflow Discovery)  
+**Steps Completed:**
+- 2.1 ✅ Created `STAKEHOLDER_MAP.md` (Mapping out CHEWs, Nurses, CHOs, Lab Techs, Pharmacists, OIC, GH Doctors).
+- 2.2 ✅ Created `CLINICAL_WORKFLOWS.md` (Mapping AS-IS paper reality vs. TO-BE digital offline-first reality for Registration, Vitals, ANC, Referrals).
+- 2.3 ✅ Created `DATA_DICTIONARY.md` (Defining exact data payloads based on nurse interview and global standards).
+- 2.4 🟢 CHECKPOINT — User review of Domain Analysis.
