@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   FlaskConical, User, ClipboardList, CheckCircle2,
-  AlertTriangle, Send, FileText, Microscope
+  AlertTriangle, Send, FileText, Microscope, ExternalLink, MapPin, Phone, Printer
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -67,6 +67,15 @@ const t = {
     successAlert: 'Result submitted successfully!',
     resultId: 'Result ID',
     technician: 'Lab Tech',
+    // External Referral additions
+    enterResults: 'Enter Results',
+    externalReferral: 'External Referral',
+    searchLab: 'Search lab name or address',
+    viewTests: 'View tests this lab offers',
+    generateSlip: 'Generate Slip',
+    direction: 'Direction',
+    call: 'Call',
+    slipGenerated: 'Referral Slip Generated for External Lab!'
   },
   HA: {
     title: 'Dakin Gwaji',
@@ -92,6 +101,15 @@ const t = {
     successAlert: 'An tura sakamako cikin nasara!',
     resultId: 'Lambar Sakamako',
     technician: 'Ɗan Gwaji',
+    // External Referral additions
+    enterResults: 'Shigar da Sakamako',
+    externalReferral: 'Tura zuwa Wani Dakin Gwaji',
+    searchLab: 'Nemo suna ko adireshin dakin gwaji',
+    viewTests: 'Duba gwaje-gwajen da suke yi',
+    generateSlip: 'Fitar da Takarda',
+    direction: 'Hanya',
+    call: 'Kira',
+    slipGenerated: 'An fitar da takardar tura zuwa wani wuri!'
   },
 };
 
@@ -135,6 +153,22 @@ const mockRequests: LabRequest[] = [
   },
 ];
 
+// ---- Mock external labs ----
+const mockExternalLabs = [
+  {
+    id: 'LAB-01',
+    name: 'Treasuredhealth Diagnostics & Medical Laboratory Services Ltd',
+    address: '5, Awoyemi street off NNPC Depot Rd, Coker bus-stop, Daleko/Ile-iwe Ejigbo, Oshodi-Isolo, Lagos, Nigeria',
+    phone: '+234 800 000 0001'
+  },
+  {
+    id: 'LAB-02',
+    name: 'Lagos State Central Laboratory',
+    address: 'No 10 Oshunpboye Street Ogba Cocoa Off Akilo Road, Agege, Lagos, Nigeria',
+    phone: '+234 800 000 0002'
+  }
+];
+
 export default function Laboratory({ language }: LaboratoryProps) {
   // Currently selected lab request
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -149,6 +183,10 @@ export default function Laboratory({ language }: LaboratoryProps) {
   });
   const [notes, setNotes] = useState('');
 
+  // External referral state
+  const [activeTab, setActiveTab] = useState<'result' | 'external'>('result');
+  const [labSearch, setLabSearch] = useState('');
+
   const lang = t[language];
   const selectedRequest = mockRequests.find((r) => r.id === selectedId) || null;
 
@@ -158,6 +196,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
     setQualitativeResult('');
     setFbcValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '' });
     setNotes('');
+    setActiveTab('result'); // reset to default tab
   };
 
   // ---- Submit result with UUID ----
@@ -190,6 +229,13 @@ export default function Laboratory({ language }: LaboratoryProps) {
     setQualitativeResult('');
     setFbcValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '' });
     setNotes('');
+  };
+
+  const handleGenerateSlip = (labName: string) => {
+    if (!selectedRequest) return;
+    const slipUUID = uuidv4();
+    alert(`${lang.slipGenerated}\nLab: ${labName}\nSlip ID: ${slipUUID}\n${selectedRequest.patientName} — ${selectedRequest.testType}`);
+    setSelectedId(null);
   };
 
   // ---- Determine if the submit button should be disabled ----
@@ -443,46 +489,131 @@ export default function Laboratory({ language }: LaboratoryProps) {
               )}
             </div>
 
-            {/* Section title */}
-            <div className="flex items-center space-x-2">
-              <Microscope className="w-5 h-5 text-indigo-500" />
-              <h4 className="text-lg font-bold text-[var(--text-primary)]">{lang.resultEntry}</h4>
+            {/* Sub-Tabs for Result Entry vs External Referral */}
+            <div className="flex space-x-2 border-b border-[var(--border-default)] pb-4 mb-2">
+              <button 
+                onClick={() => setActiveTab('result')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                  activeTab === 'result' ? 'bg-indigo-500 text-white shadow-lg' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
+                }`}
+              >
+                <Microscope className="w-4 h-4" />
+                <span>{lang.enterResults}</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab('external')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                  activeTab === 'external' ? 'bg-orange-500 text-white shadow-lg' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
+                }`}
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>{lang.externalReferral}</span>
+              </button>
             </div>
 
-            {/* Dynamic result input based on test type */}
-            <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-2xl p-5">
-              {renderResultInput(selectedRequest.testType)}
-            </div>
+            {activeTab === 'result' ? (
+              <>
+                {/* Dynamic result input based on test type */}
+                <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-2xl p-5">
+                  {renderResultInput(selectedRequest.testType)}
+                </div>
 
-            {/* Notes field */}
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-2">
-                <FileText className="w-4 h-4 text-[var(--text-muted)]" />
-                <label className="text-[var(--text-secondary)] text-sm font-semibold">
-                  {language === 'EN' ? 'Notes' : 'Bayani'}
-                </label>
+                {/* Notes field */}
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <FileText className="w-4 h-4 text-[var(--text-muted)]" />
+                    <label className="text-[var(--text-secondary)] text-sm font-semibold">
+                      {language === 'EN' ? 'Notes' : 'Bayani'}
+                    </label>
+                  </div>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={lang.notes}
+                    className="w-full h-full min-h-[100px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-4 text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition resize-none"
+                  />
+                </div>
+
+                {/* Submit button */}
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitDisabled()}
+                  className={`w-full font-bold py-4 rounded-xl flex justify-center items-center space-x-2 transition shrink-0 ${
+                    isSubmitDisabled()
+                      ? 'bg-indigo-500/30 text-indigo-300 cursor-not-allowed'
+                      : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                  }`}
+                >
+                  <Send className="w-5 h-5" />
+                  <span>{lang.submit}</span>
+                </button>
+              </>
+            ) : (
+              /* External Referral UI */
+              <div className="flex flex-col h-full space-y-4 overflow-y-auto">
+                <div className="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-1 flex items-center">
+                  <div className="pl-3 text-[var(--text-muted)]">
+                    <Microscope className="w-5 h-5" />
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder={lang.searchLab}
+                    value={labSearch}
+                    onChange={(e) => setLabSearch(e.target.value)}
+                    className="w-full bg-transparent px-3 py-3 text-[var(--text-primary)] focus:outline-none text-sm"
+                  />
+                  <div className="pr-3 text-[var(--text-muted)]">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {mockExternalLabs.filter(lab => lab.name.toLowerCase().includes(labSearch.toLowerCase())).map(lab => (
+                    <div key={lab.id} className="bg-[var(--card-bg-secondary)] border border-[var(--border-default)] rounded-2xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-[var(--text-primary)] font-bold text-lg leading-tight pr-4">{lab.name}</h4>
+                        <MapPin className="w-5 h-5 text-[var(--text-muted)] shrink-0 mt-1" />
+                      </div>
+                      
+                      {/* Highlighted name area (like the purple highlight in screenshot) */}
+                      <div className="bg-indigo-500/10 text-indigo-500 text-xs font-semibold px-3 py-1.5 rounded-lg mb-3 inline-block">
+                        {lab.name}
+                      </div>
+
+                      <p className="text-[var(--text-secondary)] text-sm mb-4 leading-snug">
+                        {lab.address}
+                      </p>
+
+                      <button className="flex items-center space-x-1 text-[var(--text-primary)] font-semibold text-sm mb-4 hover:text-indigo-500 transition">
+                        <span>{lang.viewTests}</span>
+                        <ExternalLink className="w-4 h-4" />
+                      </button>
+
+                      <div className="space-y-3">
+                        <button 
+                          onClick={() => handleGenerateSlip(lab.name)}
+                          className="w-full bg-[#0a0a2a] hover:bg-[#1a1a3a] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center space-x-2 transition"
+                        >
+                          <Printer className="w-5 h-5" />
+                          <span>{lang.generateSlip}</span>
+                        </button>
+                        
+                        <div className="flex space-x-3">
+                          <button className="w-1/2 bg-[#0a0a2a] hover:bg-[#1a1a3a] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center space-x-2 transition">
+                            <Send className="w-4 h-4" />
+                            <span>{lang.direction}</span>
+                          </button>
+                          <button className="w-1/2 border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--queue-item-hover)] font-semibold py-3.5 rounded-xl flex justify-center items-center space-x-2 transition">
+                            <Phone className="w-4 h-4" />
+                            <span>{lang.call}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder={lang.notes}
-                className="w-full h-full min-h-[100px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-4 text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition resize-none"
-              />
-            </div>
-
-            {/* Submit button */}
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitDisabled()}
-              className={`w-full font-bold py-4 rounded-xl flex justify-center items-center space-x-2 transition shrink-0 ${
-                isSubmitDisabled()
-                  ? 'bg-indigo-500/30 text-indigo-300 cursor-not-allowed'
-                  : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-              }`}
-            >
-              <Send className="w-5 h-5" />
-              <span>{lang.submit}</span>
-            </button>
+            )}
           </div>
         ) : (
           /* Empty state — no request selected */
