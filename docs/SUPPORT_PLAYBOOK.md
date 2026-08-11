@@ -220,3 +220,39 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 **Action:** Initiating the Consultation dashboard for doctors.
 **Key Decisions:**
 - **ICD-11 Auto-Suggest:** Decided against loading all 17,000+ codes into memory to prevent crashing Android tablets. Implementing a curated "Primary Care Subset" JSON list powered by `fuse.js` for fast offline fuzzy-searching.
+
+---
+
+### Entry 015 — Sprint 6 Completion: OPD Consultation & ICD-11 Engine
+**Date:** 2026-08-11
+**Action:** Built the complete OPD Consultation dashboard.
+**Files Created:**
+- `clinic-app/src/components/Consultation.tsx` — Full consultation UI with clinical queue, historical timeline, ICD-11 engine, and action center.
+- `clinic-app/src/utils/icd11Data.ts` — Curated Primary Care Subset of ICD-11 codes (Malaria, Typhoid, Cholera, Lassa Fever, etc.).
+**Key Details:**
+- Installed `fuse.js` for offline fuzzy search. Threshold set to 0.3 for high typo tolerance.
+- Historical Timeline uses a skeuomorphic cream-paper design to psychologically ease the transition from physical folders.
+- Queue automatically ranks URGENT patients (from Triage) at the top with red visual indicators.
+- Action Center provides buttons for Lab Orders, Drug Prescriptions, and Ward Admissions.
+
+---
+
+### Entry 016 — Registration Form Expansion
+**Date:** 2026-08-11
+**Action:** User requested additional registration fields based on real PHC intake forms.
+**Fields Added:** Gender (dropdown), Age, Tribe/Ethnicity, Religion (dropdown), Occupation, Address (Village/Town/LGA), Next of Kin Name, Next of Kin Phone.
+**Design Decision:** Used dropdowns for Gender (Male/Female) and Religion (Islam/Christianity/Traditional/Other) to minimize typing on small tablet screens. Tribe kept as free-text because Nigeria has 250+ ethnic groups.
+
+---
+
+### Entry 017 — Light/Dark Theme System
+**Date:** 2026-08-11
+**Action:** User reported the pure black UI was too dark. Implemented a full dual-theme system.
+**Technical Approach:**
+- Created CSS custom properties in `index.css` scoped to `[data-theme="light"]` and `[data-theme="dark"]`.
+- Light mode: Clean white (`#f5f7fa` page, `#ffffff` cards).
+- Dark mode: Soft ash gray (`#3a3f4a` page) — explicitly NOT pure black, for comfortable long-duration viewing.
+- Toggle button (Sun/Moon icon) placed in the navigation bar.
+- All 4 component files (`App.tsx`, `FrontDesk.tsx`, `Triage.tsx`, `Consultation.tsx`) refactored to use `var(--variable)` instead of hardcoded Tailwind colors.
+- Background gradient blobs only render in dark mode.
+- The emerald accent color is shared across both themes for brand consistency.
