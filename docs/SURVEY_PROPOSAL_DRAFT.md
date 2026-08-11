@@ -44,7 +44,14 @@ To execute the pilot phase, the following resources are required per facility:
 * **Software Infrastructure:** Cloud hosting for the central PostgreSQL aggregation database (Neon).
 * **Human Resources:** 1x Field Deployment Engineer, 1x Clinical Trainer.
 
-## 7. Conclusion
+## 7. Risk Management & Sustainability (Blind Spots Addressed)
+To ensure long-term viability, this proposal accounts for critical operational risks:
+* **Hardware Theft & Damage:** Tablets are highly valuable. We will mandate ruggedized, drop-proof cases and physical Kensington locks for the Edge Server. Furthermore, the local database on the Raspberry Pi will be **Encrypted at Rest**—if stolen, patient data remains unreadable.
+* **Operating Expenses (OPEX):** While initial hardware is a one-time CAPEX, the proposal includes an ongoing OPEX budget for monthly 4G data subscriptions (for cloud sync) and a 15% annual hardware attrition fund to replace cracked tablets.
+* **Data Privacy (NDPR Compliance):** The architecture guarantees that no patient data is sold, leaked, or exposed. It adheres strictly to the Nigerian Data Protection Regulation (NDPR) by enforcing Role-Based Access Control and cryptographic logins.
+* **Community Resistance:** The Ward Development Committee (WDC), consisting of local community leaders, will be engaged prior to deployment to ensure the community views the system as an upgrade to their healthcare, not a barrier.
+
+## 8. Conclusion
 The current paper-based system is not just an administrative burden; it is a clinical risk that fragments patient care. **PHC_Live** is not an off-the-shelf software forced into a rural setting—it is a system engineered precisely from the ground up for the realities of the field. Funding this pilot will establish a scalable blueprint for digitized, data-driven healthcare across the region.
 
 ---
