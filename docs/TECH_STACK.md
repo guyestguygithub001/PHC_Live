@@ -52,8 +52,9 @@ Every PHC will be equipped with a low-cost, low-power local edge server.
 
 * **Central Database:** PostgreSQL hosted on **Neon (Serverless Postgres)**.
   * *Rationale:* Neon provides a generous free tier, serverless scaling (scales to zero when not used to save money), and instant branching (great for testing features without breaking the production hospital data).
-* **Sync Engine:** A Node.js middleware service that facilitates the WatermelonDB Sync Protocol between the local tablets, the local Pi server, and the central Neon PostgreSQL database.
-* **Interoperability Engine:** Pushes aggregate statistics to the government's DHIS2 servers automatically.
+* **Sync Engine:** A **Golang** middleware service that facilitates the WatermelonDB Sync Protocol between the local tablets, the local Pi server, and the central Neon PostgreSQL database.
+  * *Rationale for Golang:* Go compiles to a single, lightweight binary with zero dependencies, making it perfect for running on low-resource Raspberry Pi edge servers. It uses extremely low RAM and handles thousands of concurrent sync requests flawlessly using goroutines.
+* **Interoperability Engine:** A Golang service that pushes aggregate statistics to the government's DHIS2 servers automatically.
 
 ---
 *Last Updated: 2026-08-11 | Chunk 3*

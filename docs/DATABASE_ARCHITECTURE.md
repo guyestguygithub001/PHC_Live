@@ -34,8 +34,8 @@ If a standard React app talks directly to a PostgreSQL database via an API, a ne
 ### 2.2 The Solution: WatermelonDB Sync Protocol
 To use PostgreSQL without losing offline capabilities, we decouple the UI from the network:
 * **The Client (Tablet):** Uses **WatermelonDB** (an offline-first React database built on local SQLite). The app *never* talks to the cloud database directly. It only talks to the local SQLite database, meaning it is always 100% fast and available.
-* **The Background Sync:** When the tablet detects Wi-Fi, WatermelonDB's built-in sync engine packages all local changes into a JSON payload and pushes it to a Node.js API on the local server.
-* **The Aggregation:** The local API translates the JSON payload into standard SQL `INSERT` commands and executes them against the **Local PostgreSQL Database**.
+* **The Background Sync:** When the tablet detects Wi-Fi, WatermelonDB's built-in sync engine packages all local changes into a JSON payload and pushes it to a high-concurrency **Golang API** on the local server.
+* **The Aggregation:** The local Golang API translates the JSON payload into standard SQL `INSERT` commands and executes them against the **Local PostgreSQL Database**.
 * **The Cloud Sync:** The Local Postgres periodically replicates to the **Neon PostgreSQL Cloud**.
 
 ---

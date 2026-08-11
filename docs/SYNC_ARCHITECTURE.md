@@ -14,7 +14,7 @@ Data flows through three distinct tiers, ensuring the clinic never stops functio
 * **Result:** The UI updates instantly (0ms latency). The Nurse feels like they are using a hyper-fast app, completely unaware of network status.
 
 ### Tier 2: The Local Facility Server (Raspberry Pi on UPS)
-* The device silently attempts to push its WatermelonDB action queue to the **Local PostgreSQL Server** (via a Node API) over the clinic's local Wi-Fi router.
+* The device silently attempts to push its WatermelonDB action queue to the **Local PostgreSQL Server** (via a high-performance Golang API) over the clinic's local Wi-Fi router.
 * If Wi-Fi is down, WatermelonDB holds the changes in a local sync queue.
 * As soon as Wi-Fi connects, it performs a pull/push sync based on `updated_at` timestamps.
 * **Result:** The CHO in consultation instantly sees the Vitals just taken by the Nurse in Triage, without any data leaving the physical building.
