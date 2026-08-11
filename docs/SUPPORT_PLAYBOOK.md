@@ -122,4 +122,5 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - 2.1 ✅ Created `STAKEHOLDER_MAP.md` (Mapping out CHEWs, Nurses, CHOs, Lab Techs, Pharmacists, OIC, GH Doctors).
 - 2.2 ✅ Created `CLINICAL_WORKFLOWS.md` (Mapping AS-IS paper reality vs. TO-BE digital offline-first reality for Registration, Vitals, ANC, Referrals).
 - 2.3 ✅ Created `DATA_DICTIONARY.md` (Defining exact data payloads based on nurse interview and global standards).
-- 2.4 🟢 CHECKPOINT — User review of Domain Analysis.
+- 2.4 ✅ Created `END_USER_EXPERIENCE.md` (Defining UX strategy for patients via Smart Hand Cards/SMS and health workers via zero-typing UI).
+- 2.5 🟢 CHECKPOINT — User review of Domain Analysis.

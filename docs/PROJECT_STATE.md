@@ -9,7 +9,7 @@
 | Field | Value |
 |---|---|
 | **Current Chunk** | Chunk 2: Domain Analysis — Stakeholder Mapping & Workflow Discovery |
-| **Current Step** | 2.4 / 2.4 (CHECKPOINT) |
+| **Current Step** | 2.5 / 2.5 (CHECKPOINT) |
 | **Status** | 🟢 CHECKPOINT — Awaiting user review |
 | **Last Updated** | 2026-08-11 12:00 WAT |
 | **Blockers** | None currently |
@@ -52,7 +52,8 @@
 | 2.1 | Create STAKEHOLDER_MAP.md | ✅ DONE | 2026-08-11 11:56 |
 | 2.2 | Create CLINICAL_WORKFLOWS.md (Patient journeys, ANC, referrals) | ✅ DONE | 2026-08-11 11:56 |
 | 2.3 | Create DATA_DICTIONARY.md (Variables and data structures) | ✅ DONE | 2026-08-11 11:56 |
-| 2.4 | CHECKPOINT — User review | 🟢 AWAITING REVIEW | 2026-08-11 11:57 |
+| 2.4 | Create END_USER_EXPERIENCE.md (UX & Data Strategy) | ✅ DONE | 2026-08-11 12:01 |
+| 2.5 | CHECKPOINT — User review | 🟢 AWAITING REVIEW | 2026-08-11 12:02 |
 
 ---
 
