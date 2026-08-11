@@ -39,7 +39,7 @@
 ### Features
 * **The "To See" Queue (OPD):** Patients who have passed Triage. Ranked by Urgency (based on Triage vitals).
 * **Historical Timeline (Skeuomorphic Folder):** A vertically scrolling timeline showing all past encounters, lab results, and drugs given to this patient. Mimics opening a physical file.
-* **Zero-Typing ICD-10 Diagnosis:** Instead of typing "Malaria", the CHO selects from a pre-populated dropdown of the top 50 most common PHC ailments. 
+* **ICD-11 Auto-Suggest Engine:** Instead of typing out diagnoses manually, the CHO starts typing a symptom (e.g., "Typhoid"), and a lightning-fast offline fuzzy search instantly suggests the exact ICD-11 code (e.g., `1A07 - Typhoid fever`). This guarantees perfect, standardized data.
 * **Action Center:** Buttons to explicitly "Order Lab Test", "Prescribe Drug", "Admit to Ward (IPD)", or "Initiate Referral". 
 * **Draft Auto-Save:** If the CHO is typing a note and the tablet battery dies, the note is saved locally in WatermelonDB as a draft and restores instantly on another tablet upon login.
 
@@ -96,11 +96,24 @@
 * **Pregnancy Timeline:** A dedicated UI tracking the standard 4-to-8 ANC visits.
 * **Scan/Foetus Tracking:** Fields for foetal heart rate, presentation, and scan results.
 * **Delivery Register:** Captures birth outcomes (Live Birth, Stillbirth, APGAR score, Birth Weight).
+* **Real-time Analytics:** Visual dashboards (charts/graphs) showing the most common diseases seen this month, total patients handled, and drug consumption rates.
 * **Automated DHIS2 Aggregation:** Because birth data is highly critical for national statistics, this module automatically maps birth outcomes to DHIS2 data elements for seamless monthly reporting.
 
 ---
 
-## 8. Inpatient Department (IPD) / Ward Module
+## 8. The Epidemic Radar (Syndromic Surveillance)
+
+**Primary User:** OIC (Officer in Charge) / State Epidemiologist  
+**Goal:** Detect outbreaks in real-time before they spread.
+
+### Features
+* **Zero-Setup Surveillance:** Because the CHO is forced to use the ICD-11 Auto-Suggest engine in the Consultation module, the data is perfectly structured automatically.
+* **Red Alert Triggers:** If a CHO selects a "Notifiable Disease" (e.g., Cholera, Lassa Fever, Measles), the local Edge Server instantly triggers a high-priority alarm on the OIC's dashboard, completely offline.
+* **Automated Escalation:** The exact second the clinic gets internet connectivity, these flagged epidemic cases are pushed upstream to the State DHIS2 or Health Ministry dashboards for rapid, targeted intervention.
+
+---
+
+## 9. Inpatient Department (IPD) / Ward Module
 
 **Primary User:** Ward Nurse / CHO  
 **Goal:** Manage admitted patients, track ongoing treatments (e.g., IV drips), and monitor daily vitals.
