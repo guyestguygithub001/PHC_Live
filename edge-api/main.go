@@ -27,8 +27,13 @@ func main() {
 		})
 	})
 
-	r.GET("/sync", auth.AuthMiddleware(), sync.PullHandler)
-	r.POST("/sync", auth.AuthMiddleware(), sync.PushHandler)
+	// API Version 1 Group
+	v1 := r.Group("/api/v1")
+	v1.Use(auth.AuthMiddleware())
+	{
+		v1.GET("/sync", sync.PullHandler)
+		v1.POST("/sync", sync.PushHandler)
+	}
 
 	// Run on local edge port
 	r.Run("0.0.0.0:8080")

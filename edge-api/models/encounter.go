@@ -18,10 +18,10 @@ const (
 
 // Encounter represents a single visit by a patient.
 type Encounter struct {
-	ID              string          `gorm:"primaryKey;type:varchar(50)" json:"id"` // WatermelonDB UUID
-	PatientID       string          `gorm:"type:varchar(50);index" json:"patient_id"`
+	ID              string          `gorm:"type:uuid;primary_key;" json:"id"` // Offline-safe UUID
+	PatientID       string          `gorm:"type:uuid;index" json:"patient_id"`
 	Patient         Patient         `gorm:"foreignKey:PatientID" json:"patient,omitempty"`
-	AttendingUserID string          `gorm:"type:varchar(50);index" json:"attending_user_id"` // Who is handling them right now
+	AttendingUserID string          `gorm:"type:uuid;index" json:"attending_user_id"` // Who is handling them right now
 	Status          EncounterStatus `gorm:"type:varchar(50);not null" json:"status"`
 	ChiefComplaint  string          `gorm:"type:text" json:"chief_complaint"` // e.g. "Fever for 3 days"
 	ICD11Code       string          `gorm:"type:varchar(20);index" json:"icd11_code"`
