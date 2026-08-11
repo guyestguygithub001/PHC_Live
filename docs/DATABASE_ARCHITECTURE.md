@@ -68,5 +68,26 @@ To prevent the user from ever facing a "Sync Failed" error due to bad data, the 
 * If a Nurse accidentally enters a blood pressure of `999/80`, the UI blocks the save locally.
 * This ensures only perfectly structured data is allowed to enter the offline queue, ensuring the eventual sync to Neon PostgreSQL never chokes.
 
+## 5. Enterprise Database Standards
+
+A database with "1 table and 47 columns" is not a database; it is a spreadsheet with delusions. It leads to 10-second load times and system failure. Our Neon PostgreSQL instance will strictly adhere to enterprise design patterns:
+
+### 5.1 ACID Compliance
+PostgreSQL is inherently ACID compliant (Atomicity, Consistency, Isolation, Durability). 
+* **Application:** When the Pharmacy dispenses a drug (Drug Revolving Fund), the transaction that creates the `prescription_dispensed` record MUST succeed at the exact same time as the transaction that decrements the `inventory_count`. If one fails, the entire transaction rolls back. No orphaned data.
+
+### 5.2 Strict Normalization & Indexing
+We will not use massive, wide tables. 
+* **Normalization:** Data is split into relational tables (e.g., `patients`, `encounters`, `observations`, `prescriptions`, `lab_results`).
+* **Proper Indexes:** We will create explicit B-Tree indices on highly queried foreign keys (e.g., `patient_id`, `facility_id`, `created_at`). 
+
+### 5.3 Migrations & Backups
+* **Migrations:** We will use an ORM (like Prisma or Drizzle) to generate strict, version-controlled SQL migration files. Changes to the database schema are never done manually; they are applied linearly via CI/CD.
+* **Backups:** Neon provides automatic Point-in-Time Recovery (PITR), allowing us to roll the entire database back to a specific second if catastrophic corruption occurs. We will also perform nightly logical backups (`pg_dump`) to secure offline storage.
+
+### 5.4 Query Optimization
+* No `SELECT *` queries. The frontend will only request the exact columns it needs.
+* Heavy use of Pagination (Cursor-based) so the system never attempts to load 10,000 records into memory at once.
+
 ---
 *Last Updated: 2026-08-11 | Chunk 3*

@@ -146,3 +146,13 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - Switched Cloud Database from CouchDB to **Neon Serverless PostgreSQL**.
 - Switched Client Database from PouchDB to **WatermelonDB** (which handles offline-first sync specifically for SQL backends in React).
 - Updated `TECH_STACK.md`, `SYNC_ARCHITECTURE.md`, and `DATABASE_ARCHITECTURE.md` to reflect this new robust SQL pipeline while maintaining the 100% offline-first requirement.
+
+---
+
+### Entry 008 — Enterprise Database Standards & Caching Strategy
+**Date:** 2026-08-11  
+**Action:** User provided strong feedback regarding database design (anti 47-column spreadsheets) and caching strategies (stampedes, TTL).  
+**Details:**  
+- Updated `DATABASE_ARCHITECTURE.md` to include Enterprise Standards: ACID compliance, strict normalization, B-Tree indexing, migrations via ORM, and query optimization (no `SELECT *`).
+- Created `CACHING_STRATEGY.md` to explicitly define Time-To-Live (TTL) as a business decision (e.g., caching addresses forever, but never caching inventory counts). Designed a Mutex Lock / Probabilistic Early Expiration system to prevent Cache Stampedes.
+- Acknowledged the "Ceiling Principle" — building the perfect foundation for the first 1,000 clinics.

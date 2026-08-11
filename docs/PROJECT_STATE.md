@@ -9,7 +9,7 @@
 | Field | Value |
 |---|---|
 | **Current Chunk** | Chunk 3: Systems Architecture — Technical Design |
-| **Current Step** | 3.5 / 3.5 (CHECKPOINT) |
+| **Current Step** | 3.8 / 3.8 (CHECKPOINT) |
 | **Status** | 🟢 CHECKPOINT — Awaiting user review |
 | **Last Updated** | 2026-08-11 12:11 WAT |
 | **Blockers** | None currently |
@@ -65,7 +65,9 @@
 | 3.2 | Create SYNC_ARCHITECTURE.md (Offline-first data sync protocol) | ✅ DONE | 2026-08-11 12:12 |
 | 3.3 | Create SECURITY_AND_COMPLIANCE.md (Encryption, RBAC) | ✅ DONE | 2026-08-11 12:12 |
 | 3.4 | Create DATABASE_ARCHITECTURE.md (Fail-proof offline db design) | ✅ DONE | 2026-08-11 12:14 |
-| 3.5 | CHECKPOINT — User review | 🟢 AWAITING REVIEW | 2026-08-11 12:15 |
+| 3.5 | Update DATABASE_ARCHITECTURE.md (Normalization & ACID) | ✅ DONE | 2026-08-11 12:20 |
+| 3.6 | Create CACHING_STRATEGY.md (TTL & Stampede prevention) | ✅ DONE | 2026-08-11 12:20 |
+| 3.7 | CHECKPOINT — User review | 🟢 AWAITING REVIEW | 2026-08-11 12:21 |
 
 ---
 
