@@ -8,7 +8,11 @@
 
 1. **Familiarity (The Skeleton):** The layout mimics the physical artifacts the staff already use. The patient history looks like a physical folder. The registration screen looks like a logbook. We do not reinvent how they view data; we just upgrade the medium.
 2. **Premium Fluidity (The Skin):** The UI uses modern web design aesthetics—soft shadows, glassmorphism, dynamic micro-animations, and vibrant but clinical colors. It must "WOW" the user and feel highly responsive. 
-3. **Vanilla CSS Tokens:** We are utilizing Vanilla CSS variables for maximum performance on low-end tablets and absolute control over the design system, avoiding heavy utility-class frameworks.
+3. **Core Styling Engine: Tailwind CSS**
+While we initially considered Vanilla CSS, we are shifting to **Tailwind CSS** to rapidly construct the UI and enforce a strict design system without writing thousands of lines of custom CSS.
+* **Utility-First Speed:** Allows for rapid iteration of the massive oversized touch targets and flexbox layouts.
+* **Custom Configuration:** We will extend the `tailwind.config.js` to include our exact clinical color palette (avoiding generic Tailwind blues/greens).
+* **Glassmorphism Utility:** We will create a custom Tailwind utility class (e.g., `.bg-glass`) combining `bg-opacity`, `backdrop-blur`, and `border-white/20` to instantly apply our premium aesthetic across the app.
 
 ---
 

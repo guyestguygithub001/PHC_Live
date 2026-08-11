@@ -112,4 +112,17 @@
 * **Discharge Summary:** When a patient is healthy enough to leave, the CHO generates a discharge note, closing the IPD event and converting the patient back to standard outpatient status.
 
 ---
-*Last Updated: 2026-08-11 | Chunk 5*
+
+## 9. Patient Booking Portal (Cloud-to-Edge)
+
+**Primary User:** The Patient (Remote)  
+**Goal:** Allow patients to book appointments from home using a zero-friction, multi-lingual web app, which syncs to the offline clinic.
+
+### Features
+* **Cloud-to-Edge Sync:** The portal lives on the public internet, writing to Neon PostgreSQL. The local clinic (Raspberry Pi) pulls these appointments down whenever it detects an internet connection.
+* **Zero Form Anxiety (OTP):** No emails or passwords. Patients authenticate purely via Phone Number and a 4-digit SMS/WhatsApp OTP.
+* **Native Localization:** A 1-tap toggle seamlessly switches the UI between English, Nigerian Pidgin ("Wetin dey do you?"), and Hausa ("Me ke damun ka/ki?").
+* **Iconography & Micro-Interactions:** Uses massive, oversized Tailwind CSS Glassmorphism cards with universal emojis (🤰 Awo, 🦟 Zazzabi) so patients can book by tapping pictures instead of reading text. Auto-advances on OTP entry to ensure a sub-30-second workflow.
+
+---
+*Last Updated: 2026-08-11 | Chunk 6*

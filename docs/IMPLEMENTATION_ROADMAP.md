@@ -52,6 +52,15 @@
 
 ---
 
+## Sprint 5: The Patient Booking Portal (Days 29-35)
+**Goal:** Build the cloud-hosted web app for remote patients and establish Cloud-to-Edge sync.
+- [ ] **Infrastructure:** Scaffold a separate React/Vite repository (`PHC_Live_Patient`) hosted on Vercel/Netlify.
+- [ ] **OTP Auth Layer:** Integrate WhatsApp/SMS API for password-less 4-digit PIN authentication.
+- [ ] **Rural UX & Localization:** Build the multi-lingual toggle (Pidgin/Hausa) and the oversized, haptic-enabled Iconography UI using Tailwind CSS.
+- [ ] **Cloud-to-Edge Sync Worker:** Update the Golang Edge API to periodically poll the Neon Postgres DB and pull down remote appointments into the local WatermelonDB Triage Queue.
+
+---
+
 ## Post-Sprint: The Field Pilot
 **Goal:** Deploy to the first physical clinic.
 - [ ] Flash the Golang binary onto the physical Raspberry Pi.
