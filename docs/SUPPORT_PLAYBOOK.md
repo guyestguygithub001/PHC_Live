@@ -134,4 +134,5 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - 3.1 ✅ Created `TECH_STACK.md` (Defining React/Vite PWA, PouchDB/CouchDB database, and Raspberry Pi edge server hardware).
 - 3.2 ✅ Created `SYNC_ARCHITECTURE.md` (Defining the 3-tier sync topology, MVCC conflict resolution, and Data Mule sneakernet fallback).
 - 3.3 ✅ Created `SECURITY_AND_COMPLIANCE.md` (Defining TLS 1.3, Local DB encryption via PIN, RBAC, and immutable audit trails).
-- 3.4 🟢 CHECKPOINT — User review of Systems Architecture.
+- 3.4 ✅ Created `DATABASE_ARCHITECTURE.md` (Defining the append-only ledger, CouchDB MVCC, smart sharding, and Zod schema validation).
+- 3.5 🟢 CHECKPOINT — User review of Systems Architecture.
