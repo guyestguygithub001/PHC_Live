@@ -7,14 +7,14 @@
 ## 1. Patient Registration & Records Module
 
 **Primary User:** Records Officer / CHEW  
-**Goal:** Digitize the "Hand Card" lookup process and eliminate infinite physical folder storage.
+**Goal:** Digitize the "Hand Card" lookup process, eliminate infinite physical folder storage, and make the front desk hyper-efficient.
 
 ### Features
-* **Smart Lookup:** Search by Name, Phone Number, or National Identification Number (NIN). 
-* **Fuzzy Matching:** Because spelling names varies, the search algorithm must tolerate typos (e.g., matching "Muhamad" to "Mohammed").
-* **Offline Demographics Cache:** As per our database architecture, demographic data is cached locally to make search 100% instant even during a blackout.
-* **Smart ID Generation:** If a patient has no ID, the system generates a human-readable ID (e.g., `PHC-KAN-0012`) that can be written on their physical hand card.
-* **Archival System:** Deceased or inactive patients can be digitally marked as archived, removing them from the active sync queue but keeping them securely in the Neon cloud database to save space on tablets.
+* **Lightning Lookup (Fuzzy Search):** Search by Name, Phone Number, or National Identification Number (NIN). The search algorithm tolerates typos (e.g., matching "Muhamad" to "Mohammed") and works 100% offline via local cache.
+* **QR Code / Barcode Scanning:** To make the unit highly functional, the facility can stick cheap, pre-printed QR codes/barcodes on the patient's physical hand card. The Records Officer simply holds the card up to the tablet's camera to instantly pull up the patient file. Zero typing required.
+* **Smart ID Generation:** If a patient is new, the system generates a sequential human-readable ID (e.g., `PHC-KAN-0012`) to write on their card.
+* **Queue Routing:** Once the record is found, the Records Officer taps "Send to Triage", "Send to ANC", or "Send to Ward". This actively manages traffic flow before the patient even sees a nurse.
+* **Archival System:** Deceased or inactive patients are digitally marked as archived, removing them from local tablets to save space but keeping them securely in the Neon cloud database.
 
 ---
 
@@ -31,16 +31,16 @@
 
 ---
 
-## 3. Consultation Module (The Doctor's Desk)
+## 3. OPD Consultation Module (Outpatient Department)
 
 **Primary User:** CHO (Community Health Officer) / Doctor  
-**Goal:** Review history, diagnose, and order labs/drugs without dual-entry.
+**Goal:** Review history, diagnose, and order labs/drugs without dual-entry, or admit patient to Ward.
 
 ### Features
-* **The "To See" Queue:** Patients who have passed Triage. Ranked by Urgency (based on Triage vitals).
+* **The "To See" Queue (OPD):** Patients who have passed Triage. Ranked by Urgency (based on Triage vitals).
 * **Historical Timeline (Skeuomorphic Folder):** A vertically scrolling timeline showing all past encounters, lab results, and drugs given to this patient. Mimics opening a physical file.
 * **Zero-Typing ICD-10 Diagnosis:** Instead of typing "Malaria", the CHO selects from a pre-populated dropdown of the top 50 most common PHC ailments. 
-* **Action Center:** Buttons to explicitly "Order Lab Test", "Prescribe Drug", or "Initiate Referral". 
+* **Action Center:** Buttons to explicitly "Order Lab Test", "Prescribe Drug", "Admit to Ward (IPD)", or "Initiate Referral". 
 * **Draft Auto-Save:** If the CHO is typing a note and the tablet battery dies, the note is saved locally in WatermelonDB as a draft and restores instantly on another tablet upon login.
 
 ---
@@ -99,4 +99,17 @@
 * **Automated DHIS2 Aggregation:** Because birth data is highly critical for national statistics, this module automatically maps birth outcomes to DHIS2 data elements for seamless monthly reporting.
 
 ---
-*Last Updated: 2026-08-11 | Chunk 4*
+
+## 8. Inpatient Department (IPD) / Ward Module
+
+**Primary User:** Ward Nurse / CHO  
+**Goal:** Manage admitted patients, track ongoing treatments (e.g., IV drips), and monitor daily vitals.
+
+### Features
+* **Bed Management:** A visual dashboard showing available and occupied beds in the ward.
+* **The Admission Chart:** A running log tied to the specific admission event (unlike the OPD timeline, which is visit-to-visit). 
+* **Medication Administration Record (MAR):** A checklist for nurses to sign off when routine medications are administered (e.g., "Artemether 80mg IV - 08:00 AM [Done]").
+* **Discharge Summary:** When a patient is healthy enough to leave, the CHO generates a discharge note, closing the IPD event and converting the patient back to standard outpatient status.
+
+---
+*Last Updated: 2026-08-11 | Chunk 5*

@@ -178,4 +178,5 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - 5.2 ✅ Created `MOTION_AND_INTERACTION.md` (Defined psychological safety mechanisms: Optimistic UI for zero latency, "Undo" Toasts instead of deletion popups, and Skeuomorphic Draft Auto-saves).
 - 5.3 ✅ Created `WORKFLOW_SIMULATION.md` (Measured exact tap counts and time required for Triage, Consultation, and Pharmacy. Proved that core tasks can be completed in under 10 seconds with zero standard typing).
 - 5.4 ✅ Created `SURVEY_PROPOSAL_DRAFT.md` (Drafted an Executive Proposal for the Programs Manager to secure funding/buy-in based on field survey loopholes and our proposed technical intervention).
-- 5.5 🟢 CHECKPOINT — User review of UI/UX Design, Workflow Simulations, & Proposal Draft.
+- 5.5 ✅ Refined `MODULE_SPECIFICATIONS.md` and `CLINICAL_WORKFLOWS.md` based on user feedback. Added explicit Inpatient Department (IPD) / Ward tracking versus Outpatient (OPD). Added QR/Barcode scanning and intelligent queue routing to make the Records Unit highly functional.
+- 5.6 🟢 CHECKPOINT — User review of UI/UX Design, Workflow Simulations, Proposal Draft, & Refined Workflows.

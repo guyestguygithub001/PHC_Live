@@ -36,13 +36,17 @@
 7. CHO writes prescription in folder.
 8. Patient goes to Pharmacy. Pharmacist dispenses and logs in DRF register.
 
-### TO-BE (Digital System)
-1. CHO selects patient from Consultation Queue.
-2. CHO reviews vitals and historical data on screen.
-3. CHO enters symptoms and selects lab tests from a digital dropdown. System sends electronic request to Lab Queue.
-4. Patient walks to Lab. Lab Tech selects patient from Lab Queue.
+### 3. The Clinical Encounter (CHO / Doctor)
+The CHO opens the patient's digital file. The screen splits into two distinct views:
+* **The Skeuomorphic Timeline:** A visual scroll of all past visits, mirroring the physical folder they are used to.
+* **The Current Visit Box:** They review the Triage vitals.
+* **Zero-Typing Diagnosis:** Instead of typing, the CHO taps an ICD-10 dropdown categorized by the top 50 PHC ailments (e.g., Malaria, Typhoid, URTI).
+* **Action Routing:** Based on the diagnosis, the CHO taps one of four paths:
+  1. `[PRESCRIBE DRUGS]` → Sends patient directly to Pharmacy queue.
+  2. `[ORDER LABS]` → Sends patient to Laboratory queue.
+  3. `[ADMIT TO WARD]` → Converts patient from Outpatient (OPD) to Inpatient (IPD) and sends them to the Ward dashboard.
+  4. `[REFER TO GH]` → Triggers the General Hospital Referral Module.
 5. Lab Tech enters results digitally. System alerts CHO that results are ready.
-6. CHO reviews results digitally, selects diagnosis (ICD-10/custom codes), and generates e-prescription.
 7. Pharmacist sees e-prescription in Pharmacy Queue, dispenses drugs, and system automatically deducts from digital inventory.
 
 ---
@@ -65,7 +69,16 @@
 
 ---
 
-## Workflow 4: The Referral Loop (PHC to General Hospital)
+## 6. The Inpatient Ward (IPD)
+If a patient is admitted (e.g., severe dehydration or post-delivery), they enter the Ward workflow.
+* **Bed Assignment:** The Ward Nurse assigns the patient to an available bed in the UI.
+* **Medication Administration Record (MAR):** The system generates a checklist for scheduled treatments (e.g., "IV Quinine - 08:00 AM, 02:00 PM").
+* **Daily Vitals Tracking:** Nurses can log vitals multiple times a day onto the specific admission chart, rather than creating a new "visit" every time.
+* **Discharge:** Once stabilized, the CHO signs a Discharge Summary, closing the IPD event and returning the patient to standard Outpatient (OPD) status.
+
+---
+
+## 7. The Referral Outpost (General Hospital)
 
 ### AS-IS (Paper Reality)
 1. Critical case identified at PHC.
