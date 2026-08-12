@@ -22,6 +22,8 @@ const translations = {
     ancQueue: 'ANC Queue',
     ancVisit: 'ANC Visit',
     deliveryRegister: 'Delivery Register',
+    immunization: 'Immunization',
+    postnatal: 'Postnatal Care',
     waiting: 'Waiting',
     inProgress: 'In Progress',
     completed: 'Completed',
@@ -49,12 +51,25 @@ const translations = {
     successAnc: 'ANC Visit recorded successfully',
     successDelivery: 'Delivery recorded with ID:',
     gestationalAge: 'Gestational Age',
+    vaccine: 'Vaccine Type',
+    dose: 'Dose Number',
+    batch: 'Batch Number',
+    nextAppt: 'Next Appointment Date',
+    recordImmunization: 'Record Immunization',
+    successImmunization: 'Immunization recorded successfully',
+    motherAssessment: 'Mother Assessment',
+    newbornAssessment: 'Newborn Assessment',
+    complications: 'Complications (if any)',
+    recordPostnatal: 'Record Postnatal Care',
+    successPostnatal: 'Postnatal care recorded successfully',
   },
   HA: {
     title: 'Awo & Haihuwa (ANC & Delivery)',
     ancQueue: 'Jerin Masu Jiran Awo',
     ancVisit: 'Awo (ANC Visit)',
     deliveryRegister: 'Rijistar Haihuwa',
+    immunization: 'Allurar Riga-kafi',
+    postnatal: 'Duba Mai Jego',
     waiting: 'Suna Jiran',
     inProgress: 'Ana Dubawa',
     completed: 'An Kammala',
@@ -82,6 +97,17 @@ const translations = {
     successAnc: 'An yi rikodin Awo cikin nasara',
     successDelivery: 'An yi rikodin Haihuwa mai Lamba:',
     gestationalAge: 'Adadin Makonnin Ciki',
+    vaccine: 'Irin Allurar',
+    dose: 'Adadin Allura (Dose)',
+    batch: 'Lambar Kundi (Batch)',
+    nextAppt: 'Rana Ta Gaba',
+    recordImmunization: 'Yi Rikodin Allura',
+    successImmunization: 'An yi rikodin Allura cikin nasara',
+    motherAssessment: 'Yadda Uwa Take',
+    newbornAssessment: 'Yadda Jariri Yake',
+    complications: 'Matsaloli (Idan Akwai)',
+    recordPostnatal: 'Yi Rikodin Mai Jego',
+    successPostnatal: 'An yi rikodin Mai Jego cikin nasara',
   }
 };
 
@@ -93,16 +119,18 @@ const mockQueue: Patient[] = [
   { id: '4', name: 'Hauwa Musa', age: 28, gestationalAge: '40 weeks', status: 'waiting' },
 ];
 
-export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme }) => {
+export default function AntenatalCare({ language, theme }: AntenatalCareProps) {
   const t = translations[language];
   
   const [queue, setQueue] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [activeTab, setActiveTab] = useState<'anc' | 'delivery'>('anc');
+  const [activeTab, setActiveTab] = useState<'anc' | 'delivery' | 'immunization' | 'postnatal'>('anc');
   
   // Clean component state for forms
   const [ancForm, setAncForm] = useState({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
   const [deliveryForm, setDeliveryForm] = useState({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
+  const [immunizationForm, setImmunizationForm] = useState({ vaccine: '', dose: '', batch: '', nextAppt: '' });
+  const [postnatalForm, setPostnatalForm] = useState({ motherAssessment: '', newbornAssessment: '', complications: '' });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Initialize data - easily swappable for real data fetching later
@@ -116,6 +144,8 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
     // Reset forms when switching patient
     setAncForm({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
     setDeliveryForm({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
+    setImmunizationForm({ vaccine: '', dose: '', batch: '', nextAppt: '' });
+    setPostnatalForm({ motherAssessment: '', newbornAssessment: '', complications: '' });
     setToastMessage(null);
   };
 
@@ -141,11 +171,27 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
     setDeliveryForm({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
   };
 
+  const handleImmunizationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Submitting Immunization:', immunizationForm);
+    setToastMessage(t.successImmunization);
+    setTimeout(() => setToastMessage(null), 3000);
+    setImmunizationForm({ vaccine: '', dose: '', batch: '', nextAppt: '' });
+  };
+
+  const handlePostnatalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Submitting Postnatal:', postnatalForm);
+    setToastMessage(t.successPostnatal);
+    setTimeout(() => setToastMessage(null), 3000);
+    setPostnatalForm({ motherAssessment: '', newbornAssessment: '', complications: '' });
+  };
+
   const getStatusColor = (status: Patient['status']) => {
     switch (status) {
       case 'waiting': return 'text-orange-500 bg-orange-500/10';
       case 'in-progress': return 'text-indigo-500 bg-indigo-500/10';
-      case 'completed': return 'text-emerald-500 bg-emerald-500/10';
+      case 'completed': return 'text-[var(--primary)] bg-[var(--primary)]/5';
       default: return 'text-gray-500 bg-gray-500/10';
     }
   };
@@ -154,15 +200,13 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
     <div className="flex flex-col h-full overflow-hidden" style={{ color: 'var(--text-primary)' }}>
       {/* Header Area */}
       <div className="px-6 py-4 flex items-center gap-3 border-b" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)' }}>
-        <div className="p-2 bg-purple-500/10 rounded-lg">
-          <Baby className="w-6 h-6 text-purple-500" />
-        </div>
-        <h1 className="text-xl font-bold">{t.title}</h1>
+        <Baby className="w-6 h-6 text-[var(--primary)]" />
+        <h1 className="text-lg font-semibold">{t.title}</h1>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Left Panel: ANC Queue */}
-        <div className="w-1/3 border-r overflow-y-auto" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--queue-bg)' }}>
+        <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r overflow-y-auto" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--queue-bg)' }}>
           <div className="p-4 border-b sticky top-0 z-10" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--queue-bg)' }}>
             <h2 className="font-semibold">{t.ancQueue}</h2>
           </div>
@@ -203,38 +247,53 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
           {selectedPatient ? (
             <>
               {/* Patient Info Header & Tabs */}
-              <div className="p-6 border-b" style={{ borderColor: 'var(--border-default)' }}>
-                <div className="flex justify-between items-center mb-4">
+              <div className="p-4 border-b" style={{ borderColor: 'var(--border-default)' }}>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 sm:gap-0">
                   <div>
-                    <h2 className="text-2xl font-bold">{selectedPatient.name}</h2>
+                    <h2 className="text-lg font-semibold">{selectedPatient.name}</h2>
                     <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
                       ID: {selectedPatient.id} • {selectedPatient.age} yrs • {t.gestationalAge}: {selectedPatient.gestationalAge}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-4">
+                {/* Module Tabs (ANC, Delivery, Immunization, Postnatal) */}
+                <div className="flex flex-wrap gap-2 sm:gap-4">
                   <button
                     onClick={() => setActiveTab('anc')}
-                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'anc' ? 'border-purple-500 text-purple-500' : 'border-transparent hover:border-gray-300'}`}
+                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'anc' ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent hover:border-gray-300'}`}
                     style={{ color: activeTab === 'anc' ? undefined : 'var(--text-secondary)' }}
                   >
                     {t.ancVisit}
                   </button>
                   <button
                     onClick={() => setActiveTab('delivery')}
-                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'delivery' ? 'border-purple-500 text-purple-500' : 'border-transparent hover:border-gray-300'}`}
+                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'delivery' ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent hover:border-gray-300'}`}
                     style={{ color: activeTab === 'delivery' ? undefined : 'var(--text-secondary)' }}
                   >
                     {t.deliveryRegister}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('immunization')}
+                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'immunization' ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent hover:border-gray-300'}`}
+                    style={{ color: activeTab === 'immunization' ? undefined : 'var(--text-secondary)' }}
+                  >
+                    {t.immunization}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('postnatal')}
+                    className={`px-4 py-2 font-medium rounded-t-lg border-b-2 transition-colors ${activeTab === 'postnatal' ? 'border-[var(--primary)] text-[var(--primary)]' : 'border-transparent hover:border-gray-300'}`}
+                    style={{ color: activeTab === 'postnatal' ? undefined : 'var(--text-secondary)' }}
+                  >
+                    {t.postnatal}
                   </button>
                 </div>
               </div>
 
               {/* Tab Form Content */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-4">
                 {toastMessage && (
-                  <div className="mb-6 p-4 bg-emerald-500/10 text-emerald-500 rounded-lg flex items-center gap-2 border border-emerald-500/20">
+                  <div className="mb-6 p-4 bg-[var(--primary)]/5 text-[var(--primary)] rounded-lg flex items-center gap-2 border border-[var(--primary)]/20">
                     <CheckCircle className="w-5 h-5" />
                     {toastMessage}
                   </div>
@@ -243,9 +302,9 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                 {/* ANC Visit Tab */}
                 {activeTab === 'anc' && (
                   <form onSubmit={handleAncSubmit} className="space-y-6 max-w-2xl">
-                    <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                    <div className="p-5 rounded-lg border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
                       <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-purple-500" />
+                        <Activity className="w-5 h-5 text-[var(--primary)]" />
                         {t.vitals}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -254,7 +313,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <input 
                             type="number" step="0.1" required
                             value={ancForm.weight} onChange={e => setAncForm({...ancForm, weight: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           />
                         </div>
@@ -264,14 +323,14 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                             <input 
                               type="number" placeholder="Sys" required
                               value={ancForm.bpSys} onChange={e => setAncForm({...ancForm, bpSys: e.target.value})}
-                              className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                              className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                               style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                             />
                             <span style={{ color: 'var(--text-secondary)' }}>/</span>
                             <input 
                               type="number" placeholder="Dia" required
                               value={ancForm.bpDia} onChange={e => setAncForm({...ancForm, bpDia: e.target.value})}
-                              className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                              className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                               style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                             />
                           </div>
@@ -279,9 +338,9 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                       </div>
                     </div>
 
-                    <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                    <div className="p-5 rounded-lg border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
                       <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <HeartPulse className="w-5 h-5 text-purple-500" />
+                        <HeartPulse className="w-5 h-5 text-[var(--primary)]" />
                         {t.foetalTracking}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -290,7 +349,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <input 
                             type="number"
                             value={ancForm.fhr} onChange={e => setAncForm({...ancForm, fhr: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           />
                         </div>
@@ -299,7 +358,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <input 
                             type="text" placeholder="e.g. Cephalic"
                             value={ancForm.presentation} onChange={e => setAncForm({...ancForm, presentation: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           />
                         </div>
@@ -309,7 +368,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                         <textarea 
                           rows={3}
                           value={ancForm.notes} onChange={e => setAncForm({...ancForm, notes: e.target.value})}
-                          className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none resize-none"
+                          className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none resize-none"
                           style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                         />
                       </div>
@@ -317,7 +376,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
 
                     <button 
                       type="submit"
-                      className="w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-xl transition-colors flex justify-center items-center gap-2 shadow-sm"
+                      className="w-full py-2.5 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium rounded-md transition-colors flex justify-center items-center gap-2 shadow-sm"
                     >
                       <FileText className="w-5 h-5" />
                       {t.recordVisit}
@@ -328,7 +387,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                 {/* Delivery Register Tab */}
                 {activeTab === 'delivery' && (
                   <form onSubmit={handleDeliverySubmit} className="space-y-6 max-w-2xl">
-                    <div className="p-5 rounded-xl border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                    <div className="p-5 rounded-lg border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
                         <div>
@@ -336,7 +395,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <select 
                             value={deliveryForm.liveBirth} 
                             onChange={e => setDeliveryForm({...deliveryForm, liveBirth: e.target.value, stillbirthType: e.target.value === 'Yes' ? '' : deliveryForm.stillbirthType})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           >
                             <option value="Yes">{t.yes}</option>
@@ -350,7 +409,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                             <select 
                               required
                               value={deliveryForm.stillbirthType} onChange={e => setDeliveryForm({...deliveryForm, stillbirthType: e.target.value})}
-                              className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                              className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                               style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                             >
                               <option value="">-- Select --</option>
@@ -365,7 +424,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <input 
                             type="number" min="0" max="10" required
                             value={deliveryForm.apgar} onChange={e => setDeliveryForm({...deliveryForm, apgar: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           />
                         </div>
@@ -375,7 +434,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <input 
                             type="number" step="0.1" required
                             value={deliveryForm.birthWeight} onChange={e => setDeliveryForm({...deliveryForm, birthWeight: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           />
                         </div>
@@ -384,7 +443,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
                           <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.gender}</label>
                           <select 
                             value={deliveryForm.gender} onChange={e => setDeliveryForm({...deliveryForm, gender: e.target.value})}
-                            className="w-full p-2.5 rounded-lg border focus:ring-2 focus:ring-purple-500/50 outline-none"
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           >
                             <option value="Male">{t.male}</option>
@@ -396,10 +455,115 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
 
                     <button 
                       type="submit"
-                      className="w-full py-3 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors flex justify-center items-center gap-2 shadow-sm"
+                      className="w-full py-2.5 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium rounded-md transition-colors flex justify-center items-center gap-2 shadow-sm"
                     >
                       <Baby className="w-5 h-5" />
                       {t.submitDelivery}
+                    </button>
+                  </form>
+                )}
+
+                {/* Immunization Tab */}
+                {activeTab === 'immunization' && (
+                  <form onSubmit={handleImmunizationSubmit} className="space-y-6 max-w-2xl">
+                    <div className="p-5 rounded-lg border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.vaccine}</label>
+                          <select 
+                            required
+                            value={immunizationForm.vaccine} onChange={e => setImmunizationForm({...immunizationForm, vaccine: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          >
+                            <option value="">-- Select --</option>
+                            <option value="OPV">OPV (Polio)</option>
+                            <option value="BCG">BCG (TB)</option>
+                            <option value="Hepatitis B">Hepatitis B</option>
+                            <option value="Pentavalent">Pentavalent</option>
+                            <option value="Yellow Fever">Yellow Fever</option>
+                            <option value="Measles">Measles</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.dose}</label>
+                          <input 
+                            type="number" required placeholder="e.g. 1"
+                            value={immunizationForm.dose} onChange={e => setImmunizationForm({...immunizationForm, dose: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.batch}</label>
+                          <input 
+                            type="text" required
+                            value={immunizationForm.batch} onChange={e => setImmunizationForm({...immunizationForm, batch: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.nextAppt}</label>
+                          <input 
+                            type="date"
+                            value={immunizationForm.nextAppt} onChange={e => setImmunizationForm({...immunizationForm, nextAppt: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button 
+                      type="submit"
+                      className="w-full py-2.5 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium rounded-md transition-colors flex justify-center items-center gap-2 shadow-sm"
+                    >
+                      <Activity className="w-5 h-5" />
+                      {t.recordImmunization}
+                    </button>
+                  </form>
+                )}
+
+                {/* Postnatal Tab */}
+                {activeTab === 'postnatal' && (
+                  <form onSubmit={handlePostnatalSubmit} className="space-y-6 max-w-2xl">
+                    <div className="p-5 rounded-lg border" style={{ borderColor: 'var(--border-default)', backgroundColor: 'var(--card-bg)', boxShadow: 'var(--shadow-card)' }}>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.motherAssessment}</label>
+                          <textarea 
+                            required rows={2}
+                            value={postnatalForm.motherAssessment} onChange={e => setPostnatalForm({...postnatalForm, motherAssessment: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none resize-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.newbornAssessment}</label>
+                          <textarea 
+                            required rows={2}
+                            value={postnatalForm.newbornAssessment} onChange={e => setPostnatalForm({...postnatalForm, newbornAssessment: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none resize-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.complications}</label>
+                          <textarea 
+                            rows={2} placeholder="Leave blank if none"
+                            value={postnatalForm.complications} onChange={e => setPostnatalForm({...postnatalForm, complications: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none resize-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <button 
+                      type="submit"
+                      className="w-full py-2.5 px-4 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium rounded-md transition-colors flex justify-center items-center gap-2 shadow-sm"
+                    >
+                      <Baby className="w-5 h-5" />
+                      {t.recordPostnatal}
                     </button>
                   </form>
                 )}
@@ -407,9 +571,7 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center" style={{ color: 'var(--text-muted)' }}>
-              <div className="p-6 bg-purple-500/5 rounded-full mb-4">
-                <Baby className="w-16 h-16 opacity-40 text-purple-500" />
-              </div>
+              <Baby className="w-16 h-16 opacity-40 text-[var(--primary)] mb-4" />
               <p className="text-lg">{t.selectPatient}</p>
             </div>
           )}
@@ -417,4 +579,4 @@ export const AntenatalCare: React.FC<AntenatalCareProps> = ({ language, theme })
       </div>
     </div>
   );
-};
+}

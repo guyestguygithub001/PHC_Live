@@ -265,7 +265,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
             <select
               value={qualitativeResult}
               onChange={(e) => setQualitativeResult(e.target.value)}
-              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer"
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition appearance-none cursor-pointer"
             >
               <option value="">{lang.selectResult}</option>
               {options.map((opt) => (
@@ -294,7 +294,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
             <select
               value={qualitativeResult}
               onChange={(e) => setQualitativeResult(e.target.value)}
-              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition appearance-none cursor-pointer"
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition appearance-none cursor-pointer"
             >
               <option value="">{lang.selectResult}</option>
               {options.map((opt) => (
@@ -323,7 +323,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                   step="0.1"
                   value={fbcValues.wbc}
                   onChange={(e) => setFbcValues({ ...fbcValues, wbc: e.target.value })}
-                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition"
                   placeholder="e.g. 7.5"
                 />
               </div>
@@ -335,7 +335,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                   step="0.01"
                   value={fbcValues.rbc}
                   onChange={(e) => setFbcValues({ ...fbcValues, rbc: e.target.value })}
-                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition"
                   placeholder="e.g. 4.8"
                 />
               </div>
@@ -347,7 +347,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                   step="0.1"
                   value={fbcValues.hemoglobin}
                   onChange={(e) => setFbcValues({ ...fbcValues, hemoglobin: e.target.value })}
-                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition"
                   placeholder="e.g. 13.5"
                 />
               </div>
@@ -359,7 +359,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                   step="1"
                   value={fbcValues.platelets}
                   onChange={(e) => setFbcValues({ ...fbcValues, platelets: e.target.value })}
-                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition"
                   placeholder="e.g. 250"
                 />
               </div>
@@ -390,15 +390,13 @@ export default function Laboratory({ language }: LaboratoryProps) {
   return (
     <div className="w-full h-full flex flex-col space-y-6">
       {/* ===== Header Bar ===== */}
-      <div
-        className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md"
-        style={{ boxShadow: 'var(--shadow-card)' }}
-      >
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center space-x-3">
           <FlaskConical className="w-8 h-8 text-indigo-500" />
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{lang.title}</h2>
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">{lang.title}</h2>
         </div>
-        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-xl border border-[var(--border-default)]">
+        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-md border border-[var(--border-default)]">
           <User className="w-5 h-5 text-indigo-500" />
           <span>{lang.technician}: Yakubu Sani</span>
         </div>
@@ -409,7 +407,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
         {/* ---- Left Panel: Lab Request Queue ---- */}
         <div
-          className="w-full md:w-1/3 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-4 overflow-y-auto"
+          className="w-full md:w-1/3 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4 overflow-y-auto"
           style={{ boxShadow: 'var(--shadow-card)' }}
         >
           <h3 className="text-[var(--text-secondary)] font-semibold mb-4 pl-2 flex items-center space-x-2">
@@ -427,9 +425,9 @@ export default function Laboratory({ language }: LaboratoryProps) {
                 <div
                   key={req.id}
                   onClick={() => handleSelectRequest(req.id)}
-                  className={`p-4 rounded-xl cursor-pointer transition border ${
+                  className={`p-4 rounded-md cursor-pointer transition border ${
                     isSelected
-                      ? 'bg-indigo-500/20 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.15)]'
+                      ? 'bg-indigo-500/20 border-indigo-500/50'
                       : isUrgent
                       ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20'
                       : 'bg-[var(--queue-item-bg)] border-transparent hover:bg-[var(--queue-item-hover)]'
@@ -439,7 +437,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                   <div className="flex justify-between items-start mb-1">
                     <p className="text-[var(--text-primary)] font-bold">{req.patientName}</p>
                     {isUrgent && (
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mt-1" />
+                      <div className="w-2 h-2 bg-red-500 rounded-full mt-1" />
                     )}
                   </div>
 
@@ -467,13 +465,13 @@ export default function Laboratory({ language }: LaboratoryProps) {
         {/* ---- Right Panel: Result Entry or Empty State ---- */}
         {selectedRequest ? (
           <div
-            className="w-full md:w-2/3 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-6 flex flex-col space-y-6 overflow-y-auto backdrop-blur-xl"
+            className="w-full md:w-2/3 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg p-4 flex flex-col space-y-6 overflow-y-auto"
             style={{ boxShadow: 'var(--shadow-card)' }}
           >
             {/* Patient header for selected request */}
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
                   {selectedRequest.patientName}
                 </h3>
                 <p className="text-[var(--text-secondary)]">
@@ -482,7 +480,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
               </div>
               {/* Mandatory testing badge (header-level, malaria only) */}
               {selectedRequest.testType === 'Malaria RDT' && (
-                <div className="flex items-center space-x-1 bg-orange-500/15 border border-orange-500/30 text-orange-500 text-xs font-bold px-3 py-1.5 rounded-xl">
+                <div className="flex items-center space-x-1 bg-orange-500/15 border border-orange-500/30 text-orange-500 text-xs font-bold px-3 py-1.5 rounded-md">
                   <AlertTriangle className="w-4 h-4" />
                   <span>{lang.mandatoryBadge}</span>
                 </div>
@@ -493,8 +491,8 @@ export default function Laboratory({ language }: LaboratoryProps) {
             <div className="flex space-x-2 border-b border-[var(--border-default)] pb-4 mb-2">
               <button 
                 onClick={() => setActiveTab('result')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition ${
-                  activeTab === 'result' ? 'bg-indigo-500 text-white shadow-lg' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-semibold transition ${
+                  activeTab === 'result' ? 'bg-indigo-500 text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
                 }`}
               >
                 <Microscope className="w-4 h-4" />
@@ -502,8 +500,8 @@ export default function Laboratory({ language }: LaboratoryProps) {
               </button>
               <button 
                 onClick={() => setActiveTab('external')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition ${
-                  activeTab === 'external' ? 'bg-orange-500 text-white shadow-lg' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-semibold transition ${
+                  activeTab === 'external' ? 'bg-orange-500 text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
                 }`}
               >
                 <ExternalLink className="w-4 h-4" />
@@ -514,7 +512,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
             {activeTab === 'result' ? (
               <>
                 {/* Dynamic result input based on test type */}
-                <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-2xl p-5">
+                <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg p-5">
                   {renderResultInput(selectedRequest.testType)}
                 </div>
 
@@ -530,7 +528,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder={lang.notes}
-                    className="w-full h-full min-h-[100px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-4 text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition resize-none"
+                    className="w-full h-full min-h-[100px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md p-4 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition resize-none"
                   />
                 </div>
 
@@ -538,10 +536,10 @@ export default function Laboratory({ language }: LaboratoryProps) {
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitDisabled()}
-                  className={`w-full font-bold py-4 rounded-xl flex justify-center items-center space-x-2 transition shrink-0 ${
+                  className={`w-full font-bold py-2.5 rounded-md flex justify-center items-center space-x-2 transition shrink-0 ${
                     isSubmitDisabled()
                       ? 'bg-indigo-500/30 text-indigo-300 cursor-not-allowed'
-                      : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                      : 'bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm'
                   }`}
                 >
                   <Send className="w-5 h-5" />
@@ -551,7 +549,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
             ) : (
               /* External Referral UI */
               <div className="flex flex-col h-full space-y-4 overflow-y-auto">
-                <div className="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-1 flex items-center">
+                <div className="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md p-1 flex items-center">
                   <div className="pl-3 text-[var(--text-muted)]">
                     <Microscope className="w-5 h-5" />
                   </div>
@@ -560,7 +558,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                     placeholder={lang.searchLab}
                     value={labSearch}
                     onChange={(e) => setLabSearch(e.target.value)}
-                    className="w-full bg-transparent px-3 py-3 text-[var(--text-primary)] focus:outline-none text-sm"
+                    className="w-full bg-transparent px-3 py-2.5 text-[var(--text-primary)] focus:outline-none text-sm"
                   />
                   <div className="pr-3 text-[var(--text-muted)]">
                     <FileText className="w-5 h-5" />
@@ -569,14 +567,14 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
                 <div className="space-y-4">
                   {mockExternalLabs.filter(lab => lab.name.toLowerCase().includes(labSearch.toLowerCase())).map(lab => (
-                    <div key={lab.id} className="bg-[var(--card-bg-secondary)] border border-[var(--border-default)] rounded-2xl p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
+                    <div key={lab.id} className="bg-[var(--card-bg-secondary)] border border-[var(--border-default)] rounded-lg p-5" style={{ boxShadow: 'var(--shadow-card)' }}>
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-[var(--text-primary)] font-bold text-lg leading-tight pr-4">{lab.name}</h4>
+                        <h4 className="text-[var(--text-primary)] font-medium text-sm leading-tight pr-4">{lab.name}</h4>
                         <MapPin className="w-5 h-5 text-[var(--text-muted)] shrink-0 mt-1" />
                       </div>
                       
                       {/* Highlighted name area (like the purple highlight in screenshot) */}
-                      <div className="bg-indigo-500/10 text-indigo-500 text-xs font-semibold px-3 py-1.5 rounded-lg mb-3 inline-block">
+                      <div className="bg-indigo-500/10 text-indigo-500 text-xs font-semibold px-3 py-1.5 rounded-md mb-3 inline-block">
                         {lab.name}
                       </div>
 
@@ -592,18 +590,18 @@ export default function Laboratory({ language }: LaboratoryProps) {
                       <div className="space-y-3">
                         <button 
                           onClick={() => handleGenerateSlip(lab.name)}
-                          className="w-full bg-[#0a0a2a] hover:bg-[#1a1a3a] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center space-x-2 transition"
+                          className="w-full bg-[#0a0a2a] hover:bg-[#1a1a3a] text-white font-semibold py-2.5 rounded-md flex justify-center items-center space-x-2 transition"
                         >
                           <Printer className="w-5 h-5" />
                           <span>{lang.generateSlip}</span>
                         </button>
                         
                         <div className="flex space-x-3">
-                          <button className="w-1/2 bg-[#0a0a2a] hover:bg-[#1a1a3a] text-white font-semibold py-3.5 rounded-xl flex justify-center items-center space-x-2 transition">
+                          <button className="w-1/2 bg-[#0a0a2a] hover:bg-[#1a1a3a] text-white font-semibold py-2.5 rounded-md flex justify-center items-center space-x-2 transition">
                             <Send className="w-4 h-4" />
                             <span>{lang.direction}</span>
                           </button>
-                          <button className="w-1/2 border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--queue-item-hover)] font-semibold py-3.5 rounded-xl flex justify-center items-center space-x-2 transition">
+                          <button className="w-1/2 border border-[var(--border-default)] text-[var(--text-primary)] hover:bg-[var(--queue-item-hover)] font-semibold py-2.5 rounded-md flex justify-center items-center space-x-2 transition">
                             <Phone className="w-4 h-4" />
                             <span>{lang.call}</span>
                           </button>
@@ -617,7 +615,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
           </div>
         ) : (
           /* Empty state — no request selected */
-          <div className="w-full md:w-2/3 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-3xl flex items-center justify-center text-[var(--text-muted)]">
+          <div className="w-full md:w-2/3 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg flex items-center justify-center text-[var(--text-muted)]">
             <div className="text-center">
               <FlaskConical className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>{lang.selectPatient}</p>

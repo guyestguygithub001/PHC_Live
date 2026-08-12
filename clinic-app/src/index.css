@@ -3,56 +3,78 @@
 @tailwind utilities;
 
 /* ============================================================
-   PHC_Live Theme System
+   PHC_Live Design System
    
-   Two themes: "light" (clean white) and "dark" (soft ash gray).
-   Both themes share the same emerald accent color for 
-   consistency. Variables are consumed via Tailwind arbitrary 
-   value syntax: bg-[var(--page-bg)], text-[var(--text-primary)].
+   Professional healthcare color palette.
+   Primary: Blue (industry standard for medical software)
+   Accent: Teal (secondary actions)
+   Status colors: Green/Amber/Red for clinical states
    ============================================================ */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #dbeafe;
+  --primary-muted: #93bbfd;
+  --secondary: #0d9488;
+  --secondary-hover: #0f766e;
+  --success: #16a34a;
+  --success-light: #dcfce7;
+  --warning: #d97706;
+  --warning-light: #fef3c7;
+  --danger: #dc2626;
+  --danger-light: #fee2e2;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+}
 
 /* --- Light Theme (Default) --- */
 [data-theme="light"] {
-  --page-bg: #f5f7fa;
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --card-bg-hover: rgba(0, 0, 0, 0.03);
+  --page-bg: #f8f9fb;
+  --card-bg: #ffffff;
+  --card-bg-hover: #f9fafb;
   --card-bg-secondary: #ffffff;
-  --input-bg: #f1f5f9;
-  --input-border: #e2e8f0;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --border-default: rgba(0, 0, 0, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.06);
-  --queue-bg: #f8fafc;
+  --input-bg: #f3f4f6;
+  --input-border: #d1d5db;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border-default: #e5e7eb;
+  --queue-bg: #f9fafb;
   --queue-item-bg: #ffffff;
-  --queue-item-hover: #f1f5f9;
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
-  --timeline-bg: #fdfbf7;
+  --queue-item-hover: #f3f4f6;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --timeline-bg: #fdfcf9;
   --timeline-border: #e5e0d8;
+  --sidebar-bg: #ffffff;
+  --header-bg: #ffffff;
 }
 
-/* --- Dark Theme (Ash Gray — NOT pure black) --- */
+/* --- Dark Theme (Slate Gray — NOT pure black) --- */
 [data-theme="dark"] {
-  --page-bg: #3a3f4a;
-  --card-bg: rgba(255, 255, 255, 0.08);
-  --card-bg-hover: rgba(255, 255, 255, 0.04);
-  --card-bg-secondary: rgba(0, 0, 0, 0.15);
-  --input-bg: rgba(0, 0, 0, 0.2);
-  --input-border: rgba(255, 255, 255, 0.1);
+  --page-bg: #1e2330;
+  --card-bg: #272d3d;
+  --card-bg-hover: #2f3648;
+  --card-bg-secondary: #1e2330;
+  --input-bg: #1a1f2e;
+  --input-border: #374151;
   --text-primary: #f1f5f9;
-  --text-secondary: rgba(255, 255, 255, 0.6);
-  --text-muted: rgba(255, 255, 255, 0.35);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --glass-bg: rgba(255, 255, 255, 0.07);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --queue-bg: rgba(0, 0, 0, 0.15);
-  --queue-item-bg: rgba(255, 255, 255, 0.05);
-  --queue-item-hover: rgba(255, 255, 255, 0.1);
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.2);
-  --timeline-bg: #fdfbf7;
-  --timeline-border: #e5e0d8;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-default: #334155;
+  --queue-bg: #1a1f2e;
+  --queue-item-bg: #272d3d;
+  --queue-item-hover: #2f3648;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --timeline-bg: #2a2520;
+  --timeline-border: #3d3630;
+  --sidebar-bg: #1a1f2e;
+  --header-bg: #272d3d;
 }
 
 body {
@@ -60,6 +82,25 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   margin: 0;
-  font-family: 'Inter', sans-serif;
-  transition: background 0.3s ease, color 0.3s ease;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbar normalization */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }

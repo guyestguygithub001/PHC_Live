@@ -284,3 +284,18 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
   - Lab cards with purple highlighted badges, locations, and contact info.
   - Replaced the generic "Book appointment" button with a contextually appropriate "Generate Slip" button that generates a UUID slip for the patient to take to the lab.
 - Added full EN/HA translations (`Tura zuwa Wani Dakin Gwaji`, `Fitar da Takarda`).
+
+ - - - 
+ 
+ # # #   E n t r y   0 2 0      C o m p r e h e n s i v e   E M R   S p e c i f i c a t i o n   R e v i e w 
+ * * D a t e : * *   2 0 2 6 - 0 8 - 1 1 
+ * * A c t i o n : * *   R e c e i v e d   a n d   r e v i e w e d   a   m a s s i v e ,   s t r u c t u r e d   D H I S 2 - c o m p l i a n t   E M R   s p e c i f i c a t i o n   f r o m   t h e   u s e r . 
+ * * D e t a i l s : * * 
+ -   * * P a t i e n t   M a s t e r   I n d e x : * *   A d d e d   r e q u i r e m e n t   f o r   B i o m e t r i c / P h o n e   d u p l i c a t e   d e t e c t i o n . 
+ -   * * M a t e r n a l   &   C h i l d   H e a l t h   ( M C H ) : * *   E x p a n d e d   t o   i n c l u d e   P o s t n a t a l   C a r e   a n d   I m m u n i z a t i o n   t r a c k i n g   ( l i n k e d   t o   m o t h e r ' s   I D ) . 
+ -   * * D i s e a s e   P r o g r a m s : * *   E x p l i c i t   m a p p i n g   f o r   M a l a r i a ,   H I V ,   T B ,   H y p e r t e n s i o n ,   a n d   D i a b e t e s   f o r   D H I S 2 . 
+ -   * * B i l l i n g   &   F i n a n c i a l : * *   N e w   m o d u l e   f o r   S e r v i c e   t y p e s ,   f e e s ,   p a y m e n t   m e t h o d s ,   a n d   i n s u r a n c e   c l a i m s . 
+ -   * * D H I S 2   I n t e g r a t i o n : * *   A P I - b a s e d   p u s h   l a y e r   f o r   a u t o m a t e d   m o n t h l y   r e p o r t i n g . 
+ -   * * G o v e r n a n c e : * *   R o l e - b a s e d   a c c e s s   a n d   a u t o m a t e d   b a c k u p s   e m p h a s i z e d . 
+ * * D e c i s i o n : * *   W e   w i l l   A P P E N D   t h e s e   n e w   r e q u i r e m e n t s   t o   o u r   e x i s t i n g   i m p l e m e n t a t i o n   p l a n .   W e   w i l l   n o t   r e w r i t e   t h e   c o r e   f o u n d a t i o n ,   b u t   r a t h e r   i n t e g r a t e   t h e s e   a s   n e w   m o d u l e s / l a y e r s   o n   t o p   o f   w h a t   w e   h a v e   a l r e a d y   b u i l t   ( e . g . ,   a d d i n g   B i l l i n g   a s   a   n e w   t a b ,   a d d i n g   D H I S 2   S y n c   t o   t h e   E d g e   S e r v e r ,   e x p a n d i n g   A N C   w i t h   I m m u n i z a t i o n ) .  
+ 

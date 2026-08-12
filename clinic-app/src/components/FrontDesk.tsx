@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, UserPlus, QrCode, ArrowRight, Activity, Wifi } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,6 +10,8 @@ interface FrontDeskProps {
 export default function FrontDesk({ language, theme }: FrontDeskProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [patients, setPatients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Registration Form State — matches the Data Dictionary from field survey
   const [firstName, setFirstName] = useState('');
@@ -94,39 +96,88 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
     setPhone(''); setNextOfKin(''); setNextOfKinPhone('');
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const fetchPatients = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('http://localhost:3001/api/v1/patients');
+      if (res.ok) {
+        const data = await res.json();
+        setPatients(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch patients", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = uuidv4(); // Offline-safe UUID — no internet needed
-    const humanId = `PHC-KAN-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-    alert(`Patient Registered!\nUUID: ${newId}\nCard ID: ${humanId}\nRouted to Triage Queue.`);
-    setIsRegistering(false);
-    resetForm();
+    
+    const payload = {
+      first_name: firstName,
+      last_name: lastName,
+      gender,
+      date_of_birth: age ? new Date(new Date().setFullYear(new Date().getFullYear() - parseInt(age))).toISOString().split('T')[0] : null,
+      tribe,
+      religion,
+      occupation,
+      address,
+      phone,
+      next_of_kin_name: nextOfKin,
+      next_of_kin_phone: nextOfKinPhone
+    };
+
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (res.ok) {
+        const newPatient = await res.json();
+        alert(`Patient Registered!\nPHC-ID: ${newPatient.phc_id}\nRouted to Triage Queue.`);
+        setIsRegistering(false);
+        resetForm();
+        fetchPatients();
+      } else {
+        alert("Registration failed!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error. Could not register patient.");
+    }
   };
 
   /** Shared CSS classes that respond to the theme via CSS custom properties */
-  const inputClass = "w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition";
+  const inputClass = "w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition";
   const selectClass = inputClass + " appearance-none";
   const labelClass = "block text-[var(--text-secondary)] text-sm mb-1";
 
   return (
     <div className="w-full h-full flex flex-col space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-start md:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div>
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t[language].title}</h2>
-          <div className="flex items-center space-x-2 text-emerald-500 mt-1">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">{t[language].title}</h2>
+          <div className="flex items-center space-x-2 text-[var(--primary)] mt-1">
             <Wifi className="w-4 h-4" />
             <span className="text-sm">{t[language].offlineMode}</span>
           </div>
         </div>
-        <div className="flex space-x-3">
-          <button className="flex items-center space-x-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-500 px-4 py-2 rounded-xl transition border border-indigo-500/20">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+          <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-500 px-4 py-2 rounded-md transition border border-indigo-500/20">
             <QrCode className="w-5 h-5" />
             <span>{t[language].scanCard}</span>
           </button>
           <button 
             onClick={() => setIsRegistering(true)}
-            className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-500/30"
+            className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-4 py-2 rounded-md transition shadow-sm"
           >
             <UserPlus className="w-5 h-5" />
             <span>{t[language].newPatient}</span>
@@ -136,8 +187,8 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
 
       {/* Main Content Area */}
       {isRegistering ? (
-        <div className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-8 backdrop-blur-xl overflow-y-auto max-h-[calc(100vh-200px)]" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6">{t[language].registerTitle}</h3>
+        <div className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg p-5 overflow-y-auto max-h-[calc(100vh-200px)]" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-6">{t[language].registerTitle}</h3>
           <form onSubmit={handleRegister} className="space-y-5">
             
             {/* Row 1: First Name, Last Name */}
@@ -221,13 +272,13 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
               <button 
                 type="button" 
                 onClick={() => setIsRegistering(false)}
-                className="w-1/3 bg-[var(--input-bg)] text-[var(--text-primary)] py-3 rounded-xl hover:opacity-80 transition border border-[var(--border-default)]"
+                className="w-1/3 bg-[var(--input-bg)] text-[var(--text-primary)] py-2.5 rounded-md hover:opacity-80 transition border border-[var(--border-default)]"
               >
                 {t[language].cancel}
               </button>
               <button 
                 type="submit"
-                className="w-2/3 bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-bold py-3 rounded-xl flex justify-center items-center space-x-2 hover:shadow-lg hover:shadow-emerald-500/30 transition"
+                className="w-2/3 bg-[var(--primary)] text-white font-medium py-2.5 rounded-md flex justify-center items-center space-x-2 hover:shadow-sm transition"
               >
                 <span>{t[language].registerBtn}</span>
                 <Activity className="w-5 h-5" />
@@ -244,25 +295,31 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
               placeholder={t[language].searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] rounded-2xl pl-12 pr-4 py-4 text-[var(--text-primary)] text-lg focus:outline-none focus:border-emerald-500 transition backdrop-blur-md"
+              className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] rounded-md pl-12 pr-3 py-2.5 text-[var(--text-primary)] text-base focus:outline-none focus:border-[var(--primary)] transition"
               style={{ boxShadow: 'var(--shadow-card)' }}
             />
           </div>
           
-          <div className="flex-1 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-6" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h3 className="text-[var(--text-secondary)] font-semibold mb-4">{t[language].queue} (3)</h3>
+          <div className="flex-1 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <h3 className="text-[var(--text-secondary)] font-semibold mb-4">{t[language].queue} ({patients.length})</h3>
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex justify-between items-center bg-[var(--queue-item-bg)] border border-[var(--border-default)] p-4 rounded-xl hover:bg-[var(--queue-item-hover)] transition cursor-pointer">
-                  <div>
-                    <p className="text-[var(--text-primary)] font-semibold">Fatima Abubakar</p>
-                    <p className="text-[var(--text-muted)] text-sm">PHC-KAN-082{i} • +234 803 000 000{i}</p>
+              {isLoading ? (
+                <p className="text-[var(--text-muted)]">Loading...</p>
+              ) : patients.length === 0 ? (
+                <p className="text-[var(--text-muted)]">No patients found.</p>
+              ) : (
+                patients.map((p) => (
+                  <div key={p.id} className="flex justify-between items-center bg-[var(--queue-item-bg)] border border-[var(--border-default)] p-4 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer">
+                    <div>
+                      <p className="text-[var(--text-primary)] font-semibold">{p.first_name} {p.last_name}</p>
+                      <p className="text-[var(--text-muted)] text-sm">{p.phc_id} {p.phone ? `• ${p.phone}` : ''}</p>
+                    </div>
+                    <button className="bg-[var(--input-bg)] hover:bg-[var(--primary)]/10 p-2 rounded-md text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
                   </div>
-                  <button className="bg-[var(--input-bg)] hover:bg-emerald-500/20 p-2 rounded-lg text-[var(--text-secondary)] hover:text-emerald-500 transition">
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

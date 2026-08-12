@@ -298,7 +298,7 @@ export default function Referral({ language, theme }: ReferralProps) {
   };
 
   // ─── Shared Styles ────────────────────────────────────────
-  const inputClass = "w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition";
+  const inputClass = "w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition";
   const selectClass = inputClass + " appearance-none";
   const labelClass = "block text-[var(--text-secondary)] text-sm mb-1 font-medium";
 
@@ -319,8 +319,8 @@ export default function Referral({ language, theme }: ReferralProps) {
         label: t[language].sent,
       },
       'Received': {
-        bg: 'bg-emerald-500/15',
-        text: 'text-emerald-500',
+        bg: 'bg-[var(--primary)]/8',
+        text: 'text-[var(--primary)]',
         icon: <CheckCircle2 className="w-3.5 h-3.5" />,
         label: t[language].received,
       },
@@ -345,7 +345,7 @@ export default function Referral({ language, theme }: ReferralProps) {
   /** Colour-coded urgency indicators */
   const renderUrgencyBadge = (level: UrgencyLevel) => {
     const config: Record<UrgencyLevel, { bg: string; text: string }> = {
-      Routine: { bg: 'bg-emerald-500/15', text: 'text-emerald-500' },
+      Routine: { bg: 'bg-[var(--primary)]/8', text: 'text-[var(--primary)]' },
       Urgent: { bg: 'bg-orange-500/15', text: 'text-orange-500' },
       Emergency: { bg: 'bg-red-500/15', text: 'text-red-500' },
     };
@@ -365,30 +365,30 @@ export default function Referral({ language, theme }: ReferralProps) {
 
       {/* ── Header ──────────────────────────────────────────── */}
       <div
-        className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md"
+        className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]"
         style={{ boxShadow: 'var(--shadow-card)' }}
       >
         <div className="flex items-center space-x-3">
           <ArrowUpRight className="w-8 h-8 text-indigo-500" />
           <div>
-            <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t[language].title}</h2>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">{t[language].title}</h2>
             <p className="text-sm text-[var(--text-muted)]">{t[language].subtitle}</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-xl border border-[var(--border-default)]">
-          <User className="w-5 h-5 text-emerald-500" />
+        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-md border border-[var(--border-default)]">
+          <User className="w-5 h-5 text-[var(--primary)]" />
           <span>{t[language].cho}</span>
         </div>
       </div>
 
       {/* ── Tab Navigation ──────────────────────────────────── */}
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap gap-2">
         {/* New Referral Tab */}
         <button
           onClick={() => setActiveView('form')}
-          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition border ${
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-md font-semibold text-sm transition border ${
             activeView === 'form'
-              ? 'bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/30'
+              ? 'bg-indigo-500 text-white border-indigo-500 shadow-sm'
               : 'bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--card-bg-hover)]'
           }`}
         >
@@ -398,9 +398,9 @@ export default function Referral({ language, theme }: ReferralProps) {
         {/* Outgoing Referrals Tab */}
         <button
           onClick={() => setActiveView('outgoing')}
-          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition border ${
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-md font-semibold text-sm transition border ${
             activeView === 'outgoing'
-              ? 'bg-indigo-500 text-white border-indigo-500 shadow-lg shadow-indigo-500/30'
+              ? 'bg-indigo-500 text-white border-indigo-500 shadow-sm'
               : 'bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--card-bg-hover)]'
           }`}
         >
@@ -414,9 +414,9 @@ export default function Referral({ language, theme }: ReferralProps) {
         {/* Counter-Referral Tab */}
         <button
           onClick={() => setActiveView('counter')}
-          className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition border ${
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-md font-semibold text-sm transition border ${
             activeView === 'counter'
-              ? 'bg-purple-500 text-white border-purple-500 shadow-lg shadow-purple-500/30'
+              ? 'bg-purple-500 text-white border-purple-500 shadow-sm'
               : 'bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--card-bg-hover)]'
           }`}
         >
@@ -435,7 +435,7 @@ export default function Referral({ language, theme }: ReferralProps) {
          ════════════════════════════════════════════════════════ */}
       {activeView === 'form' && (
         <div
-          className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-8 backdrop-blur-xl overflow-y-auto max-h-[calc(100vh-280px)]"
+          className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg p-5 overflow-y-auto max-h-[calc(100vh-280px)]"
           style={{ boxShadow: 'var(--shadow-card)' }}
         >
           <form onSubmit={handleGenerateReferral} className="space-y-5">
@@ -523,18 +523,18 @@ export default function Referral({ language, theme }: ReferralProps) {
 
             {/* Urgency Visual Indicator — shows colour when selected */}
             {urgency && (
-              <div className={`flex items-center space-x-3 p-3 rounded-xl border ${
+              <div className={`flex items-center space-x-3 p-3 rounded-md border ${
                 urgency === 'Emergency'
                   ? 'bg-red-500/10 border-red-500/30'
                   : urgency === 'Urgent'
                     ? 'bg-orange-500/10 border-orange-500/30'
-                    : 'bg-emerald-500/10 border-emerald-500/30'
+                    : 'bg-[var(--primary)]/5 border-[var(--primary)]/20'
               }`}>
                 <AlertTriangle className={`w-5 h-5 ${
-                  urgency === 'Emergency' ? 'text-red-500' : urgency === 'Urgent' ? 'text-orange-500' : 'text-emerald-500'
+                  urgency === 'Emergency' ? 'text-red-500' : urgency === 'Urgent' ? 'text-orange-500' : 'text-[var(--primary)]'
                 }`} />
                 <span className={`text-sm font-semibold ${
-                  urgency === 'Emergency' ? 'text-red-500' : urgency === 'Urgent' ? 'text-orange-500' : 'text-emerald-500'
+                  urgency === 'Emergency' ? 'text-red-500' : urgency === 'Urgent' ? 'text-orange-500' : 'text-[var(--primary)]'
                 }`}>
                   {t[language].urgency}: {urgencyLevels.find(u => u.value === urgency)?.[language === 'HA' ? 'ha' : 'en']}
                 </span>
@@ -545,7 +545,7 @@ export default function Referral({ language, theme }: ReferralProps) {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-3.5 rounded-xl flex justify-center items-center space-x-2 hover:shadow-lg hover:shadow-indigo-500/30 transition text-lg"
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold py-2.5 rounded-md flex justify-center items-center space-x-2 hover:shadow-sm transition text-lg"
               >
                 <Send className="w-5 h-5" />
                 <span>{t[language].generateBtn}</span>
@@ -560,7 +560,7 @@ export default function Referral({ language, theme }: ReferralProps) {
          ════════════════════════════════════════════════════════ */}
       {activeView === 'outgoing' && (
         <div
-          className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl backdrop-blur-xl overflow-hidden"
+          className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg overflow-hidden"
           style={{ boxShadow: 'var(--shadow-card)' }}
         >
           {outgoingReferrals.length === 0 ? (
@@ -647,14 +647,14 @@ export default function Referral({ language, theme }: ReferralProps) {
          ════════════════════════════════════════════════════════ */}
       {activeView === 'counter' && (
         <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-280px)]">
-          <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center space-x-2">
+          <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center space-x-2">
             <ArrowDownLeft className="w-5 h-5 text-purple-500" />
             <span>{t[language].counterTitle}</span>
           </h3>
 
           {counterReferrals.length === 0 ? (
             <div
-              className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-12 text-center text-[var(--text-muted)]"
+              className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg p-12 text-center text-[var(--text-muted)]"
               style={{ boxShadow: 'var(--shadow-card)' }}
             >
               <RotateCcw className="w-12 h-12 mx-auto mb-3 opacity-40" />
@@ -664,15 +664,13 @@ export default function Referral({ language, theme }: ReferralProps) {
             counterReferrals.map((cr) => (
               <div
                 key={cr.id}
-                className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-2xl p-6 backdrop-blur-md"
+                className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg p-4"
                 style={{ boxShadow: 'var(--shadow-card)' }}
               >
                 {/* Counter-referral header */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-purple-500/15 flex items-center justify-center">
-                      <RotateCcw className="w-5 h-5 text-purple-500" />
-                    </div>
+                    <RotateCcw className="w-5 h-5 text-purple-500" />
                     <div>
                       <p className="text-[var(--text-primary)] font-semibold">{cr.patient}</p>
                       <p className="text-[var(--text-muted)] text-xs">{cr.id}</p>
@@ -702,7 +700,7 @@ export default function Referral({ language, theme }: ReferralProps) {
                 </div>
 
                 {/* Discharge notes */}
-                <div className="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl p-4">
+                <div className="bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg p-4">
                   <p className="text-[var(--text-muted)] text-xs uppercase tracking-wider mb-2">{t[language].dischargeNotes}</p>
                   <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{cr.dischargeNotes}</p>
                 </div>

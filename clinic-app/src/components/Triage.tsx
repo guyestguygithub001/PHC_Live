@@ -73,26 +73,26 @@ export default function Triage({ language, theme }: TriageProps) {
 
   /** Shared input class using CSS variables */
   const inputClass = (isError: boolean = false) => 
-    `w-full bg-[var(--input-bg)] border rounded-xl px-4 py-4 text-[var(--text-primary)] text-xl text-center focus:outline-none transition ${
-      isError ? 'border-red-500' : 'border-[var(--input-border)] focus:border-emerald-500'
+    `w-full bg-[var(--input-bg)] border rounded-md px-3 py-2.5 text-[var(--text-primary)] text-xl text-center focus:outline-none transition ${
+      isError ? 'border-red-500' : 'border-[var(--input-border)] focus:border-[var(--primary)]'
     }`;
 
   // --- PIN Lock Screen ---
   if (isPinLocked) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-8 rounded-3xl backdrop-blur-xl w-full max-w-md text-center" style={{ boxShadow: 'var(--shadow-card)' }}>
-          <ShieldAlert className="w-16 h-16 text-emerald-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">{t[language].unlock}</h2>
+        <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-5 rounded-lg w-full max-w-md text-center" style={{ boxShadow: 'var(--shadow-card)' }}>
+          <ShieldAlert className="w-16 h-16 text-[var(--primary)] mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">{t[language].unlock}</h2>
           <p className="text-[var(--text-secondary)] mb-6 text-sm">Every vital sign recorded will be cryptographically tied to your User UUID.</p>
           <form onSubmit={handleUnlock} className="space-y-4">
             <input 
               type="password" maxLength={4} value={pin}
               onChange={(e) => setPin(e.target.value)}
               placeholder={t[language].pinPlaceholder}
-              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-4 text-center text-[var(--text-primary)] text-2xl tracking-[0.5em] focus:outline-none focus:border-emerald-500 transition"
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-center text-[var(--text-primary)] text-base tracking-[0.5em] focus:outline-none focus:border-[var(--primary)] transition"
             />
-            <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl transition shadow-lg shadow-emerald-500/30">
+            <button type="submit" className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold py-2.5 rounded-md transition shadow-sm">
               {t[language].unlockBtn}
             </button>
           </form>
@@ -104,28 +104,28 @@ export default function Triage({ language, theme }: TriageProps) {
   return (
     <div className="w-full h-full flex flex-col space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center space-x-3">
-          <Stethoscope className="w-8 h-8 text-emerald-500" />
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t[language].title}</h2>
+          <Stethoscope className="w-8 h-8 text-[var(--primary)]" />
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">{t[language].title}</h2>
         </div>
-        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-xl border border-[var(--border-default)]">
-          <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-lg border border-[var(--border-default)]">
+          <CheckCircle2 className="w-5 h-5 text-[var(--primary)]" />
           <span>Nurse: USR-0092</span>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 flex-1 h-0">
         {/* Queue List */}
-        <div className="w-full md:w-1/3 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="w-full md:w-1/3 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
           <h3 className="text-[var(--text-secondary)] font-semibold mb-4 pl-2">{t[language].queue}</h3>
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
               <div 
                 key={i} onClick={() => setSelectedPatient(`Patient ${i}`)}
-                className={`p-4 rounded-xl cursor-pointer transition ${
+                className={`p-4 rounded-lg cursor-pointer transition ${
                   selectedPatient === `Patient ${i}` 
-                    ? 'bg-emerald-500/20 border-emerald-500/50 border' 
+                    ? 'bg-[var(--primary)]/10 border-[var(--primary)]/40 border' 
                     : 'bg-[var(--queue-item-bg)] border-transparent border hover:bg-[var(--queue-item-hover)]'
                 }`}
               >
@@ -138,20 +138,20 @@ export default function Triage({ language, theme }: TriageProps) {
 
         {/* Vitals Form */}
         {selectedPatient ? (
-          <div className={`w-full md:w-2/3 bg-[var(--card-bg)] border p-6 rounded-3xl backdrop-blur-xl transition-all duration-500 overflow-y-auto ${
+          <div className={`w-full md:w-2/3 bg-[var(--card-bg)] border p-4 rounded-lg transition-all duration-500 overflow-y-auto ${
             isCriticalBP ? 'border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.15)]' : 'border-[var(--border-default)]'
           }`} style={{ boxShadow: isCriticalBP ? undefined : 'var(--shadow-card)' }}>
             
             {isCriticalBP && (
-              <div className="mb-6 bg-red-500/15 border border-red-500/40 text-red-500 p-4 rounded-xl flex items-center space-x-3 animate-pulse">
+              <div className="mb-6 bg-red-500/15 border border-red-500/40 text-red-500 p-4 rounded-lg flex items-center space-x-3 animate-pulse">
                 <AlertTriangle className="w-6 h-6" />
                 <span className="font-bold">{t[language].criticalAlert} — {t[language].urgentTag}</span>
               </div>
             )}
 
-            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-6 flex items-center space-x-2">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center space-x-2">
               <span>{t[language].patient}:</span>
-              <span className="text-emerald-500">Fatima Abubakar</span>
+              <span className="text-[var(--primary)]">Fatima Abubakar</span>
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -182,10 +182,10 @@ export default function Triage({ language, theme }: TriageProps) {
 
               <button 
                 type="submit"
-                className={`w-full font-bold py-4 rounded-xl flex justify-center items-center space-x-2 transition shadow-lg mt-6 ${
+                className={`w-full font-bold py-2.5 rounded-md flex justify-center items-center space-x-2 transition shadow-sm mt-6 ${
                   isCriticalBP 
-                    ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/30' 
-                    : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
+                    ? 'bg-red-500 hover:bg-red-600 text-white' 
+                    : 'bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white'
                 }`}
               >
                 <Save className="w-5 h-5" />
@@ -194,7 +194,7 @@ export default function Triage({ language, theme }: TriageProps) {
             </form>
           </div>
         ) : (
-          <div className="w-full md:w-2/3 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-3xl flex items-center justify-center text-[var(--text-muted)]">
+          <div className="w-full md:w-2/3 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg flex items-center justify-center text-[var(--text-muted)]">
             <div className="text-center">
               <Activity className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>Select a patient from the queue to record vitals</p>

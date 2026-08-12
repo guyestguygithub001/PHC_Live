@@ -234,13 +234,13 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
 
       {/* ===== Header ===== */}
       <div
-        className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md"
+        className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]"
         style={{ boxShadow: 'var(--shadow-card)' }}
       >
         <div className="flex items-center space-x-3">
-          <Pill className="w-8 h-8 text-purple-500" />
+          <Pill className="w-8 h-8 text-[var(--primary)]" />
           <div>
-            <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
               {t[language].title}
             </h2>
             <p className="text-sm text-[var(--text-muted)]">
@@ -248,8 +248,8 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-xl border border-[var(--border-default)]">
-          <User className="w-5 h-5 text-purple-500" />
+        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-md border border-[var(--border-default)]">
+          <User className="w-5 h-5 text-[var(--primary)]" />
           <span>{language === 'EN' ? 'Pharmacist: Pharm. Halima' : 'Mai Magani: Pharm. Halima'}</span>
         </div>
       </div>
@@ -259,23 +259,23 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
 
         {/* ----- Left: Prescription Queue ----- */}
         <div
-          className="w-full lg:w-1/3 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-4 overflow-y-auto"
+          className="w-full lg:w-1/3 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4 overflow-y-auto"
           style={{ boxShadow: 'var(--shadow-card)' }}
         >
           <div className="flex items-center space-x-2 mb-4 pl-2">
-            <ClipboardList className="w-5 h-5 text-purple-500" />
+            <ClipboardList className="w-5 h-5 text-[var(--primary)]" />
             <h3 className="text-[var(--text-secondary)] font-semibold">
               {t[language].queue}
             </h3>
             {/* Badge showing total pending */}
-            <span className="ml-auto bg-purple-500/20 text-purple-500 text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="ml-auto bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-bold px-2 py-0.5 rounded-full">
               {prescriptions.length}
             </span>
           </div>
 
           {prescriptions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
-              <CheckCircle2 className="w-10 h-10 mb-2 text-emerald-500" />
+              <CheckCircle2 className="w-10 h-10 mb-2 text-[var(--primary)]" />
               <p className="text-sm">
                 {language === 'EN' ? 'All prescriptions dispensed' : 'An bayar da duk magungunan'}
               </p>
@@ -292,9 +292,9 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                   <button
                     key={rx.id}
                     onClick={() => setSelectedRx(rx.id)}
-                    className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 ${
+                    className={`w-full text-left p-4 rounded-lg border transition-all duration-200 ${
                       isSelected
-                        ? 'bg-purple-500/15 border-purple-500/40'
+                        ? 'bg-[var(--primary)]/8 border-[var(--primary)]/40'
                         : 'bg-[var(--queue-item-bg)] border-[var(--border-default)] hover:bg-[var(--queue-item-hover)]'
                     }`}
                   >
@@ -305,7 +305,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                           {rx.patientName}
                         </p>
                         {/* Drug name */}
-                        <p className="text-sm text-purple-500 font-medium mt-0.5">
+                        <p className="text-sm text-[var(--primary)] font-medium mt-0.5">
                           {rx.drug}
                         </p>
                         {/* Dosage + Doctor */}
@@ -328,7 +328,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                             {t[language].lowStock}
                           </span>
                         ) : null}
-                        <ArrowRight className={`w-4 h-4 ${isSelected ? 'text-purple-500' : 'text-[var(--text-muted)]'}`} />
+                        <ArrowRight className={`w-4 h-4 ${isSelected ? 'text-[var(--primary)]' : 'text-[var(--text-muted)]'}`} />
                       </div>
                     </div>
                   </button>
@@ -343,28 +343,28 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
 
           {/* Dispensing Panel */}
           <div
-            className="bg-[var(--card-bg)] rounded-3xl border border-[var(--border-default)] p-6 flex-1"
+            className="bg-[var(--card-bg)] rounded-lg border border-[var(--border-default)] p-4 flex-1"
             style={{ boxShadow: 'var(--shadow-card)' }}
           >
             {!activeRx ? (
               /* No patient selected — placeholder */
               <div className="flex flex-col items-center justify-center h-full text-[var(--text-muted)]">
                 <Pill className="w-16 h-16 mb-4 opacity-30" />
-                <p className="text-lg">{t[language].selectPatient}</p>
+                <p className="text-sm">{t[language].selectPatient}</p>
               </div>
             ) : (
               <div className="flex flex-col h-full">
                 {/* Panel header */}
                 <div className="flex items-center space-x-2 mb-6">
-                  <Package className="w-6 h-6 text-purple-500" />
-                  <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                  <Package className="w-6 h-6 text-[var(--primary)]" />
+                  <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                     {t[language].dispensingPanel}
                   </h3>
                 </div>
 
                 {/* ---- Malaria Lab Warning Banner ---- */}
                 {isMalariaBlocked && (
-                  <div className="flex items-start space-x-3 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 mb-6">
+                  <div className="flex items-start space-x-3 bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
                     <ShieldAlert className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-red-500 font-semibold leading-relaxed">
                       {t[language].noLabWarning}
@@ -375,7 +375,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                 {/* Prescription Detail Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                   {/* Patient */}
-                  <div className="bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)]">
+                  <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].patient}
                     </p>
@@ -384,7 +384,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     </p>
                   </div>
                   {/* Condition */}
-                  <div className="bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)]">
+                  <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].condition}
                     </p>
@@ -393,16 +393,16 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     </p>
                   </div>
                   {/* Drug */}
-                  <div className="bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)]">
+                  <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].drug}
                     </p>
-                    <p className="font-semibold text-purple-500">
+                    <p className="font-semibold text-[var(--primary)]">
                       {activeRx.drug}
                     </p>
                   </div>
                   {/* Dosage */}
-                  <div className="bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)]">
+                  <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].dosage}
                     </p>
@@ -411,7 +411,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     </p>
                   </div>
                   {/* Quantity */}
-                  <div className="bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)]">
+                  <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].quantity}
                     </p>
@@ -420,7 +420,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     </p>
                   </div>
                   {/* Prescribing Doctor */}
-                  <div className="bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)]">
+                  <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].prescribedBy}
                     </p>
@@ -431,17 +431,17 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                 </div>
 
                 {/* Stock level indicator */}
-                <div className="flex items-center justify-between bg-[var(--input-bg)] rounded-xl p-4 border border-[var(--border-default)] mb-6">
+                <div className="flex items-center justify-between bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)] mb-6">
                   <div>
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].currentStock}
                     </p>
-                    <p className={`text-2xl font-bold ${
+                    <p className={`text-lg font-semibold ${
                       activeStock && activeStock.units <= 0
                         ? 'text-red-500'
                         : activeStock && activeStock.units < LOW_STOCK_THRESHOLD
                         ? 'text-orange-500'
-                        : 'text-emerald-500'
+                        : 'text-[var(--primary)]'
                     }`}>
                       {activeStock ? activeStock.units : 0} {t[language].units}
                     </p>
@@ -472,10 +472,10 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       activeStock.units <= 0 ||
                       activeStock.units < activeRx.quantity
                     }
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 flex items-center justify-center space-x-3 ${
+                    className={`w-full py-2.5 rounded-md font-medium text-sm transition-all duration-200 flex items-center justify-center space-x-3 ${
                       isMalariaBlocked || !activeStock || activeStock.units <= 0 || activeStock.units < activeRx.quantity
                         ? 'bg-red-500/20 text-red-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:opacity-90 active:scale-[0.98]'
+                        : 'bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.98]'
                     }`}
                   >
                     {isMalariaBlocked ? (
@@ -507,12 +507,12 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
 
           {/* ===== Inventory Dashboard ===== */}
           <div
-            className="bg-[var(--card-bg)] rounded-3xl border border-[var(--border-default)] p-5"
+            className="bg-[var(--card-bg)] rounded-lg border border-[var(--border-default)] p-5"
             style={{ boxShadow: 'var(--shadow-card)' }}
           >
             <div className="flex items-center space-x-2 mb-4">
-              <BarChart3 className="w-5 h-5 text-purple-500" />
-              <h3 className="text-[var(--text-primary)] font-bold">
+              <BarChart3 className="w-5 h-5 text-[var(--primary)]" />
+              <h3 className="text-[var(--text-primary)] font-semibold">
                 {t[language].inventoryDashboard}
               </h3>
             </div>
@@ -525,7 +525,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                 return (
                   <div
                     key={item.id}
-                    className={`relative rounded-2xl p-4 border transition-all ${
+                    className={`relative rounded-lg p-4 border transition-all ${
                       isEmpty
                         ? 'bg-red-500/10 border-red-500/30'
                         : isLow
@@ -535,7 +535,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                   >
                     {/* Red warning badge for items below threshold */}
                     {isLow && (
-                      <span className="absolute -top-2 -right-2 flex items-center space-x-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg">
+                      <span className="absolute -top-2 -right-2 flex items-center space-x-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                         <AlertTriangle className="w-3 h-3" />
                         <span>{t[language].lowStock}</span>
                       </span>
@@ -547,12 +547,12 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     </p>
 
                     {/* Unit count */}
-                    <p className={`text-2xl font-bold ${
+                    <p className={`text-lg font-semibold ${
                       isEmpty
                         ? 'text-red-500'
                         : isLow
                         ? 'text-orange-500'
-                        : 'text-emerald-500'
+                        : 'text-[var(--primary)]'
                     }`}>
                       {item.units}
                     </p>
@@ -568,7 +568,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                             ? 'bg-red-500'
                             : isLow
                             ? 'bg-orange-500'
-                            : 'bg-emerald-500'
+                            : 'bg-[var(--primary)]'
                         }`}
                         style={{
                           width: `${Math.min((item.units / 200) * 100, 100)}%`,

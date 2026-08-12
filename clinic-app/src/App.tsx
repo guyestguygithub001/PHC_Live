@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon, FlaskConical, Pill, Send, Baby, BedDouble } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon, FlaskConical, Pill, Send, Baby, BedDouble, CreditCard, Menu, X } from 'lucide-react';
 import FrontDesk from './components/FrontDesk';
 import Triage from './components/Triage';
 import Consultation from './components/Consultation';
@@ -8,8 +8,9 @@ import Pharmacy from './components/Pharmacy';
 import Referral from './components/Referral';
 import AntenatalCare from './components/AntenatalCare';
 import InpatientWard from './components/InpatientWard';
+import Billing from './components/Billing';
 
-type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION' | 'LABORATORY' | 'PHARMACY' | 'REFERRAL' | 'ANC' | 'IPD';
+type AppScreen = 'PORTAL' | 'FRONT_DESK' | 'TRIAGE' | 'CONSULTATION' | 'LABORATORY' | 'PHARMACY' | 'REFERRAL' | 'ANC' | 'IPD' | 'BILLING';
 type Language = 'EN' | 'HA';
 type Theme = 'light' | 'dark';
 
@@ -17,10 +18,28 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('FRONT_DESK');
   const [language, setLanguage] = useState<Language>('EN');
   const [theme, setTheme] = useState<Theme>('light');
+  const [isNavOpen, setIsNavOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '') as AppScreen;
+      const validScreens = ['PORTAL', 'FRONT_DESK', 'TRIAGE', 'CONSULTATION', 'LABORATORY', 'PHARMACY', 'REFERRAL', 'ANC', 'IPD', 'BILLING'];
+      if (hash && validScreens.includes(hash)) {
+        setCurrentScreen(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    if (!window.location.hash) {
+      window.location.hash = currentScreen;
+    } else {
+      handleHashChange();
+    }
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const t = {
     EN: {
@@ -40,7 +59,8 @@ function App() {
       referralTab: "Referral",
       ancTab: "Antenatal Care",
       ipdTab: "Inpatient Ward",
-      syncPending: "3 Pending Syncs"
+      billingTab: "Billing",
+      syncPending: "3 Pending"
     },
     HA: {
       switch: "Canza zuwa Turanci",
@@ -59,7 +79,8 @@ function App() {
       referralTab: "Tura Mara Lafiya",
       ancTab: "Awo (ANC)",
       ipdTab: "Kwanciya a Asibiti",
-      syncPending: "Ana Jiran Tura (3)"
+      billingTab: "Kudin Asibiti",
+      syncPending: "Ana Jiran (3)"
     }
   };
 
@@ -75,26 +96,31 @@ function App() {
     }, 1500);
   };
 
-  /** Active tab styling based on current theme */
-  const tabActive = 'bg-emerald-500 text-white shadow-lg';
-  const tabInactive = theme === 'light'
-    ? 'text-slate-500 hover:bg-slate-100'
-    : 'text-white/60 hover:bg-white/10';
+  const modules = [
+    { id: 'PORTAL', icon: CalendarClock, label: t[language].portalTab },
+    { id: 'FRONT_DESK', icon: UserPlus, label: t[language].frontDeskTab },
+    { id: 'TRIAGE', icon: Stethoscope, label: t[language].triageTab },
+    { id: 'CONSULTATION', icon: FileText, label: t[language].consultationTab },
+    { id: 'LABORATORY', icon: FlaskConical, label: t[language].labTab },
+    { id: 'PHARMACY', icon: Pill, label: t[language].pharmacyTab },
+    { id: 'REFERRAL', icon: Send, label: t[language].referralTab },
+    { id: 'ANC', icon: Baby, label: t[language].ancTab },
+    { id: 'IPD', icon: BedDouble, label: t[language].ipdTab },
+    { id: 'BILLING', icon: CreditCard, label: t[language].billingTab }
+  ];
 
   const renderPortal = () => (
-    <div className="bg-[var(--card-bg)] p-8 rounded-3xl backdrop-blur-xl border border-[var(--border-default)] w-full max-w-md mx-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
-      <div className="text-center mb-8">
-        <div className="bg-emerald-500/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
-          <CalendarClock className="w-8 h-8 text-emerald-400" />
-        </div>
-        <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">{t[language].title}</h2>
-        <p className="text-[var(--text-secondary)]">{t[language].subtitle}</p>
+    <div className="bg-[var(--card-bg)] p-6 rounded-lg border border-[var(--border-default)] w-full max-w-md mx-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="text-center mb-6">
+        <CalendarClock className="w-10 h-10 text-[var(--primary)] mx-auto mb-3" />
+        <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-1">{t[language].title}</h2>
+        <p className="text-sm text-[var(--text-secondary)]">{t[language].subtitle}</p>
       </div>
 
       {step === 1 ? (
-        <form onSubmit={handlePhoneSubmit} className="space-y-6">
+        <form onSubmit={handlePhoneSubmit} className="space-y-4">
           <div>
-            <label className="block text-[var(--text-secondary)] text-sm font-medium mb-2">
+            <label className="block text-[var(--text-secondary)] text-sm mb-1.5">
               {t[language].phoneLabel}
             </label>
             <input
@@ -102,26 +128,26 @@ function App() {
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
               placeholder="+234 800 000 0000"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading || !phone}
-            className="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-bold py-3 px-4 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex justify-center items-center h-12"
+            className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium py-2.5 px-4 rounded-md transition-colors disabled:opacity-50 flex justify-center items-center h-10"
           >
             {isLoading ? (
-              <div className="w-6 h-6 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               t[language].sendCode
             )}
           </button>
         </form>
       ) : (
-        <form className="space-y-6">
+        <form className="space-y-4">
           <div>
-            <label className="block text-[var(--text-secondary)] text-sm font-medium mb-2">
+            <label className="block text-[var(--text-secondary)] text-sm mb-1.5">
               {t[language].enterOtp}
             </label>
             <input
@@ -130,13 +156,13 @@ function App() {
               maxLength={6}
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] text-center tracking-widest text-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] text-center tracking-widest text-lg focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]"
               placeholder="••••••"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-slate-900 font-bold py-3 px-4 rounded-xl hover:opacity-90 transition-opacity"
+            className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium py-2.5 px-4 rounded-md transition-colors"
           >
             {t[language].verify}
           </button>
@@ -146,132 +172,94 @@ function App() {
   );
 
   return (
-    <div data-theme={theme} className="min-h-screen bg-[var(--page-bg)] flex flex-col items-center p-4 relative overflow-hidden font-sans transition-colors duration-300">
-      
-      {/* Background Gradients — only visible in dark mode */}
-      {theme === 'dark' && (
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-emerald-500/10 blur-[120px] rounded-full mix-blend-screen animate-pulse" />
-          <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] bg-teal-600/10 blur-[150px] rounded-full mix-blend-screen" />
+    <div data-theme={theme} className="min-h-screen bg-[var(--page-bg)] flex flex-col items-center px-4 py-3 font-sans transition-colors duration-200">
+
+      {/* Navigation Drawer */}
+      {isNavOpen && (
+        <div className="fixed inset-0 z-50 flex" onClick={() => setIsNavOpen(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div 
+            className="relative h-full w-72 bg-[var(--sidebar-bg)] border-r border-[var(--border-default)] flex flex-col"
+            style={{ boxShadow: 'var(--shadow-elevated)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-[var(--border-default)] flex justify-between items-center">
+              <span className="text-sm font-semibold text-[var(--text-primary)]">Modules</span>
+              <button 
+                onClick={() => setIsNavOpen(false)}
+                className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <nav className="flex-1 overflow-y-auto py-1">
+              {modules.map(module => {
+                const isActive = currentScreen === module.id;
+                return (
+                  <button 
+                    key={module.id}
+                    onClick={() => {
+                      window.location.hash = module.id;
+                      setIsNavOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                      isActive 
+                        ? 'bg-[var(--primary)]/8 text-[var(--primary)] font-medium border-l-2 border-[var(--primary)]' 
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--card-bg-hover)] hover:text-[var(--text-primary)] border-l-2 border-transparent'
+                    }`}
+                  >
+                    <module.icon className="w-4 h-4 shrink-0" />
+                    <span>{module.label}</span>
+                  </button>
+                )
+              })}
+            </nav>
+          </div>
         </div>
       )}
 
-      {/* Top Navigation Bar */}
-      <div className="w-full max-w-6xl flex flex-col md:flex-row justify-between items-center mb-8 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-2xl p-2 backdrop-blur-sm" style={{ boxShadow: 'var(--shadow-card)' }}>
-        
-        {/* Module Tabs */}
-        <div className="flex space-x-2 w-full md:w-auto overflow-x-auto p-1">
+      {/* Header Bar */}
+      <div className="w-full max-w-6xl flex items-center justify-between mb-4 bg-[var(--header-bg)] border border-[var(--border-default)] rounded-lg px-4 py-2.5 z-30 relative" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="flex items-center gap-3">
           <button 
-            onClick={() => setCurrentScreen('PORTAL')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'PORTAL' ? tabActive : tabInactive
-            }`}
+            onClick={() => setIsNavOpen(true)}
+            className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)] rounded-md transition-colors"
+            title="Open Navigation"
           >
-            <CalendarClock className="w-4 h-4" />
-            <span>{t[language].portalTab}</span>
+            <Menu className="w-5 h-5" />
           </button>
-          <button 
-            onClick={() => setCurrentScreen('FRONT_DESK')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'FRONT_DESK' ? tabActive : tabInactive
-            }`}
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>{t[language].frontDeskTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('TRIAGE')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'TRIAGE' ? tabActive : tabInactive
-            }`}
-          >
-            <Stethoscope className="w-4 h-4" />
-            <span>{t[language].triageTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('CONSULTATION')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'CONSULTATION' ? tabActive : tabInactive
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>{t[language].consultationTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('LABORATORY')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'LABORATORY' ? tabActive : tabInactive
-            }`}
-          >
-            <FlaskConical className="w-4 h-4" />
-            <span>{t[language].labTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('PHARMACY')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'PHARMACY' ? tabActive : tabInactive
-            }`}
-          >
-            <Pill className="w-4 h-4" />
-            <span>{t[language].pharmacyTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('REFERRAL')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'REFERRAL' ? tabActive : tabInactive
-            }`}
-          >
-            <Send className="w-4 h-4" />
-            <span>{t[language].referralTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('ANC')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'ANC' ? tabActive : tabInactive
-            }`}
-          >
-            <Baby className="w-4 h-4" />
-            <span>{t[language].ancTab}</span>
-          </button>
-          <button 
-            onClick={() => setCurrentScreen('IPD')}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
-              currentScreen === 'IPD' ? tabActive : tabInactive
-            }`}
-          >
-            <BedDouble className="w-4 h-4" />
-            <span>{t[language].ipdTab}</span>
-          </button>
+          <h1 className="text-base font-semibold text-[var(--text-primary)]">PHC_Live</h1>
+          <span className="text-xs text-[var(--text-muted)] hidden sm:inline">
+            {modules.find(m => m.id === currentScreen)?.label}
+          </span>
         </div>
-
-        <div className="flex items-center space-x-3 mt-4 md:mt-0 px-2">
-          {/* Sync Status */}
-          <div className="flex items-center space-x-2 bg-red-500/20 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold animate-pulse">
-            <CloudOff className="w-4 h-4" />
-            <span>{t[language].syncPending}</span>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 text-[var(--danger)] bg-[var(--danger-light)] px-2.5 py-1 rounded-md text-xs font-medium">
+            <CloudOff className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{t[language].syncPending}</span>
           </div>
 
-          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--input-bg)] border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-emerald-500 transition"
-            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            className="p-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)] rounded-md transition-colors"
+            title={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
           >
-            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
 
-          {/* Language Toggle */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center space-x-2 bg-[var(--input-bg)] hover:bg-[var(--card-bg-hover)] text-[var(--text-primary)] px-4 py-2 rounded-xl transition-all border border-[var(--border-default)]"
+            className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--input-bg)] px-2.5 py-1.5 rounded-md transition-colors text-xs font-medium"
           >
             <Languages className="w-4 h-4" />
-            <span className="text-sm font-medium">{t[language].switch}</span>
+            <span className="hidden sm:inline">{language === 'EN' ? 'HA' : 'EN'}</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="w-full max-w-6xl flex-1 flex flex-col items-center justify-center">
         {currentScreen === 'PORTAL' && renderPortal()}
         {currentScreen === 'FRONT_DESK' && <FrontDesk language={language} theme={theme} />}
@@ -282,6 +270,7 @@ function App() {
         {currentScreen === 'REFERRAL' && <Referral language={language} theme={theme} />}
         {currentScreen === 'ANC' && <AntenatalCare language={language} theme={theme} />}
         {currentScreen === 'IPD' && <InpatientWard language={language} theme={theme} />}
+        {currentScreen === 'BILLING' && <Billing language={language} theme={theme} />}
       </div>
     </div>
   );

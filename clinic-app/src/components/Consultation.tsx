@@ -16,8 +16,17 @@ export default function Consultation({ language, theme }: ConsultationProps) {
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   
   // ICD-11 Engine State
-  const [diagnosisQuery, setDiagnosisQuery] = useState('');
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<ICD11Code | null>(null);
+  const [diagnosisQuery, setDiagnosisQuery] = useState('');
+
+  // Disease Programs State
+  const [diseasePrograms, setDiseasePrograms] = useState({
+    malaria: false,
+    hiv: false,
+    tb: false,
+    hypertension: false,
+    diabetes: false
+  });
 
   // Fuse.js setup — highly typo-tolerant offline fuzzy search
   const fuse = useMemo(() => new Fuse(primaryCareICD11, {
@@ -42,7 +51,13 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       actionLab: "Order Lab Test",
       actionDrug: "Prescribe Drug",
       actionAdmit: "Admit to Ward",
-      complete: "Complete & Discharge"
+      complete: "Complete & Discharge",
+      programs: "Disease Programs (DHIS2 Sync)",
+      malaria: "Malaria",
+      hiv: "HIV/AIDS",
+      tb: "Tuberculosis",
+      hypertension: "Hypertension",
+      diabetes: "Diabetes"
     },
     HA: {
       title: "Duba Marasa Lafiya (OPD)",
@@ -55,20 +70,26 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       actionLab: "Rubuta Gwajin Lab",
       actionDrug: "Rubuta Magani",
       actionAdmit: "Kwantar a Asibiti",
-      complete: "Kammala Jiyya"
+      complete: "Kammala Jiyya",
+      programs: "Cutar Tsari (DHIS2 Sync)",
+      malaria: "Zazzabin Cizon Sauro (Malaria)",
+      hiv: "Kan-jamau (HIV/AIDS)",
+      tb: "Tari (TB)",
+      hypertension: "Hawan Jini (Hypertension)",
+      diabetes: "Ciwon Sukari (Diabetes)"
     }
   };
 
   return (
     <div className="w-full h-full flex flex-col space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center bg-[var(--card-bg)] p-4 rounded-2xl border border-[var(--border-default)] backdrop-blur-md" style={{ boxShadow: 'var(--shadow-card)' }}>
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]" style={{ boxShadow: 'var(--shadow-card)' }}>
         <div className="flex items-center space-x-3">
-          <Stethoscope className="w-8 h-8 text-emerald-500" />
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t[language].title}</h2>
+          <Stethoscope className="w-8 h-8 text-[var(--primary)]" />
+          <h2 className="text-lg font-semibold text-[var(--text-primary)]">{t[language].title}</h2>
         </div>
-        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-xl border border-[var(--border-default)]">
-          <User className="w-5 h-5 text-emerald-500" />
+        <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-lg border border-[var(--border-default)]">
+          <User className="w-5 h-5 text-[var(--primary)]" />
           <span>CHO: Dr. Ibrahim</span>
         </div>
       </div>
@@ -76,15 +97,15 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       <div className="flex flex-col md:flex-row gap-6 flex-1 h-0">
         
         {/* The Clinical Queue */}
-        <div className="w-full md:w-1/4 bg-[var(--queue-bg)] rounded-3xl border border-[var(--border-default)] p-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
+        <div className="w-full md:w-1/4 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
           <h3 className="text-[var(--text-secondary)] font-semibold mb-4 pl-2">{t[language].queue}</h3>
           <div className="space-y-2">
             {/* Urgent Patient — always red regardless of theme */}
             <div 
               onClick={() => setSelectedPatient('Patient 1')}
-              className={`p-4 rounded-xl cursor-pointer transition ${
+              className={`p-4 rounded-lg cursor-pointer transition ${
                 selectedPatient === 'Patient 1' 
-                  ? 'bg-red-500/20 border-red-500/50 border shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
+                  ? 'bg-red-500/20 border-red-500/50 border shadow-sm' 
                   : 'bg-red-500/10 border-red-500/20 border hover:bg-red-500/20'
               }`}
             >
@@ -100,9 +121,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
             {/* Normal Patient */}
             <div 
               onClick={() => setSelectedPatient('Patient 2')}
-              className={`p-4 rounded-xl cursor-pointer transition ${
+              className={`p-4 rounded-lg cursor-pointer transition ${
                 selectedPatient === 'Patient 2' 
-                  ? 'bg-emerald-500/20 border-emerald-500/50 border' 
+                  ? 'bg-[var(--primary)]/10 border-[var(--primary)]/40 border' 
                   : 'bg-[var(--queue-item-bg)] border-transparent border hover:bg-[var(--queue-item-hover)]'
               }`}
             >
@@ -117,18 +138,18 @@ export default function Consultation({ language, theme }: ConsultationProps) {
           <div className="w-full md:w-3/4 flex flex-col gap-6 overflow-y-auto">
             
             {/* Patient Header */}
-            <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-6 rounded-3xl backdrop-blur-xl shrink-0" style={{ boxShadow: 'var(--shadow-card)' }}>
-              <div className="flex justify-between items-center">
+            <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-4 rounded-lg shrink-0" style={{ boxShadow: 'var(--shadow-card)' }}>
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center">
                 <div>
-                  <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-1">Fatima Abubakar</h3>
+                  <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Fatima Abubakar</h3>
                   <p className="text-[var(--text-secondary)]">ID: PHC-KAN-0824 • 42 Years • Female</p>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="bg-red-500/15 border border-red-500/40 rounded-xl px-4 py-2 text-center">
+                  <div className="bg-red-500/15 border border-red-500/40 rounded-lg px-4 py-2 text-center">
                     <p className="text-red-400 text-xs">Blood Pressure</p>
                     <p className="text-red-500 font-bold text-lg">180/110</p>
                   </div>
-                  <div className="bg-[var(--input-bg)] border border-[var(--border-default)] rounded-xl px-4 py-2 text-center">
+                  <div className="bg-[var(--input-bg)] border border-[var(--border-default)] rounded-lg px-4 py-2 text-center">
                     <p className="text-[var(--text-muted)] text-xs">Temperature</p>
                     <p className="text-[var(--text-primary)] font-bold text-lg">37.1°C</p>
                   </div>
@@ -139,7 +160,7 @@ export default function Consultation({ language, theme }: ConsultationProps) {
             <div className="flex flex-col md:flex-row gap-6 flex-1 h-0">
               
               {/* Historical Timeline (Skeuomorphic Folder) — always cream paper */}
-              <div className="w-full md:w-1/3 bg-[var(--timeline-bg)] border border-[var(--timeline-border)] rounded-3xl p-6 overflow-y-auto shadow-inner relative text-slate-800">
+              <div className="w-full md:w-1/3 bg-[var(--timeline-bg)] border border-[var(--timeline-border)] rounded-lg p-4 overflow-y-auto shadow-inner relative text-slate-800">
                 <h3 className="font-bold text-slate-600 mb-6 flex items-center space-x-2 border-b border-slate-200 pb-4">
                   <History className="w-5 h-5" />
                   <span>{t[language].history}</span>
@@ -151,10 +172,10 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
                       <Pill className="w-4 h-4" />
                     </div>
-                    <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                       <div className="flex items-center justify-between space-x-2 mb-1">
                         <div className="font-bold text-slate-700 text-sm">Dispensary</div>
-                        <time className="text-xs font-medium text-emerald-600">May 12</time>
+                        <time className="text-xs font-medium text-[var(--primary)]">May 12</time>
                       </div>
                       <div className="text-sm text-slate-600">Artemether/Lumefantrine 20/120mg given.</div>
                     </div>
@@ -165,7 +186,7 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                     <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
                       <FlaskConical className="w-4 h-4" />
                     </div>
-                    <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                       <div className="flex items-center justify-between space-x-2 mb-1">
                         <div className="font-bold text-slate-700 text-sm">Lab Result</div>
                         <time className="text-xs font-medium text-slate-400">May 12</time>
@@ -177,21 +198,21 @@ export default function Consultation({ language, theme }: ConsultationProps) {
               </div>
 
               {/* Current Encounter & Action Center */}
-              <div className="w-full md:w-2/3 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-3xl p-6 flex flex-col space-y-6 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center space-x-2">
-                  <FileText className="w-5 h-5 text-emerald-500" />
+              <div className="w-full md:w-2/3 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-lg p-4 flex flex-col space-y-6 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)] flex items-center space-x-2">
+                  <FileText className="w-5 h-5 text-[var(--primary)]" />
                   <span>{t[language].newEncounter}</span>
                 </h3>
 
                 {/* ICD-11 Engine */}
-                <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-2xl p-4">
+                <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg p-4">
                   <label className="block text-[var(--text-secondary)] text-sm mb-3 font-semibold">{t[language].diagnosis}</label>
                   
                   {selectedDiagnosis ? (
-                    <div className="bg-emerald-500/15 border border-emerald-500/40 p-4 rounded-xl flex justify-between items-center">
+                    <div className="bg-[var(--primary)]/8 border border-[var(--primary)]/40 p-4 rounded-lg flex justify-between items-center">
                       <div>
-                        <p className="text-[var(--text-primary)] font-bold text-lg">{selectedDiagnosis.title}</p>
-                        <p className="text-emerald-500 text-sm">ICD-11: {selectedDiagnosis.code}</p>
+                        <p className="text-[var(--text-primary)] font-medium text-sm">{selectedDiagnosis.title}</p>
+                        <p className="text-[var(--primary)] text-sm">ICD-11: {selectedDiagnosis.code}</p>
                       </div>
                       <button onClick={() => setSelectedDiagnosis(null)} className="bg-[var(--input-bg)] hover:opacity-70 p-2 rounded-lg text-[var(--text-primary)] transition">
                         <X className="w-5 h-5" />
@@ -205,12 +226,12 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                         placeholder={t[language].searchDiagnosis}
                         value={diagnosisQuery}
                         onChange={(e) => setDiagnosisQuery(e.target.value)}
-                        className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl pl-12 pr-4 py-4 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition"
+                        className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md pl-12 pr-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition"
                       />
                       
                       {/* Search Results Dropdown */}
                       {searchResults.length > 0 && (
-                        <div className="absolute top-full left-0 w-full mt-2 bg-[var(--card-bg-secondary)] border border-[var(--border-default)] rounded-xl z-50 overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
+                        <div className="absolute top-full left-0 w-full mt-2 bg-[var(--card-bg-secondary)] border border-[var(--border-default)] rounded-lg z-50 overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
                           {searchResults.map((result) => (
                             <div 
                               key={result.id}
@@ -219,9 +240,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                             >
                               <div>
                                 <p className="text-[var(--text-primary)] font-semibold">{result.title}</p>
-                                <p className="text-emerald-500 text-sm">Code: {result.code}</p>
+                                <p className="text-[var(--primary)] text-sm">Code: {result.code}</p>
                               </div>
-                              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-emerald-500 transition" />
+                              <ChevronRight className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition" />
                             </div>
                           ))}
                         </div>
@@ -230,31 +251,51 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                   )}
                 </div>
 
+                {/* Disease Programs */}
+                <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg p-4">
+                  <label className="block text-[var(--text-secondary)] text-sm mb-3 font-semibold">{t[language].programs}</label>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(diseasePrograms).map(([key, value]) => (
+                      <button
+                        key={key}
+                        onClick={() => setDiseasePrograms(prev => ({ ...prev, [key]: !prev[key as keyof typeof diseasePrograms] }))}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors border ${
+                          value 
+                            ? 'bg-purple-500 text-white border-purple-500 shadow-sm' 
+                            : 'bg-[var(--input-bg)] text-[var(--text-secondary)] border-[var(--input-border)] hover:border-purple-500/50'
+                        }`}
+                      >
+                        {t[language][key as keyof typeof t['EN']]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Notes */}
                 <div className="flex-1">
                   <textarea 
                     placeholder="Clinical notes (optional)..."
-                    className="w-full h-full min-h-[120px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-2xl p-4 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition resize-none"
+                    className="w-full h-full min-h-[120px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md p-4 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition resize-none"
                   ></textarea>
                 </div>
 
                 {/* Action Center */}
-                <div className="grid grid-cols-3 gap-4 shrink-0">
-                  <button className="bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-500 font-semibold py-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0">
+                  <button className="bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition">
                     <FlaskConical className="w-6 h-6" />
                     <span className="text-sm">{t[language].actionLab}</span>
                   </button>
-                  <button className="bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/25 text-purple-500 font-semibold py-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition">
+                  <button className="bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/25 text-purple-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition">
                     <Pill className="w-6 h-6" />
                     <span className="text-sm">{t[language].actionDrug}</span>
                   </button>
-                  <button className="bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/25 text-orange-500 font-semibold py-4 rounded-xl flex flex-col items-center justify-center space-y-2 transition">
+                  <button className="bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/25 text-orange-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition">
                     <Activity className="w-6 h-6" />
                     <span className="text-sm">{t[language].actionAdmit}</span>
                   </button>
                 </div>
 
-                <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl flex justify-center items-center space-x-2 transition shadow-lg shadow-emerald-500/30 shrink-0">
+                <button className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium py-2.5 rounded-md flex justify-center items-center space-x-2 transition shadow-sm shrink-0">
                   <CheckCircle2 className="w-5 h-5" />
                   <span>{t[language].complete}</span>
                 </button>
@@ -262,7 +303,7 @@ export default function Consultation({ language, theme }: ConsultationProps) {
             </div>
           </div>
         ) : (
-          <div className="w-full md:w-3/4 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-3xl flex items-center justify-center text-[var(--text-muted)]">
+          <div className="w-full md:w-3/4 bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg flex items-center justify-center text-[var(--text-muted)]">
             <div className="text-center">
               <Stethoscope className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p>{t[language].selectPatient}</p>

@@ -176,10 +176,10 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
   };
 
   return (
-    <div className="flex h-full w-full gap-6 p-4">
+    <div className="flex flex-col md:flex-row h-full w-full gap-4 md:gap-6 p-4 overflow-y-auto md:overflow-hidden">
       {/* Left Panel: Bed Management Dashboard */}
       <div 
-        className="w-1/3 flex flex-col rounded-xl overflow-hidden flex-shrink-0"
+        className="w-full md:w-1/3 flex flex-col rounded-lg overflow-hidden flex-shrink-0"
         style={{ 
           backgroundColor: 'var(--card-bg)',
           boxShadow: 'var(--shadow-card)',
@@ -219,7 +219,7 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
               }}
             >
               <div className="flex justify-between items-center w-full">
-                <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+                <span className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
                   {t.bed} {bed.number}
                 </span>
                 <span 
@@ -252,7 +252,7 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
 
       {/* Right Panel: Main View */}
       <div 
-        className="w-2/3 flex flex-col rounded-xl overflow-hidden"
+        className="w-full md:w-2/3 flex flex-col rounded-lg overflow-hidden"
         style={{ 
           backgroundColor: 'var(--card-bg)',
           boxShadow: 'var(--shadow-card)',
@@ -260,7 +260,7 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
         }}
       >
         {!selectedBed || selectedBed.status === 'available' ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center h-full">
+          <div className="flex-1 flex flex-col items-center justify-center p-5 text-center h-full">
             <BedDouble className="w-16 h-16 mb-4 opacity-20" style={{ color: 'var(--text-muted)' }} />
             <h3 className="text-xl font-medium" style={{ color: 'var(--text-secondary)' }}>
               {t.selectBed}
@@ -270,12 +270,12 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
           <>
             {/* Header with Patient Info */}
             <div 
-              className="p-6 border-b"
+              className="p-4 border-b"
               style={{ borderColor: 'var(--border-default)' }}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                  <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
                     {selectedBed.patientName}
                   </h2>
                   <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -320,7 +320,7 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className="flex-1 p-4 overflow-y-auto">
               {activeTab === 'mar' && (
                 <div className="space-y-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -352,7 +352,7 @@ export default function InpatientWard({ language, theme }: InpatientWardProps) {
                                 <Clock className="w-4 h-4" /> {med.time}
                               </span>
                               {med.administeredAt && (
-                                <span className="flex items-center gap-1 text-emerald-500 font-medium">
+                                <span className="flex items-center gap-1 text-[var(--primary)] font-medium">
                                   <CheckCircle className="w-4 h-4" /> 
                                   {t.administered} at {med.administeredAt}
                                 </span>

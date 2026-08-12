@@ -15,6 +15,7 @@
 * **Smart ID Generation:** If a patient is new, the system generates a sequential human-readable ID (e.g., `PHC-KAN-0012`) to write on their card.
 * **Queue Routing:** Once the record is found, the Records Officer taps "Send to Triage", "Send to ANC", or "Send to Ward". This actively manages traffic flow before the patient even sees a nurse.
 * **Archival System:** Deceased or inactive patients are digitally marked as archived, removing them from local tablets to save space but keeping them securely in the Neon cloud database.
+* **Patient Master Index (PMI) Enhancements:** Advanced duplicate detection engine utilizing phone number hashing and optional biometric data (fingerprint/facial templates) to guarantee a single unified patient record across the network.
 
 ---
 
@@ -42,6 +43,7 @@
 * **ICD-11 Auto-Suggest Engine:** Instead of typing out diagnoses manually, the CHO starts typing a symptom (e.g., "Typhoid"), and a lightning-fast offline fuzzy search instantly suggests the exact ICD-11 code (e.g., `1A07 - Typhoid fever`). This guarantees perfect, standardized data.
 * **Action Center:** Buttons to explicitly "Order Lab Test", "Prescribe Drug", "Admit to Ward (IPD)", or "Initiate Referral". 
 * **Draft Auto-Save:** If the CHO is typing a note and the tablet battery dies, the note is saved locally in WatermelonDB as a draft and restores instantly on another tablet upon login.
+* **Disease Programs (Vertical Integration):** Built-in clinical pathways and structured data capture for priority programs (Malaria, HIV, TB, Hypertension, Diabetes). Prompts condition-specific protocols and routes programmatic data to reporting layers.
 
 ---
 
@@ -98,6 +100,7 @@
 * **Delivery Register:** Captures birth outcomes (Live Birth, Stillbirth, APGAR score, Birth Weight).
 * **Real-time Analytics:** Visual dashboards (charts/graphs) showing the most common diseases seen this month, total patients handled, and drug consumption rates.
 * **Automated DHIS2 Aggregation:** Because birth data is highly critical for national statistics, this module automatically maps birth outcomes to DHIS2 data elements for seamless monthly reporting.
+* **Immunization & Postnatal Care (PNC):** Comprehensive tracking of the infant vaccination schedule with automated reminder generation. Integrates postnatal maternal checkups with the neonatal visit timeline to ensure combined mother-child wellness tracking.
 
 ---
 
@@ -126,7 +129,7 @@
 
 ---
 
-## 9. Patient Booking Portal (Cloud-to-Edge)
+## 10. Patient Booking Portal (Cloud-to-Edge)
 
 **Primary User:** The Patient (Remote)  
 **Goal:** Allow patients to book appointments from home using a zero-friction, multi-lingual web app, which syncs to the offline clinic.
@@ -136,6 +139,32 @@
 * **Zero Form Anxiety (OTP):** No emails or passwords. Patients authenticate purely via Phone Number and a 4-digit SMS/WhatsApp OTP.
 * **Native Localization:** A 1-tap toggle seamlessly switches the UI between English, Nigerian Pidgin ("Wetin dey do you?"), and Hausa ("Me ke damun ka/ki?").
 * **Iconography & Micro-Interactions:** Uses massive, oversized Tailwind CSS Glassmorphism cards with universal emojis (🤰 Awo, 🦟 Zazzabi) so patients can book by tapping pictures instead of reading text. Auto-advances on OTP entry to ensure a sub-30-second workflow.
+
+---
+
+## 11. Billing & Financial Module
+
+**Primary User:** Cashier / Revenue Officer  
+**Goal:** Digitize the collection of facility fees, manage exemptions, and generate transparent financial reports to reduce leakage.
+
+### Features
+* **Integrated Point-of-Sale:** Automatically pulls pending invoices from Triage, OPD, Lab, and Pharmacy into a single patient bill.
+* **Flexible Payment Methods:** Supports Cash, POS, and digital transfers, while maintaining a rigid audit trail for every transaction.
+* **Exemptions & Subsidies:** Native support for the Basic Health Care Provision Fund (BHCPF) and state health insurance schemes, allowing zero-fee billing with appropriate justification codes.
+* **End-of-Day Reconciliation:** One-click generation of shift reports detailing revenue collected versus services rendered, ensuring full financial transparency for the facility manager.
+
+---
+
+## 12. DHIS2 Integration Layer
+
+**Primary User:** M&E Officer / Local Government Area (LGA) Supervisor  
+**Goal:** Automate the burdensome monthly HMIS/DHIS2 reporting process, eliminating manual tally sheets.
+
+### Features
+* **Automated Tally Sheets:** The system silently aggregates data in the background (e.g., tallying every Malaria RDT positive, every Penta-3 vaccine given) into standard DHIS2 indicator formats.
+* **One-Click Export & Sync:** At the end of the month, the M&E officer simply reviews the generated summary and clicks "Push to DHIS2".
+* **Offline Resilience:** If internet is unavailable at month-end, the payload is securely cached and will automatically upload when connectivity is restored.
+* **Data Quality Checks:** Built-in validation rules prevent submission of mathematically impossible data.
 
 ---
 *Last Updated: 2026-08-11 | Chunk 6*
