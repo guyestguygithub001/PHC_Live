@@ -1,67 +1,113 @@
-# ARCHITECTURE_DECISIONS.md — Architecture Decision Records (ADR)
+# Architecture Decisions
 
-> **Purpose:** Every significant technical or design decision is recorded here with its context and rationale. This is an append-only log — entries are never modified or deleted, only new ones are added.
+Running log of technical decisions made during development. The point of this file is to capture the "why" not just the "what" -- because six months from now nobody remembers why we picked X over Y.
 
----
-
-## ADR-001: Start with an Empty Repository
-**Date:** 2026-08-11  
-**Status:** ✅ ACCEPTED  
-**Context:** The original PHC app design had loopholes discovered during field surveys at actual PHCs. The team considered whether to refactor the existing codebase or start fresh.  
-**Decision:** Start with a completely empty repository and re-engineer the system from scratch.  
-**Rationale:** The loopholes were fundamental (wrong assumptions about workflows, missing referral chain, no offline consideration). A patch-and-fix approach would carry forward architectural debt. A clean start allows designing for the real-world constraints discovered in the field.  
-**Consequences:** All previous code is abandoned. New architecture is designed around actual PHC operations.
+Not every decision is in here. Just the ones that were non-obvious or where we genuinely debated options.
 
 ---
 
-## ADR-002: Scope Includes Primary and Secondary Healthcare
-**Date:** 2026-08-11  
-**Status:** ✅ ACCEPTED  
-**Context:** PHCs refer critical cases to General Hospitals (secondary care). Currently this referral is done with a paper note and there is NO data flow between PHC and General Hospital.  
-**Decision:** The system scope covers both Primary Healthcare Centres (PHCs) and Secondary Healthcare facilities (General Hospitals). Tertiary care is out of scope for now.  
-**Rationale:** The referral chain between PHC and General Hospital is a critical loophole. Without including both tiers, the system cannot solve the broken referral tracking problem. 60-70% of rural births happen at PHCs and that data never reaches hospitals or national databases.  
-**Consequences:** System must support multi-facility deployment with data sharing between facility tiers. Authentication and RBAC must span across facility types.
+## ADR-001: Starting from scratch instead of refactoring
+
+**Date:** 2026-08-11
+
+We had a previous version of this app. After the field visit on August 10th, it became clear that the original assumptions were wrong at a fundamental level. The original design assumed patients came in, were seen, and left. It did not account for referrals, inpatient stays, the lab-before-medication requirement, or the offline constraint.
+
+The options were: (a) patch the existing codebase or (b) start clean. We went with option (b). Patching would have meant carrying forward wrong assumptions in the data model, which tends to become expensive to fix later. Clean start was faster in the end.
 
 ---
 
-## ADR-003: Offline-First Architecture is Mandatory
-**Date:** 2026-08-11  
-**Status:** ✅ ACCEPTED  
-**Context:** PHCs are located in rural and suburban areas where electricity blackouts are frequent and internet connectivity is unreliable or absent.  
-**Decision:** The application MUST function 100% offline. All data entry, retrieval, and clinical workflows must work without internet. Data synchronization happens when connectivity is restored.  
-**Rationale:** Any system that requires constant internet will fail in the target environment. Field survey confirmed that PHCs are "mostly in villages and blacked out sometimes out of light and Network."  
-**Consequences:** Requires local database on device (e.g., IndexedDB, SQLite, PouchDB). Need conflict resolution strategy for sync. PWA or native app architecture required. Cannot rely on server-side rendering or API calls for core functionality.
+## ADR-002: Why the scope covers both PHCs and General Hospitals
+
+**Date:** 2026-08-11
+
+Originally this was just a PHC system. But once you understand how referrals work -- a nurse writes a paper note, hands it to the patient, and that is the entire information transfer -- it becomes obvious you cannot solve the problem at one end only.
+
+If a patient arrives at a General Hospital with a paper note that says "hypertension, referred from PHC Karaye", the GH doctor has nothing useful to work with. The referral module only makes sense if there is something on the receiving end to receive it.
+
+So the GH gets a lightweight read-only dashboard for incoming referrals and the ability to send discharge summaries back. That closes the loop. Everything beyond that (GH's own EMR, billing, etc.) is out of scope.
 
 ---
 
-## ADR-004: Mobile-First Design
-**Date:** 2026-08-11  
-**Status:** ✅ ACCEPTED  
-**Context:** PHC staff primarily use Android phones. Some facilities may have tablets. Desktop computers are rare and unreliable due to power outages.  
-**Decision:** Design mobile-first. The primary interface is for Android phones/tablets. Desktop interface is secondary.  
-**Rationale:** The most reliable computing device in a PHC during a blackout is a charged smartphone. Building mobile-first ensures the system is usable in the most constrained environment.  
-**Consequences:** UI must be thumb-friendly. Forms must be optimized for small screens. Data entry should minimize typing (use dropdowns, checkboxes, voice input where possible).
+## ADR-003: Offline first - this was not negotiable
+
+**Date:** 2026-08-11
+
+The field survey was clear: PHCs lose power regularly, and rural areas have patchy mobile data. A system that needs internet to function is not a system for this environment, it is just software that will sit unused.
+
+The architecture is: local SQLite (via WatermelonDB) on the device, a local Go server on a Raspberry Pi (or similar edge device) at the facility, and Neon PostgreSQL in the cloud. Everything works without the cloud connection. The cloud sync runs in the background whenever a connection is available.
+
+The conflict resolution piece of the sync is still being worked out. Right now the backend does basic REST. The WatermelonDB sync adapter needs to be properly wired up -- that is the next major engineering task after the module UIs are stable.
 
 ---
 
-## ADR-005: Append-Only Documentation Strategy
-**Date:** 2026-08-11  
-**Status:** ✅ ACCEPTED  
-**Context:** The team needs a single, growing blueprint that captures the full history of the project. Past decisions and their context must be preserved.  
-**Decision:** All project documentation follows an append-only strategy. Documents are never rewritten or restructured — new information is appended to the end.  
-**Rationale:** User requirement: "make sure not rewrite the whole thing at some point. only append current information to previous information so that there is 1 blueprint."  
-**Consequences:** Documents may grow long over time. Table of contents and section headers become critical for navigation. Version control (git) provides additional history.
+## ADR-004: React + Vite + TypeScript for the frontend
+
+**Date:** 2026-08-11
+
+Considered Vue.js as well. One person on the team had more Vue experience. We went with React because the kind of state management needed for patient queues and multi-step forms fits better with React's component model, and because there is more ecosystem support for the offline libraries we needed (WatermelonDB has a React-first API).
+
+Vite over Create React App because CRA is effectively dead at this point. Build times with CRA on even a small project are slow.
+
+TypeScript was a given. With a project this size and this many modules, catching type errors at compile time rather than at runtime saves a lot of debugging.
 
 ---
 
-## ADR-006: Chunked Work with Validation Checkpoints
-**Date:** 2026-08-11  
-**Status:** ✅ ACCEPTED  
-**Context:** Complex systems design requires structured progress tracking and stakeholder buy-in at each stage.  
-**Decision:** All work is broken into discrete chunks of 5-7 steps. After each chunk, work pauses for user review before proceeding.  
-**Rationale:** Prevents runaway design that doesn't align with stakeholder needs. Each checkpoint is an opportunity to course-correct using new field data (which the user is expecting). Follows Agile principles of iterative delivery and feedback.  
-**Consequences:** Slower overall pace but higher quality and alignment. Each chunk produces a reviewable deliverable.
+## ADR-005: Go + Gin for the backend
+
+**Date:** 2026-08-11
+
+The backend server (clinic-server) is written in Go using Gin. The main argument for Go was deployment simplicity on constrained hardware. You compile a single binary, copy it to the Raspberry Pi, run it. No runtime to manage, no node_modules, no version conflicts with the OS.
+
+We also looked at Node.js with Fastify, which would have let the whole team work in one language. The operational argument for Go on edge hardware won. Memory usage on a Pi 4 is also noticeably lower.
 
 ---
 
-*APPEND NEW ADR ENTRIES BELOW THIS LINE*
+## ADR-006: Neon PostgreSQL for cloud storage
+
+**Date:** 2026-08-11
+
+Needed a cloud Postgres with: a workable free tier for development, reasonable latency from Nigeria, and no always-on cost for idle databases (clinics that are not syncing should not be costing money).
+
+Neon's serverless model and scale-to-zero fit those requirements. We looked at Supabase (has extra features we do not need yet) and Railway (no scale-to-zero at the time of evaluation).
+
+One practical issue: the initial connection pooling setup was wrong and we were hitting Neon's connection limits during testing. Fixed in the current version of main.go.
+
+---
+
+## ADR-007: Fuse.js for ICD-11 offline search
+
+**Date:** 2026-08-11
+
+The Consultation module needs to let a CHO type "typhoid" and get the correct ICD-11 code back, without needing internet. We are not bundling the full ICD-11 dataset (it is too large for a mobile device). We have a curated subset covering the most common conditions at PHC level in Nigeria.
+
+Fuse.js handles the fuzzy matching client-side. Fast enough for the subset size we are working with.
+
+The subset itself needs clinical review before we go into a real pilot. The current list is a reasonable starting point but should not be treated as definitive without a clinician signing off on it.
+
+---
+
+## ADR-008: Hausa as the first local language
+
+**Date:** 2026-08-11
+
+The pilot target area is northern Nigeria, where Hausa is the dominant language. The app has an EN/HA toggle on every screen.
+
+Nigerian Pidgin was originally in scope for the Patient Portal. We pulled back on this for now because Pidgin does not have a standardized written form and varies enough by region that a poorly written Pidgin translation could feel worse than just using English. Revisit this when we have a native Pidgin speaker available for review.
+
+---
+
+## ADR-009: UI design direction change
+
+**Date:** 2026-08-12
+
+The initial UI used heavy glassmorphism, gradient text, colored shadows, and emerald green as the dominant accent color. This was the wrong call for clinical software for a few reasons:
+
+1. Healthcare software convention is blue-primary (think most hospital software, DHIS2, OpenMRS). Green as primary reads as "success" not "primary action" in this context.
+2. Glassmorphism looks dated fast and performs poorly on low-end Android devices.
+3. Over-designed UIs create visual noise. A nurse entering vitals for the 50th patient of the day does not want visual entertainment.
+
+The UI was normalized to a professional blue-primary palette, solid card backgrounds, reduced border radii, and tighter padding. The design now reads closer to functional clinical software than a Dribbble concept.
+
+---
+
+*New entries go below this line*

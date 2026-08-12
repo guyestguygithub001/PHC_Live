@@ -45,9 +45,9 @@ This system is built for the people who actually work in and use PHCs:
 
 When we visited PHCs and talked to the staff, here's what we discovered:
 
-1. **Patients carry a HAND CARD** — if they lose it, nobody can find their records quickly
-2. **Records are PAPER FOLDERS** — staff has to search through piles of folders to find one patient
-3. **Dead patients' files are kept FOREVER** — they take up physical space with no benefit
+1. Patients carry a hand card home. If they lose it, finding their records means searching through stacks of physical folders by date.
+2. Records are paper folders. There are rooms at some PHCs dedicated entirely to storage, including files of patients who have been dead for years.
+3. When a critical case is referred to a General Hospital, the referral is a handwritten note. There is no way to know if the patient arrived, what treatment they got, or what the outcome was.
 4. **Referrals are WRITTEN NOTES** — when a critical patient is sent to a General Hospital, there's no way to track if they arrived or what happened
 5. **Birth data STAYS at the PHC** — even though 60-70% of rural births happen at PHCs, that data never reaches the national health system
 6. **PHCs and General Hospitals are DISCONNECTED** — no data flows between them at all
@@ -128,10 +128,36 @@ All project documents are in the `/docs` folder:
 
 ## Current Status
 
-📍 **Phase:** Implementation & UI Normalization  
-📍 **Stage:** De-AI UI Overhaul  
-📍 **Recent Update:** Successfully normalized all 10 modules (Front Desk, Triage, Consultation, Lab, Pharmacy, Referral, ANC, Inpatient, Billing, Portal) to use a professional healthcare design system. Removed AI design signatures (excessive glassmorphism, inappropriate shadows, emerald dominance) in favor of standard clinical blue palettes, clean solid borders, and structured hierarchy.
-📍 **Next:** DHIS2 Auto-Aggregation & Epidemic Radar
+The core clinical modules are built and running: Front Desk, Triage, OPD Consultation, Laboratory, Pharmacy, Referral, Antenatal Care, Inpatient Ward, and Billing. The UI has gone through a significant design revision since the initial version -- the first iteration was too visual and not practical enough for a clinical setting. The current design is calmer and more appropriate for staff who are using it all day.
+
+What is still in progress:
+- DHIS2 auto-aggregation (background reporting worker)
+- Epidemic Radar / syndromic surveillance alerts
+- WatermelonDB sync adapter to Neon (offline sync is the next big piece)
+- Pilot facility selection and field testing
+
+---
+
+## Running Locally
+
+**Frontend (React app)**
+```bash
+cd clinic-app
+npm install
+npm run dev
+# runs on http://localhost:5173
+```
+
+**Backend (Go API server)**
+```bash
+cd clinic-server
+cp .env.example .env
+# fill in your DATABASE_URL in .env
+go run .
+# runs on http://localhost:3001
+```
+
+You need a Neon PostgreSQL database. Create a free project at neon.tech and paste the connection string into your `.env` file.
 
 ---
 

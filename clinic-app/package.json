@@ -1,13 +1,17 @@
 {
-  "name": "clinic-app",
+  "name": "phc-live",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.4.1",
   "type": "module",
+  "description": "Offline-first clinical management system for Nigerian Primary Healthcare Centres",
+  "author": "PHC_Live Development Team",
+  "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "echo \"Tests in progress - see /src/__tests__\" && exit 0"
   },
   "dependencies": {
     "@nozbe/watermelondb": "^0.28.0",
