@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FlaskConical, User, ClipboardList, CheckCircle2,
   AlertTriangle, Send, FileText, Microscope, ExternalLink, MapPin, Phone, Printer
@@ -212,45 +212,7 @@ const t = {
   }
 };
 
-// ---- Mock lab request data ----
-const mockRequests: LabRequest[] = [
-  {
-    id: 'LR-001',
-    patientName: 'Halima Yusuf',
-    patientId: 'PHC-KAN-1201',
-    testType: 'Malaria RDT',
-    orderedBy: 'Dr. Ibrahim',
-    orderedAt: '09:12 AM',
-    priority: 'urgent',
-  },
-  {
-    id: 'LR-002',
-    patientName: 'Abdullahi Musa',
-    patientId: 'PHC-KAN-1143',
-    testType: 'Widal Test',
-    orderedBy: 'Dr. Ibrahim',
-    orderedAt: '09:30 AM',
-    priority: 'normal',
-  },
-  {
-    id: 'LR-003',
-    patientName: 'Aisha Bello',
-    patientId: 'PHC-KAN-1089',
-    testType: 'Full Blood Count',
-    orderedBy: 'CHO Fatima',
-    orderedAt: '10:05 AM',
-    priority: 'normal',
-  },
-  {
-    id: 'LR-004',
-    patientName: 'Musa Garba',
-    patientId: 'PHC-KAN-1210',
-    testType: 'Malaria RDT',
-    orderedBy: 'Dr. Ibrahim',
-    orderedAt: '10:22 AM',
-    priority: 'normal',
-  },
-];
+// ---- Remove mockRequests to avoid confusion ----
 
 // ---- Mock external labs ----
 const mockExternalLabs = [
@@ -286,8 +248,26 @@ export default function Laboratory({ language }: LaboratoryProps) {
   const [activeTab, setActiveTab] = useState<'result' | 'external'>('result');
   const [labSearch, setLabSearch] = useState('');
 
+  const [queue, setQueue] = useState<any[]>([]);
+
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/queues/lab');
+      if (res.ok) {
+        const data = await res.json();
+        setQueue(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
   const lang = t[language];
-  const selectedRequest = mockRequests.find((r) => r.id === selectedId) || null;
+  const selectedRequest = queue.find((r) => r.id === selectedId) || null;
 
   // ---- Reset form when switching patients ----
   const handleSelectRequest = (id: string) => {
@@ -299,35 +279,39 @@ export default function Laboratory({ language }: LaboratoryProps) {
   };
 
   // ---- Submit result with UUID ----
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedRequest) return;
 
-    const resultUUID = uuidv4();
     const resultPayload = {
-      resultId: resultUUID,
-      requestId: selectedRequest.id,
-      patientId: selectedRequest.patientId,
-      testType: selectedRequest.testType,
       result:
-        selectedRequest.testType === 'Full Blood Count'
+        selectedRequest.test_type === 'Full Blood Count'
           ? fbcValues
           : qualitativeResult,
       notes,
-      submittedAt: new Date().toISOString(),
     };
 
-    // Log payload for debugging; in production this would POST to a local DB
-    console.log('[Lab Result Submitted]', resultPayload);
+    try {
+      const res = await fetch(`http://localhost:3001/api/v1/labs/${selectedRequest.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resultPayload)
+      });
 
-    alert(
-      `${lang.successAlert}\n${lang.resultId}: ${resultUUID}\n${selectedRequest.patientName} — ${selectedRequest.testType}`
-    );
-
-    // Reset after submission
-    setSelectedId(null);
-    setQualitativeResult('');
-    setFbcValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '' });
-    setNotes('');
+      if (res.ok) {
+        alert(`${lang.successAlert}\n${selectedRequest.patient?.first_name || 'Patient'} — ${selectedRequest.test_type}`);
+        // Reset after submission
+        setSelectedId(null);
+        setQualitativeResult('');
+        setFbcValues({ wbc: '', rbc: '', hemoglobin: '', platelets: '' });
+        setNotes('');
+        fetchQueue();
+      } else {
+        alert("Failed to submit result");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit result");
+    }
   };
 
   const handleGenerateSlip = (labName: string) => {
@@ -340,7 +324,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
   // ---- Determine if the submit button should be disabled ----
   const isSubmitDisabled = (): boolean => {
     if (!selectedRequest) return true;
-    if (selectedRequest.testType === 'Full Blood Count') {
+    if (selectedRequest.test_type === 'Full Blood Count') {
       return !fbcValues.wbc || !fbcValues.rbc || !fbcValues.hemoglobin || !fbcValues.platelets;
     }
     return !qualitativeResult;
@@ -515,10 +499,11 @@ export default function Laboratory({ language }: LaboratoryProps) {
           </h3>
 
           <div className="space-y-2">
-            {mockRequests.map((req) => {
+            {queue.map((req) => {
               const isSelected = selectedId === req.id;
-              const isMalaria = req.testType === 'Malaria RDT';
+              const isMalaria = req.test_type === 'Malaria RDT';
               const isUrgent = req.priority === 'urgent';
+              const patientName = req.patient ? `${req.patient.first_name} ${req.patient.last_name}` : 'Unknown Patient';
 
               return (
                 <div
@@ -534,7 +519,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                 >
                   {/* Patient name + urgent pulse dot */}
                   <div className="flex justify-between items-start mb-1">
-                    <p className="text-[var(--text-primary)] font-bold">{req.patientName}</p>
+                    <p className="text-[var(--text-primary)] font-bold">{patientName}</p>
                     {isUrgent && (
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-1" />
                     )}
@@ -542,7 +527,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
                   {/* Test type + mandatory malaria badge */}
                   <div className="flex items-center space-x-2 mb-1">
-                    <p className="text-[var(--text-secondary)] text-sm">{getTestLabel(req.testType)}</p>
+                    <p className="text-[var(--text-secondary)] text-sm">{getTestLabel(req.test_type as TestType)}</p>
                     {isMalaria && (
                       <span className="inline-flex items-center space-x-1 bg-orange-500/15 border border-orange-500/30 text-orange-500 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
                         <AlertTriangle className="w-3 h-3" />
@@ -553,11 +538,14 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
                   {/* Ordered by + time */}
                   <p className="text-[var(--text-muted)] text-xs">
-                    {lang.orderedBy}: {req.orderedBy} • {req.orderedAt}
+                    {lang.orderedBy}: {req.ordered_by} • {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               );
             })}
+            {queue.length === 0 && (
+              <p className="text-[var(--text-muted)] text-sm text-center py-4">No lab requests</p>
+            )}
           </div>
         </div>
 
@@ -571,14 +559,14 @@ export default function Laboratory({ language }: LaboratoryProps) {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">
-                  {selectedRequest.patientName}
+                  {selectedRequest.patient ? `${selectedRequest.patient.first_name} ${selectedRequest.patient.last_name}` : 'Unknown Patient'}
                 </h3>
                 <p className="text-[var(--text-secondary)]">
-                  ID: {selectedRequest.patientId} • {getTestLabel(selectedRequest.testType)}
+                  ID: {selectedRequest.patient?.phc_id} • {getTestLabel(selectedRequest.test_type as TestType)}
                 </p>
               </div>
               {/* Mandatory testing badge (header-level, malaria only) */}
-              {selectedRequest.testType === 'Malaria RDT' && (
+              {selectedRequest.test_type === 'Malaria RDT' && (
                 <div className="flex items-center space-x-1 bg-orange-500/15 border border-orange-500/30 text-orange-500 text-xs font-bold px-3 py-1.5 rounded-md">
                   <AlertTriangle className="w-4 h-4" />
                   <span>{lang.mandatoryBadge}</span>
@@ -612,7 +600,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
               <>
                 {/* Dynamic result input based on test type */}
                 <div className="bg-[var(--queue-bg)] border border-[var(--border-default)] rounded-lg p-5">
-                  {renderResultInput(selectedRequest.testType)}
+                  {renderResultInput(selectedRequest.test_type as TestType)}
                 </div>
 
                 {/* Notes field */}

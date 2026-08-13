@@ -309,34 +309,7 @@ function App() {
         </div>
         
         <div className="flex items-center gap-2">
-          {/* GSM Gateway status badge */}
-          <button 
-            onClick={() => setIsSmsOpen(true)}
-            className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 rounded-md text-xs font-semibold border border-emerald-500/25 transition cursor-pointer"
-            title="Open SMS & WhatsApp Sandbox"
-          >
-            <Radio className="w-3.5 h-3.5 animate-pulse" />
-            <span className="hidden md:inline">GSM Active</span>
-          </button>
 
-          {/* Battery / Solar Panel status badge */}
-          <button 
-            onClick={() => setIsBatteryModalOpen(true)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border transition cursor-pointer ${
-              theme === 'solar-save'
-                ? 'text-blue-500 bg-blue-500/10 border-blue-500/25 animate-pulse'
-                : 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/25'
-            }`}
-            title="Local Solar Grid Dashboard"
-          >
-            <Zap className="w-3.5 h-3.5 text-amber-500" />
-            <span>82%</span>
-          </button>
-
-          <div className="flex items-center gap-1.5 text-[var(--danger)] bg-[var(--danger-light)] px-2.5 py-1 rounded-md text-xs font-medium">
-            <CloudOff className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t[language].syncPending}</span>
-          </div>
 
           <button
             onClick={toggleTheme}

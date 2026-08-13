@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, Stethoscope, AlertTriangle, Save, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,7 +8,8 @@ interface TriageProps {
 }
 
 export default function Triage({ language, theme }: TriageProps) {
-  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
+  const [queue, setQueue] = useState<any[]>([]);
   const [isPinLocked, setIsPinLocked] = useState(true);
   const [pin, setPin] = useState('');
 
@@ -18,6 +19,24 @@ export default function Triage({ language, theme }: TriageProps) {
   const [temp, setTemp] = useState('');
   const [weight, setWeight] = useState('');
   const [spo2, setSpo2] = useState('');
+
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/queues/triage');
+      if (res.ok) {
+        const data = await res.json();
+        setQueue(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!isPinLocked) {
+      fetchQueue();
+    }
+  }, [isPinLocked]);
 
   const t = {
     EN: {
@@ -110,13 +129,44 @@ export default function Triage({ language, theme }: TriageProps) {
     if (pin.length >= 4) setIsPinLocked(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isInvalidTemp) { alert(t[language].validationErr); return; }
-    const vitalId = uuidv4();
-    alert(`Vitals Saved Offline! (Vital UUID: ${vitalId})\nPatient routed to Consultation Queue.`);
-    setSelectedPatient(null);
-    setBpSystolic(''); setBpDiastolic(''); setTemp(''); setWeight(''); setSpo2('');
+    if (!selectedPatient) return;
+
+    const payload = {
+      patient_id: selectedPatient.id,
+      type: "Triage",
+      provider_id: "USR-0092",
+      vitals: {
+        bp_systolic: parseInt(bpSystolic),
+        bp_diastolic: parseInt(bpDiastolic),
+        temp: parseFloat(temp),
+        weight: parseFloat(weight),
+        spo2: parseInt(spo2)
+      },
+      status: "completed"
+    };
+
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/encounters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert("Vitals Saved successfully!\nPatient routed to Consultation Queue.");
+        setSelectedPatient(null);
+        setBpSystolic(''); setBpDiastolic(''); setTemp(''); setWeight(''); setSpo2('');
+        fetchQueue();
+      } else {
+        alert("Failed to save vitals!");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error saving vitals.");
+    }
   };
 
   /** Shared input class using CSS variables */
@@ -168,19 +218,22 @@ export default function Triage({ language, theme }: TriageProps) {
         <div className="w-full md:w-1/3 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
           <h3 className="text-[var(--text-secondary)] font-semibold mb-4 pl-2">{t[language].queue}</h3>
           <div className="space-y-2">
-            {[1, 2, 3, 4].map((i) => (
+            {queue.map((p) => (
               <div 
-                key={i} onClick={() => setSelectedPatient(`Patient ${i}`)}
+                key={p.id} onClick={() => setSelectedPatient(p)}
                 className={`p-4 rounded-lg cursor-pointer transition ${
-                  selectedPatient === `Patient ${i}` 
+                  selectedPatient?.id === p.id 
                     ? 'bg-[var(--primary)]/10 border-[var(--primary)]/40 border' 
                     : 'bg-[var(--queue-item-bg)] border-transparent border hover:bg-[var(--queue-item-hover)]'
                 }`}
               >
-                <p className="text-[var(--text-primary)] font-semibold">Fatima Abubakar</p>
-                <p className="text-[var(--text-muted)] text-sm">Arrived 10 mins ago</p>
+                <p className="text-[var(--text-primary)] font-semibold">{p.first_name} {p.last_name}</p>
+                <p className="text-[var(--text-muted)] text-sm">{p.phc_id} • {p.gender}</p>
               </div>
             ))}
+            {queue.length === 0 && (
+              <p className="text-[var(--text-muted)] text-sm text-center py-4">No patients waiting</p>
+            )}
           </div>
         </div>
 
@@ -199,7 +252,7 @@ export default function Triage({ language, theme }: TriageProps) {
 
             <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-6 flex items-center space-x-2">
               <span>{t[language].patient}:</span>
-              <span className="text-[var(--primary)]">Fatima Abubakar</span>
+              <span className="text-[var(--primary)]">{selectedPatient.first_name} {selectedPatient.last_name}</span>
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-6">

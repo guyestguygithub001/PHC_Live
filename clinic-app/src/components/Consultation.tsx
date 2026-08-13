@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Stethoscope, FileText, FlaskConical, Pill, Activity, 
   Search, History, User, CheckCircle2, ChevronRight, X, Mic, Volume2
@@ -13,7 +13,8 @@ interface ConsultationProps {
 }
 
 export default function Consultation({ language, theme }: ConsultationProps) {
-  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
+  const [queue, setQueue] = useState<any[]>([]);
   
   // ICD-11 Engine State
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<ICD11Code | null>(null);
@@ -32,6 +33,31 @@ export default function Consultation({ language, theme }: ConsultationProps) {
   const [clinicalNotes, setClinicalNotes] = useState('');
   const [isDictating, setIsDictating] = useState(false);
   const [dictationLang, setDictationLang] = useState<'EN' | 'PI' | 'HA'>('EN');
+
+  // Action Center States
+  const [orderLab, setOrderLab] = useState(false);
+  const [labTestType, setLabTestType] = useState('Malaria RDT');
+  
+  const [orderPrescription, setOrderPrescription] = useState(false);
+  const [prescriptionDrug, setPrescriptionDrug] = useState('Artemether/Lumefantrine 20/120mg');
+  const [dosage, setDosage] = useState('1 tab twice daily for 3 days');
+  const [quantity, setQuantity] = useState(1);
+
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/queues/consultation');
+      if (res.ok) {
+        const data = await res.json();
+        setQueue(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
 
   // Fuse.js setup — highly typo-tolerant offline fuzzy search
   const fuse = useMemo(() => new Fuse(primaryCareICD11, {
@@ -142,6 +168,67 @@ export default function Consultation({ language, theme }: ConsultationProps) {
     }
   };
 
+  const handleSubmit = async () => {
+    if (!selectedPatient) return;
+    try {
+      // 1. Submit Encounter
+      const encRes = await fetch('http://localhost:3001/api/v1/encounters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patient_id: selectedPatient.id,
+          provider_id: "CHO: Dr. Ibrahim",
+          notes: clinicalNotes,
+          icd11_code: selectedDiagnosis?.code || "",
+          icd11_title: selectedDiagnosis?.title || ""
+        })
+      });
+      const encData = await encRes.json();
+      const encounterId = encData.id || `enc_${Date.now()}`;
+
+      // 2. Submit Lab Order if toggled
+      if (orderLab) {
+        await fetch('http://localhost:3001/api/v1/labs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            encounter_id: encounterId,
+            test_type: labTestType,
+            status: "pending",
+            ordered_by: "CHO: Dr. Ibrahim"
+          })
+        });
+      }
+
+      // 3. Submit Prescription if toggled
+      if (orderPrescription) {
+        await fetch('http://localhost:3001/api/v1/prescriptions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            encounter_id: encounterId,
+            drug_name: prescriptionDrug,
+            dosage: dosage,
+            quantity: quantity,
+            status: "pending",
+            prescribed_by: "CHO: Dr. Ibrahim"
+          })
+        });
+      }
+
+      // Complete & Reset
+      setSelectedPatient(null);
+      setClinicalNotes("");
+      setSelectedDiagnosis(null);
+      setOrderLab(false);
+      setOrderPrescription(false);
+      fetchQueue();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit consultation.");
+    }
+  };
+
   return (
     <div className="w-full h-full flex flex-col space-y-6">
       {/* Header */}
@@ -162,36 +249,38 @@ export default function Consultation({ language, theme }: ConsultationProps) {
         <div className="w-full md:w-1/4 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4 overflow-y-auto" style={{ boxShadow: 'var(--shadow-card)' }}>
           <h3 className="text-[var(--text-secondary)] font-semibold mb-4 pl-2">{t[language].queue}</h3>
           <div className="space-y-2">
-            {/* Urgent Patient — always red regardless of theme */}
-            <div 
-              onClick={() => setSelectedPatient('Patient 1')}
-              className={`p-4 rounded-lg cursor-pointer transition ${
-                selectedPatient === 'Patient 1' 
-                  ? 'bg-red-500/20 border-red-500/50 border shadow-sm' 
-                  : 'bg-red-500/10 border-red-500/20 border hover:bg-red-500/20'
-              }`}
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[var(--text-primary)] font-bold">Fatima Abubakar</p>
-                  <p className="text-red-500 text-xs font-bold mt-1">URGENT • BP 180/110</p>
-                </div>
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              </div>
-            </div>
+            {queue.map((p) => {
+              const bpSystolic = p.vitals?.bp_systolic || 0;
+              const bpDiastolic = p.vitals?.bp_diastolic || 0;
+              const isUrgent = bpSystolic >= 180 || bpDiastolic >= 110 || (p.vitals?.temp && (p.vitals.temp > 40 || p.vitals.temp < 35));
 
-            {/* Normal Patient */}
-            <div 
-              onClick={() => setSelectedPatient('Patient 2')}
-              className={`p-4 rounded-lg cursor-pointer transition ${
-                selectedPatient === 'Patient 2' 
-                  ? 'bg-[var(--primary)]/10 border-[var(--primary)]/40 border' 
-                  : 'bg-[var(--queue-item-bg)] border-transparent border hover:bg-[var(--queue-item-hover)]'
-              }`}
-            >
-              <p className="text-[var(--text-primary)] font-semibold">Musa Ibrahim</p>
-              <p className="text-[var(--text-muted)] text-sm">Normal • Temp 37.2°C</p>
-            </div>
+              return (
+                <div 
+                  key={p.id}
+                  onClick={() => setSelectedPatient(p)}
+                  className={`p-4 rounded-lg cursor-pointer transition ${
+                    selectedPatient?.id === p.id 
+                      ? (isUrgent ? 'bg-red-500/20 border-red-500/50 border shadow-sm' : 'bg-[var(--primary)]/10 border-[var(--primary)]/40 border')
+                      : (isUrgent ? 'bg-red-500/10 border-red-500/20 border hover:bg-red-500/20' : 'bg-[var(--queue-item-bg)] border-transparent border hover:bg-[var(--queue-item-hover)]')
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-[var(--text-primary)] font-bold">{p.first_name} {p.last_name}</p>
+                      {isUrgent ? (
+                        <p className="text-red-500 text-xs font-bold mt-1">URGENT • BP {bpSystolic}/{bpDiastolic}</p>
+                      ) : (
+                        <p className="text-[var(--text-muted)] text-sm">Normal • Temp {p.vitals?.temp || '--'}°C</p>
+                      )}
+                    </div>
+                    {isUrgent && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+                  </div>
+                </div>
+              );
+            })}
+            {queue.length === 0 && (
+              <p className="text-[var(--text-muted)] text-sm text-center py-4">No patients waiting</p>
+            )}
           </div>
         </div>
 
@@ -203,17 +292,21 @@ export default function Consultation({ language, theme }: ConsultationProps) {
             <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-4 rounded-lg shrink-0" style={{ boxShadow: 'var(--shadow-card)' }}>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-between items-start sm:items-center">
                 <div>
-                  <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">Fatima Abubakar</h3>
-                  <p className="text-[var(--text-secondary)]">ID: PHC-KAN-0824 • 42 Years • Female</p>
+                  <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-1">{selectedPatient.first_name} {selectedPatient.last_name}</h3>
+                  <p className="text-[var(--text-secondary)]">ID: {selectedPatient.phc_id} • {selectedPatient.date_of_birth} • {selectedPatient.gender}</p>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <div className="bg-red-500/15 border border-red-500/40 rounded-lg px-4 py-2 text-center">
-                    <p className="text-red-400 text-xs">Blood Pressure</p>
-                    <p className="text-red-500 font-bold text-lg">180/110</p>
+                  <div className={`${(selectedPatient.vitals?.bp_systolic >= 180 || selectedPatient.vitals?.bp_diastolic >= 110) ? 'bg-red-500/15 border border-red-500/40' : 'bg-[var(--input-bg)] border border-[var(--border-default)]'} rounded-lg px-4 py-2 text-center`}>
+                    <p className={`${(selectedPatient.vitals?.bp_systolic >= 180 || selectedPatient.vitals?.bp_diastolic >= 110) ? 'text-red-400' : 'text-[var(--text-muted)]'} text-xs`}>Blood Pressure</p>
+                    <p className={`${(selectedPatient.vitals?.bp_systolic >= 180 || selectedPatient.vitals?.bp_diastolic >= 110) ? 'text-red-500' : 'text-[var(--text-primary)]'} font-bold text-lg`}>
+                      {selectedPatient.vitals?.bp_systolic || '--'}/{selectedPatient.vitals?.bp_diastolic || '--'}
+                    </p>
                   </div>
-                  <div className="bg-[var(--input-bg)] border border-[var(--border-default)] rounded-lg px-4 py-2 text-center">
-                    <p className="text-[var(--text-muted)] text-xs">Temperature</p>
-                    <p className="text-[var(--text-primary)] font-bold text-lg">37.1°C</p>
+                  <div className={`${(selectedPatient.vitals?.temp > 40 || selectedPatient.vitals?.temp < 35) ? 'bg-red-500/15 border border-red-500/40' : 'bg-[var(--input-bg)] border border-[var(--border-default)]'} rounded-lg px-4 py-2 text-center`}>
+                    <p className={`${(selectedPatient.vitals?.temp > 40 || selectedPatient.vitals?.temp < 35) ? 'text-red-400' : 'text-[var(--text-muted)]'} text-xs`}>Temperature</p>
+                    <p className={`${(selectedPatient.vitals?.temp > 40 || selectedPatient.vitals?.temp < 35) ? 'text-red-500' : 'text-[var(--text-primary)]'} font-bold text-lg`}>
+                      {selectedPatient.vitals?.temp || '--'}°C
+                    </p>
                   </div>
                 </div>
               </div>
@@ -418,11 +511,17 @@ export default function Consultation({ language, theme }: ConsultationProps) {
 
                 {/* Action Center */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0">
-                  <button className="bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/25 text-indigo-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition">
+                  <button 
+                    onClick={() => setOrderLab(!orderLab)}
+                    className={`${orderLab ? 'bg-indigo-500/25 border-indigo-500/50' : 'bg-indigo-500/15 border-indigo-500/25'} hover:bg-indigo-500/25 border text-indigo-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition`}
+                  >
                     <FlaskConical className="w-6 h-6" />
                     <span className="text-sm">{t[language].actionLab}</span>
                   </button>
-                  <button className="bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/25 text-purple-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition">
+                  <button 
+                    onClick={() => setOrderPrescription(!orderPrescription)}
+                    className={`${orderPrescription ? 'bg-purple-500/25 border-purple-500/50' : 'bg-purple-500/15 border-purple-500/25'} hover:bg-purple-500/25 border text-purple-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition`}
+                  >
                     <Pill className="w-6 h-6" />
                     <span className="text-sm">{t[language].actionDrug}</span>
                   </button>
@@ -432,7 +531,33 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                   </button>
                 </div>
 
-                <button className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium py-2.5 rounded-md flex justify-center items-center space-x-2 transition shadow-sm shrink-0">
+                {orderLab && (
+                  <div className="bg-[var(--input-bg)] border border-[var(--border-default)] p-3 rounded-md mt-2 flex flex-col gap-2">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">Order Laboratory Test</p>
+                    <select value={labTestType} onChange={(e) => setLabTestType(e.target.value)} className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] p-2 rounded text-[var(--text-primary)] text-sm outline-none focus:border-[var(--primary)]">
+                      <option>Malaria RDT</option>
+                      <option>FBC (Full Blood Count)</option>
+                      <option>Widal Test</option>
+                      <option>Urinalysis</option>
+                    </select>
+                  </div>
+                )}
+                
+                {orderPrescription && (
+                  <div className="bg-[var(--input-bg)] border border-[var(--border-default)] p-3 rounded-md mt-2 flex flex-col gap-2">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">Write Prescription</p>
+                    <input type="text" value={prescriptionDrug} onChange={(e) => setPrescriptionDrug(e.target.value)} className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] p-2 rounded text-[var(--text-primary)] text-sm outline-none focus:border-[var(--primary)]" placeholder="Drug name (e.g. Paracetamol 500mg)" />
+                    <div className="flex gap-2">
+                      <input type="text" value={dosage} onChange={(e) => setDosage(e.target.value)} className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] p-2 rounded text-[var(--text-primary)] text-sm outline-none focus:border-[var(--primary)]" placeholder="Dosage" />
+                      <input type="number" value={quantity} onChange={(e) => setQuantity(parseInt(e.target.value) || 1)} className="w-20 bg-[var(--card-bg)] border border-[var(--border-default)] p-2 rounded text-[var(--text-primary)] text-sm outline-none focus:border-[var(--primary)]" placeholder="Qty" />
+                    </div>
+                  </div>
+                )}
+
+                <button 
+                  onClick={handleSubmit}
+                  className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium py-2.5 rounded-md flex justify-center items-center space-x-2 transition shadow-sm shrink-0 mt-4"
+                >
                   <CheckCircle2 className="w-5 h-5" />
                   <span>{t[language].complete}</span>
                 </button>

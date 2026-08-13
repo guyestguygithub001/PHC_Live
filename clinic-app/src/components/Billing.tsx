@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CreditCard, Search, FileText, CheckCircle, Shield } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -80,17 +80,50 @@ export default function Billing({ language, theme }: BillingProps) {
     }
   };
 
-  const mockPatients = [
-    { id: 'PHC-KAN-0045', name: 'Amina Yusuf', pendingAmount: 1500 },
-    { id: 'PHC-KAN-0046', name: 'Ibrahim Musa', pendingAmount: 500 }
-  ];
+  const [queue, setQueue] = useState<any[]>([]);
 
-  const handlePayment = (e: React.FormEvent) => {
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/queues/billing');
+      if (res.ok) {
+        const data = await res.json();
+        setQueue(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
+
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`${t[language].paymentSuccess}!\nReceipt ID: ${uuidv4().split('-')[0].toUpperCase()}`);
-    setSelectedPatient(null);
-    setFee('');
-    setInsuranceClaim('');
+    if (!selectedPatient) return;
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/encounters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patient_id: selectedPatient.id,
+          type: 'Payment',
+          clinical_notes: `Method: ${paymentMethod}, Service: ${serviceType}, Amount: ${fee || selectedPatient.pendingAmount}, Ref: ${insuranceClaim}`
+        })
+      });
+      if (res.ok) {
+        alert(`${t[language].paymentSuccess}!\nReceipt ID: ${uuidv4().split('-')[0].toUpperCase()}`);
+        setSelectedPatient(null);
+        setFee('');
+        setInsuranceClaim('');
+        fetchQueue();
+      } else {
+        alert("Payment failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Payment failed");
+    }
   };
 
   const inputClass = "w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition";
@@ -120,7 +153,7 @@ export default function Billing({ language, theme }: BillingProps) {
           </div>
           
           <div className="space-y-3">
-            {mockPatients.map((p) => (
+            {queue.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.phc_id.toLowerCase().includes(searchQuery.toLowerCase())).map((p) => (
               <div 
                 key={p.id} 
                 onClick={() => setSelectedPatient(p)}
@@ -132,11 +165,14 @@ export default function Billing({ language, theme }: BillingProps) {
               >
                 <p className="font-medium text-[var(--text-primary)]">{p.name}</p>
                 <div className="flex justify-between mt-1 text-sm text-[var(--text-muted)]">
-                  <span>{p.id}</span>
+                  <span>{p.phc_id}</span>
                   <span className="text-red-400">₦{p.pendingAmount}</span>
                 </div>
               </div>
             ))}
+            {queue.length === 0 && (
+              <div className="text-center text-[var(--text-muted)] mt-10">No pending bills</div>
+            )}
           </div>
         </div>
 
@@ -145,7 +181,7 @@ export default function Billing({ language, theme }: BillingProps) {
           {selectedPatient ? (
             <div className="max-w-md w-full mx-auto">
               <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-5 text-center">
-                {selectedPatient.name} <span className="text-[var(--text-muted)] font-normal ml-2">({selectedPatient.id})</span>
+                {selectedPatient.name} <span className="text-[var(--text-muted)] font-normal ml-2">({selectedPatient.phc_id})</span>
               </h3>
               <form onSubmit={handlePayment} className="space-y-4">
                 <div>

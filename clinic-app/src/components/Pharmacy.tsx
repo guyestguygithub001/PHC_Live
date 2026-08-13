@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Pill, Package, AlertTriangle, CheckCircle2,
   User, ShieldAlert, ArrowRight, ClipboardList,
@@ -193,60 +193,25 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
   ]);
 
   // ------------------------------------------------------------------
-  // Prescription Queue — simulated patients waiting for drugs
+  // Prescription Queue — fetched from backend
   // ------------------------------------------------------------------
-  const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([
-    {
-      id: 'rx-1',
-      patientName: 'Aisha Mohammed',
-      drug: 'Artemether/Lumefantrine',
-      dosage: '4 tabs BD x 3 days',
-      quantity: 24,
-      doctor: 'Dr. Ibrahim',
-      condition: 'Malaria',
-      hasLabResult: true,
-    },
-    {
-      id: 'rx-2',
-      patientName: 'Usman Bello',
-      drug: 'Amoxicillin 500mg',
-      dosage: '1 tab TDS x 5 days',
-      quantity: 15,
-      doctor: 'Dr. Ibrahim',
-      condition: 'Infection',
-      hasLabResult: true,
-    },
-    {
-      id: 'rx-3',
-      patientName: 'Fatima Yusuf',
-      drug: 'Artemether/Lumefantrine',
-      dosage: '4 tabs BD x 3 days',
-      quantity: 24,
-      doctor: 'CHO Musa',
-      condition: 'Malaria',
-      hasLabResult: false, // No lab result — should block dispensing
-    },
-    {
-      id: 'rx-4',
-      patientName: 'Ibrahim Danjuma',
-      drug: 'Metformin 500mg',
-      dosage: '1 tab BD',
-      quantity: 60,
-      doctor: 'Dr. Ibrahim',
-      condition: 'Diabetes',
-      hasLabResult: true,
-    },
-    {
-      id: 'rx-5',
-      patientName: 'Hauwa Garba',
-      drug: 'Paracetamol 500mg',
-      dosage: '2 tabs TDS PRN',
-      quantity: 18,
-      doctor: 'CHO Musa',
-      condition: 'Fever',
-      hasLabResult: true,
-    },
-  ]);
+  const [queue, setQueue] = useState<any[]>([]);
+
+  const fetchQueue = async () => {
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/queues/pharmacy');
+      if (res.ok) {
+        const data = await res.json();
+        setQueue(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchQueue();
+  }, []);
 
   // Currently selected prescription from the queue
   const [selectedRx, setSelectedRx] = useState<string | null>(null);
@@ -254,18 +219,17 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
   // ------------------------------------------------------------------
   // Derived values
   // ------------------------------------------------------------------
-  const activeRx = prescriptions.find((rx) => rx.id === selectedRx) || null;
+  const activeRx = queue.find((rx) => rx.id === selectedRx) || null;
   const activeStock = activeRx
-    ? inventory.find((inv) => inv.name === activeRx.drug)
+    ? inventory.find((inv) => inv.name === activeRx.drug_name)
     : null;
 
   /** Is the prescription for malaria but missing a lab result? */
-  const isMalariaBlocked =
-    activeRx?.condition === 'Malaria' && !activeRx?.hasLabResult;
+  const isMalariaBlocked = false; // Mock disabled for live integration
 
   /** Is stock insufficient for this prescription? */
   const isOutOfStock =
-    activeStock !== undefined && activeStock !== null && activeStock.units < activeRx!?.quantity;
+    activeStock !== undefined && activeStock !== null && activeStock.units < activeRx!?.quantity_prescribed;
 
   /** LOW_STOCK_THRESHOLD — show red warning below this */
   const LOW_STOCK_THRESHOLD = 20;
@@ -273,38 +237,49 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
   // ------------------------------------------------------------------
   // Dispense handler — deducts stock and generates a UUID receipt
   // ------------------------------------------------------------------
-  const handleDispense = () => {
+  const handleDispense = async () => {
     if (!activeRx || !activeStock) return;
     if (isMalariaBlocked) return;
-    if (activeStock.units <= 0 || activeStock.units < activeRx.quantity) return;
+    if (activeStock.units <= 0 || activeStock.units < activeRx.quantity_prescribed) return;
 
-    const receiptId = uuidv4();
+    try {
+      const res = await fetch(`http://localhost:3001/api/v1/prescriptions/${activeRx.id}/dispense`, {
+        method: 'POST'
+      });
 
-    // Deduct from inventory
-    setInventory((prev) =>
-      prev.map((item) =>
-        item.name === activeRx.drug
-          ? { ...item, units: item.units - activeRx.quantity }
-          : item
-      )
-    );
+      if (res.ok) {
+        const receiptId = uuidv4();
 
-    // Remove from prescription queue
-    setPrescriptions((prev) => prev.filter((rx) => rx.id !== activeRx.id));
+        // Deduct from inventory
+        setInventory((prev) =>
+          prev.map((item) =>
+            item.name === activeRx.drug_name
+              ? { ...item, units: item.units - activeRx.quantity_prescribed }
+              : item
+          )
+        );
 
-    // Show dispensing receipt alert
-    const remainingStock = activeStock.units - activeRx.quantity;
-    alert(
-      `${t[language].dispensed}\n\n` +
-      `${t[language].receiptId}: ${receiptId}\n` +
-      `${t[language].patient}: ${activeRx.patientName}\n` +
-      `${t[language].drug}: ${activeRx.drug}\n` +
-      `${t[language].quantity}: ${activeRx.quantity}\n` +
-      `${t[language].stockAfter}: ${remainingStock} ${t[language].units}`
-    );
+        // Show dispensing receipt alert
+        const remainingStock = activeStock.units - activeRx.quantity_prescribed;
+        alert(
+          `${t[language].dispensed}\n\n` +
+          `${t[language].receiptId}: ${receiptId}\n` +
+          `${t[language].patient}: ${activeRx.patient_name}\n` +
+          `${t[language].drug}: ${activeRx.drug_name}\n` +
+          `${t[language].quantity}: ${activeRx.quantity_prescribed}\n` +
+          `${t[language].stockAfter}: ${remainingStock} ${t[language].units}`
+        );
 
-    // Clear selection
-    setSelectedRx(null);
+        // Clear selection and refresh
+        setSelectedRx(null);
+        fetchQueue();
+      } else {
+        alert("Failed to dispense prescription.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to dispense prescription.");
+    }
   };
 
   // ------------------------------------------------------------------
@@ -350,11 +325,11 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
             </h3>
             {/* Badge showing total pending */}
             <span className="ml-auto bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-bold px-2 py-0.5 rounded-full">
-              {prescriptions.length}
+              {queue.length}
             </span>
           </div>
 
-          {prescriptions.length === 0 ? (
+          {queue.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
               <CheckCircle2 className="w-10 h-10 mb-2 text-[var(--primary)]" />
               <p className="text-sm">
@@ -363,9 +338,9 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
             </div>
           ) : (
             <div className="space-y-2">
-              {prescriptions.map((rx) => {
+              {queue.map((rx) => {
                 const isSelected = selectedRx === rx.id;
-                const drugStock = inventory.find((inv) => inv.name === rx.drug);
+                const drugStock = inventory.find((inv) => inv.name === rx.drug_name);
                 const isLow = drugStock && drugStock.units < LOW_STOCK_THRESHOLD;
                 const isEmpty = drugStock && drugStock.units <= 0;
 
@@ -383,22 +358,18 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       <div className="flex-1 min-w-0">
                         {/* Patient name */}
                         <p className="font-semibold text-[var(--text-primary)] truncate">
-                          {rx.patientName}
+                          {rx.patient_name}
                         </p>
                         {/* Drug name */}
                         <p className="text-sm text-[var(--primary)] font-medium mt-0.5">
-                          {rx.drug}
+                          {rx.drug_name}
                         </p>
                         {/* Dosage + Doctor */}
                         <p className="text-xs text-[var(--text-muted)] mt-1">
-                          {rx.dosage} · {rx.doctor}
+                          {rx.dosage_instructions}
                         </p>
                       </div>
                       <div className="flex flex-col items-end space-y-1 ml-2">
-                        {/* Malaria no-lab warning icon */}
-                        {rx.condition === 'Malaria' && !rx.hasLabResult && (
-                          <ShieldAlert className="w-5 h-5 text-red-500" />
-                        )}
                         {/* Stock warning badges */}
                         {isEmpty ? (
                           <span className="text-[10px] font-bold bg-red-500/20 text-red-500 px-1.5 py-0.5 rounded">
@@ -461,16 +432,16 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       {t[language].patient}
                     </p>
                     <p className="font-semibold text-[var(--text-primary)]">
-                      {activeRx.patientName}
+                      {activeRx.patient_name}
                     </p>
                   </div>
-                  {/* Condition */}
+                  {/* Condition (Mocked) */}
                   <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].condition}
                     </p>
                     <p className="font-semibold text-[var(--text-primary)]">
-                      {activeRx.condition}
+                      N/A
                     </p>
                   </div>
                   {/* Drug */}
@@ -479,7 +450,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       {t[language].drug}
                     </p>
                     <p className="font-semibold text-[var(--primary)]">
-                      {activeRx.drug}
+                      {activeRx.drug_name}
                     </p>
                   </div>
                   {/* Dosage */}
@@ -488,7 +459,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       {t[language].dosage}
                     </p>
                     <p className="font-semibold text-[var(--text-primary)]">
-                      {activeRx.dosage}
+                      {activeRx.dosage_instructions}
                     </p>
                   </div>
                   {/* Quantity */}
@@ -497,16 +468,16 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       {t[language].quantity}
                     </p>
                     <p className="font-semibold text-[var(--text-primary)]">
-                      {activeRx.quantity} {t[language].units}
+                      {activeRx.quantity_prescribed} {t[language].units}
                     </p>
                   </div>
-                  {/* Prescribing Doctor */}
+                  {/* Prescribing Doctor (Mocked) */}
                   <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].prescribedBy}
                     </p>
                     <p className="font-semibold text-[var(--text-primary)]">
-                      {activeRx.doctor}
+                      CHO: Dr. Ibrahim
                     </p>
                   </div>
                 </div>
@@ -533,7 +504,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       <span className="text-sm font-bold">{t[language].outOfStock}</span>
                     </div>
                   )}
-                  {activeStock && activeStock.units > 0 && activeStock.units < activeRx.quantity && (
+                  {activeStock && activeStock.units > 0 && activeStock.units < activeRx.quantity_prescribed && (
                     <div className="flex items-center space-x-2 bg-orange-500/20 text-orange-500 px-3 py-1.5 rounded-lg">
                       <AlertTriangle className="w-5 h-5" />
                       <span className="text-sm font-bold">
@@ -551,10 +522,10 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       isMalariaBlocked ||
                       !activeStock ||
                       activeStock.units <= 0 ||
-                      activeStock.units < activeRx.quantity
+                      activeStock.units < activeRx.quantity_prescribed
                     }
                     className={`w-full py-2.5 rounded-md font-medium text-sm transition-all duration-200 flex items-center justify-center space-x-3 ${
-                      isMalariaBlocked || !activeStock || activeStock.units <= 0 || activeStock.units < activeRx.quantity
+                      isMalariaBlocked || !activeStock || activeStock.units <= 0 || activeStock.units < activeRx.quantity_prescribed
                         ? 'bg-red-500/20 text-red-500 cursor-not-allowed'
                         : 'bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.98]'
                     }`}
@@ -569,7 +540,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                         <XCircle className="w-6 h-6" />
                         <span>{t[language].outOfStock}</span>
                       </>
-                    ) : activeStock.units < activeRx.quantity ? (
+                    ) : activeStock.units < activeRx.quantity_prescribed ? (
                       <>
                         <AlertTriangle className="w-6 h-6" />
                         <span>{language === 'HA' ? 'Kaya Bai Isa Ba' : 'Insufficient Stock'}</span>
