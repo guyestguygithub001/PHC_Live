@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Languages, CalendarClock, UserPlus, Stethoscope, CloudOff, FileText, Sun, Moon, FlaskConical, Pill, Send, Baby, BedDouble, CreditCard, Menu, X, Zap, Battery, MessageSquareCode, Radio } from 'lucide-react';
+import { Languages, CalendarClock, UserPlus, Stethoscope,  FileText, Sun, Moon, FlaskConical, Pill, Send, Baby, BedDouble, CreditCard, Menu, X, Zap, Battery, MessageSquareCode, Radio } from 'lucide-react';
 import FrontDesk from './components/FrontDesk';
 import Triage from './components/Triage';
 import Consultation from './components/Consultation';

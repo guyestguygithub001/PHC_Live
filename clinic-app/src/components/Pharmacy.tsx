@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Pill, Package, AlertTriangle, CheckCircle2,
   User, ShieldAlert, ArrowRight, ClipboardList,
-  BarChart3, XCircle
+  BarChart3, XCircle, History, FileText, FlaskConical
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -196,6 +196,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
   // Prescription Queue — fetched from backend
   // ------------------------------------------------------------------
   const [queue, setQueue] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
 
   const fetchQueue = async () => {
     try {
@@ -209,12 +210,33 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
     }
   };
 
+  const fetchHistory = async (patientId: string) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`);
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchQueue();
   }, []);
 
   // Currently selected prescription from the queue
   const [selectedRx, setSelectedRx] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedRx) {
+      const activeRx = queue.find((rx) => rx.id === selectedRx);
+      if (activeRx) fetchHistory(activeRx.patient_id);
+    } else {
+      setHistory([]);
+    }
+  }, [selectedRx, queue]);
 
   // ------------------------------------------------------------------
   // Derived values
@@ -224,12 +246,16 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
     ? inventory.find((inv) => inv.name === activeRx.drug_name)
     : null;
 
+  // Extract condition and doctor from history
+  const recentEncounter = history.find(h => h.type === 'encounter');
+  const condition = recentEncounter ? recentEncounter.description : 'Unknown';
+  
   /** Is the prescription for malaria but missing a lab result? */
-  const isMalariaBlocked = false; // Mock disabled for live integration
+  const hasMalariaLab = history.some(h => h.type === 'lab' && h.description.toLowerCase().includes('malaria') && h.description.toLowerCase().includes('positive'));
+  const isMalariaBlocked = activeRx?.drug_name.toLowerCase().includes('artemether') ? !hasMalariaLab : false;
 
   /** Is stock insufficient for this prescription? */
-  const isOutOfStock =
-    activeStock !== undefined && activeStock !== null && activeStock.units < activeRx!?.quantity_prescribed;
+  // Removed unused isOutOfStock
 
   /** LOW_STOCK_THRESHOLD — show red warning below this */
   const LOW_STOCK_THRESHOLD = 20;
@@ -405,8 +431,45 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                 <p className="text-sm">{t[language].selectPatient}</p>
               </div>
             ) : (
-              <div className="flex flex-col h-full">
-                {/* Panel header */}
+              <div className="flex flex-col md:flex-row gap-6 h-full">
+                
+                {/* Historical Timeline (Same style as Consultation) */}
+                <div className="w-full md:w-1/3 bg-[var(--timeline-bg)] border border-[var(--timeline-border)] rounded-lg p-4 overflow-y-auto shadow-inner relative text-slate-800 shrink-0">
+                  <h3 className="font-bold text-slate-600 mb-6 flex items-center space-x-2 border-b border-slate-200 pb-4">
+                    <History className="w-5 h-5" />
+                    <span>{language === 'HA' ? 'Tarihin Jiyya' : language === 'PI' ? 'Patient History' : 'Patient History'}</span>
+                  </h3>
+
+                  <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                    {history.length === 0 ? (
+                      <div className="text-sm text-slate-500 text-center py-4">No previous history found.</div>
+                    ) : (
+                      history.map((item, idx) => {
+                        let Icon = FileText;
+                        if (item.type === 'lab') Icon = FlaskConical;
+                        if (item.type === 'dispensary') Icon = Pill;
+
+                        return (
+                          <div key={idx} className="relative flex items-center justify-between group">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                              <div className="flex items-center justify-between space-x-2 mb-1">
+                                <div className="font-bold text-slate-700 text-sm">{item.title}</div>
+                                <time className="text-xs font-medium text-[var(--primary)]">{new Date(item.date).toLocaleDateString()}</time>
+                              </div>
+                              <div className="text-sm text-slate-600">{item.description}</div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                <div className="w-full md:w-2/3 flex flex-col h-full overflow-y-auto">
+                  {/* Panel header */}
                 <div className="flex items-center space-x-2 mb-6">
                   <Package className="w-6 h-6 text-[var(--primary)]" />
                   <h3 className="text-lg font-semibold text-[var(--text-primary)]">
@@ -435,13 +498,13 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       {activeRx.patient_name}
                     </p>
                   </div>
-                  {/* Condition (Mocked) */}
+                  {/* Condition (From History) */}
                   <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].condition}
                     </p>
-                    <p className="font-semibold text-[var(--text-primary)]">
-                      N/A
+                    <p className="font-semibold text-[var(--text-primary)] truncate" title={condition}>
+                      {condition}
                     </p>
                   </div>
                   {/* Drug */}
@@ -471,7 +534,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                       {activeRx.quantity_prescribed} {t[language].units}
                     </p>
                   </div>
-                  {/* Prescribing Doctor (Mocked) */}
+                  {/* Prescribing Doctor */}
                   <div className="bg-[var(--input-bg)] rounded-md p-4 border border-[var(--border-default)]">
                     <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
                       {t[language].prescribedBy}
@@ -553,6 +616,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     )}
                   </button>
                 </div>
+              </div>
               </div>
             )}
           </div>

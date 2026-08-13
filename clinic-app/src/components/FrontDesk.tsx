@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, UserPlus, QrCode, ArrowRight, Activity, Wifi } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
+
 
 interface FrontDeskProps {
   language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';

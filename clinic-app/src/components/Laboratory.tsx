@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FlaskConical, User, ClipboardList, CheckCircle2,
-  AlertTriangle, Send, FileText, Microscope, ExternalLink, MapPin, Phone, Printer
+  FlaskConical, User, ClipboardList, 
+  AlertTriangle, Send, FileText, Microscope, ExternalLink, MapPin, Phone, Printer, History, Pill
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -249,6 +249,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
   const [labSearch, setLabSearch] = useState('');
 
   const [queue, setQueue] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
 
   const fetchQueue = async () => {
     try {
@@ -262,12 +263,32 @@ export default function Laboratory({ language }: LaboratoryProps) {
     }
   };
 
+  const fetchHistory = async (patientId: string) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`);
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchQueue();
   }, []);
 
   const lang = t[language];
   const selectedRequest = queue.find((r) => r.id === selectedId) || null;
+
+  useEffect(() => {
+    if (selectedRequest) {
+      fetchHistory(selectedRequest.patient_id || selectedRequest.PatientID);
+    } else {
+      setHistory([]);
+    }
+  }, [selectedRequest]);
 
   // ---- Reset form when switching patients ----
   const handleSelectRequest = (id: string) => {
@@ -574,27 +595,64 @@ export default function Laboratory({ language }: LaboratoryProps) {
               )}
             </div>
 
-            {/* Sub-Tabs for Result Entry vs External Referral */}
-            <div className="flex space-x-2 border-b border-[var(--border-default)] pb-4 mb-2">
-              <button 
-                onClick={() => setActiveTab('result')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-semibold transition ${
-                  activeTab === 'result' ? 'bg-indigo-500 text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
-                }`}
-              >
-                <Microscope className="w-4 h-4" />
-                <span>{lang.enterResults}</span>
-              </button>
-              <button 
-                onClick={() => setActiveTab('external')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-semibold transition ${
-                  activeTab === 'external' ? 'bg-orange-500 text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
-                }`}
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>{lang.externalReferral}</span>
-              </button>
-            </div>
+            <div className="flex flex-col md:flex-row gap-6 h-full min-h-0">
+              {/* Historical Timeline */}
+              <div className="w-full md:w-1/3 bg-[var(--timeline-bg)] border border-[var(--timeline-border)] rounded-lg p-4 overflow-y-auto shadow-inner relative text-slate-800 shrink-0">
+                <h3 className="font-bold text-slate-600 mb-6 flex items-center space-x-2 border-b border-slate-200 pb-4">
+                  <History className="w-5 h-5" />
+                  <span>{language === 'HA' ? 'Tarihin Jiyya' : language === 'PI' ? 'Patient History' : 'Patient History'}</span>
+                </h3>
+
+                <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                  {history.length === 0 ? (
+                    <div className="text-sm text-slate-500 text-center py-4">No previous history found.</div>
+                  ) : (
+                    history.map((item, idx) => {
+                      let Icon = FileText;
+                      if (item.type === 'lab') Icon = FlaskConical;
+                      if (item.type === 'dispensary') Icon = Pill;
+
+                      return (
+                        <div key={idx} className="relative flex items-center justify-between group">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                            <div className="flex items-center justify-between space-x-2 mb-1">
+                              <div className="font-bold text-slate-700 text-sm">{item.title}</div>
+                              <time className="text-xs font-medium text-[var(--primary)]">{new Date(item.date).toLocaleDateString()}</time>
+                            </div>
+                            <div className="text-sm text-slate-600">{item.description}</div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              <div className="w-full md:w-2/3 flex flex-col h-full overflow-y-auto pr-2">
+                {/* Sub-Tabs for Result Entry vs External Referral */}
+                <div className="flex space-x-2 border-b border-[var(--border-default)] pb-4 mb-2">
+                  <button 
+                    onClick={() => setActiveTab('result')}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-semibold transition ${
+                      activeTab === 'result' ? 'bg-indigo-500 text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
+                    }`}
+                  >
+                    <Microscope className="w-4 h-4" />
+                    <span>{lang.enterResults}</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('external')}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-semibold transition ${
+                      activeTab === 'external' ? 'bg-orange-500 text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--queue-item-hover)]'
+                    }`}
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>{lang.externalReferral}</span>
+                  </button>
+                </div>
 
             {activeTab === 'result' ? (
               <>
@@ -699,6 +757,8 @@ export default function Laboratory({ language }: LaboratoryProps) {
                 </div>
               </div>
             )}
+            </div>
+            </div>
           </div>
         ) : (
           /* Empty state — no request selected */
