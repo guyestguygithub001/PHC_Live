@@ -3,7 +3,7 @@ import { Search, UserPlus, QrCode, ArrowRight, Activity, Wifi } from 'lucide-rea
 import { v4 as uuidv4 } from 'uuid';
 
 interface FrontDeskProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -86,6 +86,96 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
       christianity: "Kirista",
       traditional: "Gargajiya",
       other: "Wani"
+    },
+    YO: {
+      title: "Ibi Gbigba Alejo & Akosile",
+      searchPlaceholder: "Wa pelu Oruko, Nomba, tabi ID...",
+      newPatient: "Alaisan Tuntun",
+      scanCard: "Sikan Kadi",
+      registerTitle: "Forukosile Alaisan Tuntun",
+      firstName: "Oruko Akoko",
+      lastName: "Oruko Baba",
+      gender: "Abo/Ako",
+      age: "Ojo ori",
+      tribe: "Eya",
+      religion: "Esin",
+      occupation: "Ise",
+      address: "Adiresi (Abule / Ilu / LGA)",
+      phone: "Nomba Ero Ibanisoro",
+      nextOfKin: "Ebi ti o sunmo julo (Oruko)",
+      nextOfKinPhone: "Ebi ti o sunmo julo (Nomba)",
+      registerBtn: "Forukosile & Fi ranse si Triage",
+      cancel: "Fagilee",
+      offlineMode: "Ko si Intaneeti (LAN Nsise)",
+      queue: "Akojopo Awon Ti Nduro",
+      selectGender: "Yan Abo/Ako",
+      male: "Okunrin",
+      female: "Obinrin",
+      selectReligion: "Yan Esin",
+      islam: "Imale",
+      christianity: "Igbagbo",
+      traditional: "Ibile",
+      other: "Miran"
+    },
+    IG: {
+      title: "Ebe Nnabata & Ndekọ",
+      searchPlaceholder: "Chọọ aha, ekwentị, ma ọ bụ ID...",
+      newPatient: "Onye Ọrịa Ọhụrụ",
+      scanCard: "Nyochaa Kaadị",
+      registerTitle: "Debanye Onye Ọrịa Ọhụrụ",
+      firstName: "Aha Mbụ",
+      lastName: "Aha Nna",
+      gender: "Mmekọahụ",
+      age: "Afọ",
+      tribe: "Agbụrụ",
+      religion: "Okwukwe",
+      occupation: "Ọrụ",
+      address: "Adreesị (Obodo / LGA)",
+      phone: "Nọmba Ekwentị",
+      nextOfKin: "Onye Ikekwu (Aha)",
+      nextOfKinPhone: "Onye Ikekwu (Ekwentị)",
+      registerBtn: "Debanye & Ziga na Triage",
+      cancel: "Kagbuo",
+      offlineMode: "Enweghị Ịntanetị (LAN na-arụ ọrụ)",
+      queue: "Ndị Na-eche",
+      selectGender: "Họrọ Mmekọahụ",
+      male: "Nwoke",
+      female: "Nwanyị",
+      selectReligion: "Họrọ Okwukwe",
+      islam: "Alakụba",
+      christianity: "Iso Ụzọ Kraịst",
+      traditional: "Ọdịnala",
+      other: "Ọzọ"
+    },
+    PI: {
+      title: "Front Desk & Records",
+      searchPlaceholder: "Search for Name, Phone, or ID...",
+      newPatient: "New Patient",
+      scanCard: "Scan Card",
+      registerTitle: "Register New Patient",
+      firstName: "First Name",
+      lastName: "Last Name",
+      gender: "Gender",
+      age: "Age",
+      tribe: "Tribe",
+      religion: "Religion",
+      occupation: "Work",
+      address: "Address (Village / Town / LGA)",
+      phone: "Phone Number",
+      nextOfKin: "Next of Kin (Name)",
+      nextOfKinPhone: "Next of Kin (Phone)",
+      registerBtn: "Register & Send go Triage",
+      cancel: "Cancel",
+      offlineMode: "No Internet (LAN dey work)",
+      queue: "Waiting List",
+      selectGender: "Choose Gender",
+      male: "Man",
+      female: "Woman",
+      selectReligion: "Choose Religion",
+      islam: "Muslim",
+      christianity: "Christian",
+      traditional: "Traditional",
+      other: "Other"
     }
   };
 
@@ -161,23 +251,23 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
 
   return (
     <div className="w-full h-full flex flex-col space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-start md:items-center bg-[var(--card-bg)] p-4 rounded-lg border border-[var(--border-default)]" style={{ boxShadow: 'var(--shadow-card)' }}>
+      {/* Page Header (No Box) */}
+      <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-start md:items-center mb-2">
         <div>
-          <h2 className="text-lg font-semibold text-[var(--text-primary)]">{t[language].title}</h2>
-          <div className="flex items-center space-x-2 text-[var(--primary)] mt-1">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t[language].title}</h2>
+          <div className="flex items-center space-x-2 text-[var(--primary)] mt-1.5">
             <Wifi className="w-4 h-4" />
-            <span className="text-sm">{t[language].offlineMode}</span>
+            <span className="text-sm font-medium">{t[language].offlineMode}</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
-          <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-500 px-4 py-2 rounded-md transition border border-indigo-500/20">
+          <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 text-[var(--primary)] px-4 py-2.5 rounded-lg transition font-medium">
             <QrCode className="w-5 h-5" />
             <span>{t[language].scanCard}</span>
           </button>
           <button 
             onClick={() => setIsRegistering(true)}
-            className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-4 py-2 rounded-md transition shadow-sm"
+            className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-5 py-2.5 rounded-lg transition shadow-sm font-medium"
           >
             <UserPlus className="w-5 h-5" />
             <span>{t[language].newPatient}</span>
@@ -287,34 +377,40 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
           </form>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col space-y-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-[var(--text-muted)]" />
-            <input 
-              type="text" 
-              placeholder={t[language].searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[var(--card-bg)] border border-[var(--border-default)] rounded-md pl-12 pr-3 py-2.5 text-[var(--text-primary)] text-base focus:outline-none focus:border-[var(--primary)] transition"
-              style={{ boxShadow: 'var(--shadow-card)' }}
-            />
+        <div className="flex-1 bg-[var(--card-bg)] rounded-xl border border-[var(--border-default)] flex flex-col overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
+          {/* Unified Search Header */}
+          <div className="p-4 border-b border-[var(--border-default)] bg-[var(--header-bg)]">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
+              <input 
+                type="text" 
+                placeholder={t[language].searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg pl-10 pr-4 py-2.5 text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--primary)] transition"
+              />
+            </div>
           </div>
           
-          <div className="flex-1 bg-[var(--queue-bg)] rounded-lg border border-[var(--border-default)] p-4" style={{ boxShadow: 'var(--shadow-card)' }}>
-            <h3 className="text-[var(--text-secondary)] font-semibold mb-4">{t[language].queue} ({patients.length})</h3>
-            <div className="space-y-3">
+          {/* Waiting List Body */}
+          <div className="flex-1 p-0 overflow-y-auto bg-[var(--queue-bg)]">
+            <div className="px-5 py-3 border-b border-[var(--border-default)] flex justify-between items-center bg-[var(--card-bg)]">
+              <h3 className="text-[var(--text-secondary)] font-semibold text-xs uppercase tracking-wider">{t[language].queue} ({patients.length})</h3>
+            </div>
+            
+            <div className="p-2 space-y-1">
               {isLoading ? (
-                <p className="text-[var(--text-muted)]">Loading...</p>
+                <div className="p-8 text-center text-[var(--text-muted)] animate-pulse">Loading...</div>
               ) : patients.length === 0 ? (
-                <p className="text-[var(--text-muted)]">No patients found.</p>
+                <div className="p-8 text-center text-[var(--text-muted)]">No patients found.</div>
               ) : (
                 patients.map((p) => (
-                  <div key={p.id} className="flex justify-between items-center bg-[var(--queue-item-bg)] border border-[var(--border-default)] p-4 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer">
+                  <div key={p.id} className="flex justify-between items-center bg-[var(--queue-item-bg)] p-3 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer group">
                     <div>
-                      <p className="text-[var(--text-primary)] font-semibold">{p.first_name} {p.last_name}</p>
-                      <p className="text-[var(--text-muted)] text-sm">{p.phc_id} {p.phone ? `• ${p.phone}` : ''}</p>
+                      <p className="text-[var(--text-primary)] font-medium group-hover:text-[var(--primary)] transition">{p.first_name} {p.last_name}</p>
+                      <p className="text-[var(--text-muted)] text-xs mt-0.5">{p.phc_id} {p.phone ? `• ${p.phone}` : ''}</p>
                     </div>
-                    <button className="bg-[var(--input-bg)] hover:bg-[var(--primary)]/10 p-2 rounded-md text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
+                    <button className="text-[var(--text-muted)] group-hover:text-[var(--primary)] transition p-1">
                       <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>

@@ -3,7 +3,7 @@ import { BedDouble, Pill, FileText, CheckCircle, Clock, LogOut, User, Activity }
 import { v4 as uuidv4 } from 'uuid';
 
 interface InpatientWardProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -78,6 +78,87 @@ const translations = {
     dischargeSuccess: 'An sallami majinyaci cikin nasara.',
     selectOutcome: 'Zabi Sakamako',
     writeNote: 'Rubuta bayanin sallama a nan...'
+  },
+  YO: {
+    ward: 'Wọọdu Awọn Alaisan',
+    bedManagement: 'Itọju Ibusun',
+    available: 'O wa',
+    occupied: 'Ti gba',
+    bed: 'Ibusun',
+    patient: 'Alaisan',
+    diagnosis: 'Aisan',
+    marTab: 'MAR (Oogun)',
+    dischargeTab: 'Idasilẹ',
+    marTitle: 'Iwe Itọju Oogun',
+    time: 'Aago',
+    status: 'Ipo',
+    markDone: 'Samisi Bi O Ti Ṣe',
+    administered: 'Ti fi fun',
+    dischargeNote: 'Iwe Idasilẹ',
+    outcome: 'Abajade',
+    dischargedHealthy: 'Idasilẹ Pẹlu Ilera',
+    referred: 'Tọkasi',
+    deceased: 'O ti ku',
+    generateDischarge: 'Ṣe Idasilẹ',
+    selectBed: 'Yan ibusun ti o ti gba lati wo awọn alaye',
+    noMedication: 'Ko si oogun ti nṣiṣẹ',
+    dischargeSuccess: 'Alaisan ti yọ kuro ni aṣeyọri.',
+    selectOutcome: 'Yan Abajade',
+    writeNote: 'Kọ iwe idasilẹ nibi...'
+  },
+  IG: {
+    ward: 'Wọọdụ Ndị Ọrịa',
+    bedManagement: 'Nlekọta Àkwà',
+    available: 'Ọ Dị',
+    occupied: 'Ejiri Ya',
+    bed: 'Àkwà',
+    patient: 'Onye Ọrịa',
+    diagnosis: 'Nchọpụta',
+    marTab: 'MAR (Ọgwụ)',
+    dischargeTab: 'Ịhapụ',
+    marTitle: 'Ndekọ Nchịkwa Ọgwụ',
+    time: 'Oge',
+    status: 'Ọnọdụ',
+    markDone: 'Kaa ka Ọ gwụla',
+    administered: 'Enyerela',
+    dischargeNote: 'Ihe Ndekọ Ịhapụ',
+    outcome: 'Nsonaazụ',
+    dischargedHealthy: 'A hapụrụ ya na ahụike',
+    referred: 'E zigara',
+    deceased: 'Ọ nwụrụ',
+    generateDischarge: 'Mepụta Ịhapụ',
+    selectBed: 'Họrọ àkwà ejiri hụ nkọwa',
+    noMedication: 'Enweghị ọgwụ na-arụ ọrụ',
+    dischargeSuccess: 'Ahapụla onye ọrịa nke ọma.',
+    selectOutcome: 'Họrọ Nsonaazụ',
+    writeNote: 'Dee ihe ndekọ ịhapụ ebe a...'
+  },
+  PI: {
+    ward: 'Ward for Sick pipo',
+    bedManagement: 'Bed Management',
+    available: 'E dey',
+    occupied: 'Person dey',
+    bed: 'Bed',
+    patient: 'Patient',
+    diagnosis: 'Sickness',
+    marTab: 'MAR (Medicine)',
+    dischargeTab: 'Discharge',
+    marTitle: 'Medicine Record',
+    time: 'Time',
+    status: 'Status',
+    markDone: 'Mark say e don done',
+    administered: 'Don give',
+    dischargeNote: 'Discharge Note',
+    outcome: 'Result',
+    dischargedHealthy: 'Discharge well well',
+    referred: 'Refer',
+    deceased: 'Don die',
+    generateDischarge: 'Generate Discharge',
+    selectBed: 'Select bed wey get person to see wetin dey happen',
+    noMedication: 'No medicine',
+    dischargeSuccess: 'Patient don discharge well.',
+    selectOutcome: 'Select Result',
+    writeNote: 'Write discharge note for here...'
   }
 };
 

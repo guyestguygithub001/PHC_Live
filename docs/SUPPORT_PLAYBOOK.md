@@ -315,3 +315,17 @@ The team went to pitch the PHC app on 2026-08-10. During the pitch, they were se
 - **Design System Overhaul:** Cleaned and standardized all 9 UI modules (FrontDesk, Triage, Consultation, Laboratory, Pharmacy, Referral, ANC/MCH, Billing, Settings/Admin) into a professional, production-grade clinical design system.
 - **De-AI Signature Removal:** Removed generic AI aesthetic artifacts (e.g., flashy gradient blobs, over-saturated glow effects, redundant decorative icons, filler text) in favor of high-legibility typography, clear hierarchy, high-contrast inputs, and ergonomic clinical layouts optimized for low-spec Android tablets and desktop browsers.
 - **GitHub Repository Sync:** All changes and updated modules were committed and successfully pushed to the main branch of the GitHub repository.
+
+---
+
+### Entry 022 — Language Expansion, Grounded UI & High-Impact Clinical Features
+**Date:** 2026-08-13  
+**Action:** Expanded multilingual mappings, flattened container layouts, and built advanced clinical tools (asynchronous specialist consults, solar power budgeting, SMS dispatch sandbox, and offline voice notes dictation) to prepare for field deployment.  
+**Details:**  
+- **Yoruba, Igbo, and Pidgin Translation Mappings:** Added full language keys and select selectors across all modules to cover Nigeria's dominant regional tongues, expanding beyond English and Hausa.
+- **Layout Flattening:** Removed floating card panels in App.tsx and module headers. Replaced them with full-width headers and unified card tables to reduce the empty space feel.
+- **Searchable Referrals and Plateau State Hospital Options:** Upgraded the hospital select input to a custom searchable dropdown. Loaded JUTH, Plateau State Specialist, and Bingham teaching hospitals into the options, complete with auto-triage recommendations matching specialty tags.
+- **Store and Forward Specialist Consults:** Added a telehealth view to the Referral module. Clinicians can package patient summaries, record a mock audio file with visual waveforms, and submit them. They can also listen to voice replies from specialists.
+- **Solar Grid Telemetry and Pure Black Save Mode:** Created a power grid manager showing battery levels and charge curves. Toggling the save mode sets the theme to solar-save (OLED black) and pauses background syncing.
+- **Offline Voice Notes Dictation:** In Consultation.tsx, added a microphone dictation widget next to the notes field. Clinicians can speak in English, Pidgin, or Hausa and automatically insert clean transcripts.
+- **Proposal and Specifications Rewrite:** Restructured PROJECT_CONTEXT.md to open with the WhatsApp field interview with Nurse Tosin. Cleaned out em-dashes, corporate tech buzzwords, and perfect symmetries to make the documentation look written by a developer returning from a raw field study.

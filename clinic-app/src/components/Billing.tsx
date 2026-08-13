@@ -3,7 +3,7 @@ import { CreditCard, Search, FileText, CheckCircle, Shield } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid';
 
 interface BillingProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -41,6 +41,42 @@ export default function Billing({ language, theme }: BillingProps) {
       processPayment: "Karbi Kudi",
       paymentSuccess: "An Karbi Kudi Lafiya",
       receipt: "Bada Rasiti"
+    },
+    YO: {
+      title: "Owo ati Isuna",
+      searchPlaceholder: "Wa alaisan fun sisanwo...",
+      selectPatient: "Yan alaisan lati sanwo",
+      serviceType: "Iru Iṣẹ",
+      fee: "Oye (₦)",
+      paymentMethod: "Ọna Sisan",
+      insuranceRef: "Nọmba Iṣeduro",
+      processPayment: "Sanwo",
+      paymentSuccess: "Sisanwo Ti Ṣaṣeyọri",
+      receipt: "Fa iwe-ẹri jade"
+    },
+    IG: {
+      title: "Ịkwụ Ụgwọ na Ego",
+      searchPlaceholder: "Chọọ onye ọrịa maka ịkwụ ụgwọ...",
+      selectPatient: "Họrọ onye ọrịa iji kwụọ ụgwọ",
+      serviceType: "Ụdị Ọrụ",
+      fee: "Ụgwọ (₦)",
+      paymentMethod: "Ụzọ Ịkwụ Ụgwọ",
+      insuranceRef: "Nọmba Inshọransị",
+      processPayment: "Kwụọ Ụgwọ",
+      paymentSuccess: "A Kwụọla Ụgwọ Nke Ọma",
+      receipt: "WePụta Akwụkwọ Ịkwụ Ụgwọ"
+    },
+    PI: {
+      title: "Billing & Money Matter",
+      searchPlaceholder: "Find patient to pay...",
+      selectPatient: "Select patient wey wan pay",
+      serviceType: "Service Type",
+      fee: "Money (₦)",
+      paymentMethod: "How you won pay",
+      insuranceRef: "Insurance Number",
+      processPayment: "Pay Money",
+      paymentSuccess: "Payment Don Enter",
+      receipt: "Give Receipt"
     }
   };
 

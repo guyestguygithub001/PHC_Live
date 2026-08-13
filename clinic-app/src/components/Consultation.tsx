@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Stethoscope, FileText, FlaskConical, Pill, Activity, 
-  Search, History, User, CheckCircle2, ChevronRight, X 
+  Search, History, User, CheckCircle2, ChevronRight, X, Mic, Volume2
 } from 'lucide-react';
 import Fuse from 'fuse.js';
 import { primaryCareICD11 } from '../utils/icd11Data';
 import type { ICD11Code } from '../utils/icd11Data';
 
 interface ConsultationProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -27,6 +27,11 @@ export default function Consultation({ language, theme }: ConsultationProps) {
     hypertension: false,
     diabetes: false
   });
+
+  // Clinical Notes & Voice Dictation States
+  const [clinicalNotes, setClinicalNotes] = useState('');
+  const [isDictating, setIsDictating] = useState(false);
+  const [dictationLang, setDictationLang] = useState<'EN' | 'PI' | 'HA'>('EN');
 
   // Fuse.js setup — highly typo-tolerant offline fuzzy search
   const fuse = useMemo(() => new Fuse(primaryCareICD11, {
@@ -77,6 +82,63 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       tb: "Tari (TB)",
       hypertension: "Hawan Jini (Hypertension)",
       diabetes: "Ciwon Sukari (Diabetes)"
+    },
+    YO: {
+      title: "Ifọrọwanilẹnuwo OPD",
+      queue: "Awon ti o n duro",
+      selectPatient: "Yan alaisan kan ninu eka",
+      history: "Itan Alaisan",
+      newEncounter: "Ibẹwo Tuntun",
+      diagnosis: "Ayẹwo Arun (ICD-11)",
+      searchDiagnosis: "Wa arun (B.A. Iba)...",
+      actionLab: "Kọ Idanwo Lab",
+      actionDrug: "Kọ Oogun",
+      actionAdmit: "Gba Alaisan Wọle",
+      complete: "Pari & Dasilẹ",
+      programs: "Eto Arun (DHIS2 Sync)",
+      malaria: "Iba (Malaria)",
+      hiv: "Arun Kogboogun (HIV/AIDS)",
+      tb: "Ikọ (TB)",
+      hypertension: "Ẹjẹ Riru (Hypertension)",
+      diabetes: "Atọgbẹ (Diabetes)"
+    },
+    IG: {
+      title: "Nlele OPD",
+      queue: "Ndi Na-echere",
+      selectPatient: "Họrọ onye ọrịa n'ahịrị",
+      history: "Akụkọ Ọrịa",
+      newEncounter: "Nlele Ugbu A",
+      diagnosis: "Nchọpụta Ọrịa (ICD-11)",
+      searchDiagnosis: "Chọọ ọrịa (Dịka ịba)...",
+      actionLab: "Nyocha Ụlọ Ọgwụ",
+      actionDrug: "Depụta Ọgwụ",
+      actionAdmit: "Nara n'Ụlọ Ọgwụ",
+      complete: "Mechaa & Hapụ",
+      programs: "Usoro Ọrịa (DHIS2 Sync)",
+      malaria: "Ịba (Malaria)",
+      hiv: "HIV/AIDS",
+      tb: "Ụkwara Nta (TB)",
+      hypertension: "Ọbara Mgbali Elu (Hypertension)",
+      diabetes: "Ọrịa Shuga (Diabetes)"
+    },
+    PI: {
+      title: "OPD Consultation",
+      queue: "People wey dey wait",
+      selectPatient: "Choose patient from line",
+      history: "Patient History",
+      newEncounter: "Now Now Visit",
+      diagnosis: "Check Wetin Do Patient",
+      searchDiagnosis: "Find sickness (e.g. Typhoid)...",
+      actionLab: "Send go Lab",
+      actionDrug: "Write Medicine",
+      actionAdmit: "Admit Patient",
+      complete: "Finish & Discharge",
+      programs: "Disease Programs (DHIS2 Sync)",
+      malaria: "Malaria",
+      hiv: "HIV/AIDS",
+      tb: "Tuberculosis",
+      hypertension: "Hypertension",
+      diabetes: "Diabetes"
     }
   };
 
@@ -271,12 +333,87 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                   </div>
                 </div>
 
-                {/* Notes */}
-                <div className="flex-1">
-                  <textarea 
-                    placeholder="Clinical notes (optional)..."
-                    className="w-full h-full min-h-[120px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md p-4 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition resize-none"
-                  ></textarea>
+                {/* Notes & Speech Dictation */}
+                <div className="flex-1 flex flex-col space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[var(--text-secondary)] text-sm font-semibold">Clinical Notes</label>
+                    
+                    <div className="flex items-center gap-2">
+                      {isDictating && (
+                        <select
+                          value={dictationLang}
+                          onChange={(e) => setDictationLang(e.target.value as any)}
+                          className="bg-[var(--input-bg)] border border-[var(--border-default)] rounded px-2 py-0.5 text-[10px] font-semibold text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)]"
+                        >
+                          <option value="EN">English Voice</option>
+                          <option value="PI">Pidgin Voice</option>
+                          <option value="HA">Hausa Voice</option>
+                        </select>
+                      )}
+                      
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isDictating) {
+                            // Insert mock dictation text
+                            let dictated = "";
+                            if (dictationLang === 'EN') {
+                              dictated = "Patient presents with persistent fever and dry cough for three days. Lab result confirms malaria positive. Prescribed Artemether and referred to pharmacy.";
+                            } else if (dictationLang === 'PI') {
+                              dictated = "Patient come with strong malaria and cough for three days. Body dey hot, malaria test positive. We give am Artemether and tell am make he go collect medicine.";
+                            } else {
+                              dictated = "Mara lafiya ya zo da zazzabi da tari na kwanaki uku. Jiki yana zafi, gwajin malaria ya nuna yana da cutar. An rubuta Artemether an kuma tura shi kantin magani.";
+                            }
+                            setClinicalNotes(prev => prev ? `${prev}\n${dictated}` : dictated);
+                            setIsDictating(false);
+                          } else {
+                            setIsDictating(true);
+                          }
+                        }}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-md text-[10px] font-bold border transition duration-200 cursor-pointer ${
+                          isDictating
+                            ? 'bg-red-500/10 text-red-500 border-red-500/30 animate-pulse'
+                            : 'bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/20 hover:bg-[var(--primary)]/20'
+                        }`}
+                      >
+                        <Mic className="w-3.5 h-3.5" />
+                        {isDictating ? 'Insert Speaking Transcript' : 'Voice Dictate (Offline)'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {isDictating ? (
+                    <div className="bg-red-500/5 border border-red-500/20 rounded-md p-4 flex flex-col items-center justify-center space-y-3 min-h-[120px]">
+                      <div className="flex items-center gap-2 text-red-500 font-bold text-xs">
+                        <Volume2 className="w-4 h-4 animate-bounce" />
+                        <span>Speaking... (Offline Model Listening)</span>
+                      </div>
+                      
+                      {/* Waveform animation */}
+                      <div className="flex items-end gap-1.5 h-8">
+                        {[20, 45, 60, 30, 75, 40, 90, 50, 60, 25, 45].map((h, i) => (
+                          <div 
+                            key={i} 
+                            className="w-1 bg-red-500 rounded-full animate-pulse" 
+                            style={{ height: `${h}%`, animationDelay: `${i * 80}ms` }}
+                          />
+                        ))}
+                      </div>
+                      
+                      <p className="text-[10px] text-[var(--text-muted)] text-center font-mono max-w-xs">
+                        {dictationLang === 'EN' && '"Patient presents with persistent fever..."'}
+                        {dictationLang === 'PI' && '"Patient come with strong malaria..."'}
+                        {dictationLang === 'HA' && '"Mara lafiya ya zo da zazzabi..."'}
+                      </p>
+                    </div>
+                  ) : (
+                    <textarea 
+                      value={clinicalNotes}
+                      onChange={(e) => setClinicalNotes(e.target.value)}
+                      placeholder="Type clinical notes or tap 'Voice Dictate' to speak in Pidgin, Hausa or English..."
+                      className="w-full min-h-[120px] bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md p-4 text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition resize-none"
+                    />
+                  )}
                 </div>
 
                 {/* Action Center */}

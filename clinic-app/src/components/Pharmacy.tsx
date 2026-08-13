@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 // ============================================================
 
 interface PharmacyProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -97,6 +97,87 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
       receiptId: 'Lambar Rasiti',
       stockAfter: 'Sauran Kaya',
       belowThreshold: 'Ƙasa da mafi ƙarancin (20)',
+    },
+    YO: {
+      title: 'Ile Itaja Oogun',
+      subtitle: 'Owo Oogun To N Yi',
+      queue: 'Laini Iwe Oogun',
+      selectPatient: 'Yan alaisan lati inu laini lati fun ni oogun',
+      dispensingPanel: 'Ibi Ifunni Oogun',
+      prescriptionDetails: 'Ekunrere Iwe Oogun',
+      drug: 'Oogun',
+      dosage: 'Lilo',
+      quantity: 'Iye',
+      currentStock: 'Oja Lọwọlọwọ',
+      dispense: 'Fun Ni Oogun',
+      outOfStock: 'Oja Ti Tan',
+      lowStock: 'Oja Fẹ Tan',
+      stock: 'Oja',
+      inventoryDashboard: 'Boodu Oja',
+      units: 'ege',
+      prescribedBy: 'Ayewo lati owo',
+      patient: 'Alaisan',
+      condition: 'Aisan',
+      noLabWarning:
+        'IKILO: Ko si abajade RDT Malaria. A kọ lati fun ni oogun gẹgẹbi ilana PHC.',
+      dispensed: 'A ti fun ni oogun ni aseyori!',
+      receiptId: 'Nọmba Iwe Ẹri',
+      stockAfter: 'Oja Lẹhin Ifunni',
+      belowThreshold: 'Labẹ iye ti o kere julọ (20)',
+    },
+    IG: {
+      title: 'Ụlọ Ọgwụ',
+      subtitle: 'Ego Ọgwụ Na-agbanwe',
+      queue: 'Ahịrị Ọgwụ',
+      selectPatient: 'Họrọ onye ọrịa n\'ahịrị iji nye ya ọgwụ',
+      dispensingPanel: 'Ebe Enyemaka Ọgwụ',
+      prescriptionDetails: 'Nkọwa Ọgwụ',
+      drug: 'Ọgwụ',
+      dosage: 'Ọ̀tụ̀tụ̀',
+      quantity: 'Ọnụọgụ',
+      currentStock: 'Ngwa Ahịa Ugbu A',
+      dispense: 'Nye Ọgwụ',
+      outOfStock: 'Ngwa Ahịa Agwụla',
+      lowStock: 'Ngwa Ahịa Dị Ala',
+      stock: 'Ngwa Ahịa',
+      inventoryDashboard: 'Bọọdụ Ngwa Ahịa',
+      units: 'nkeji',
+      prescribedBy: 'Onye dere ya',
+      patient: 'Onye Ọrịa',
+      condition: 'Ọnọdụ',
+      noLabWarning:
+        'ỊDỌ AKA NA NTỊ: Enweghị nsonaazụ Malaria RDT. A machibidoro inye ọgwụ dị ka usoro PHC si dị.',
+      dispensed: 'E nyere ọgwụ nke ọma!',
+      receiptId: 'Nọmba Nnata',
+      stockAfter: 'Ngwa Ahịa Mgbe Enyere Ya',
+      belowThreshold: 'N\'okpuru nke kacha nta (20)',
+    },
+    PI: {
+      title: 'Pharmacy',
+      subtitle: 'Medicine Fund',
+      queue: 'Medicine Line',
+      selectPatient: 'Select patient from line to give medicine',
+      dispensingPanel: 'Give Medicine Panel',
+      prescriptionDetails: 'Medicine Details',
+      drug: 'Medicine',
+      dosage: 'Dosage',
+      quantity: 'How many',
+      currentStock: 'Stock wey dey',
+      dispense: 'Give Medicine',
+      outOfStock: 'Medicine don finish',
+      lowStock: 'Medicine don low',
+      stock: 'Stock',
+      inventoryDashboard: 'Stock Dashboard',
+      units: 'units',
+      prescribedBy: 'Who write am',
+      patient: 'Patient',
+      condition: 'Sickness',
+      noLabWarning:
+        'WARNING: No Malaria test result. We no fit give medicine based on PHC rule.',
+      dispensed: 'Medicine given successfully!',
+      receiptId: 'Receipt Number',
+      stockAfter: 'Stock wey remain',
+      belowThreshold: 'Below minimum (20)',
     },
   };
 
@@ -250,7 +331,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
         </div>
         <div className="flex items-center space-x-2 text-[var(--text-secondary)] bg-[var(--input-bg)] px-4 py-2 rounded-md border border-[var(--border-default)]">
           <User className="w-5 h-5 text-[var(--primary)]" />
-          <span>{language === 'EN' ? 'Pharmacist: Pharm. Halima' : 'Mai Magani: Pharm. Halima'}</span>
+          <span>{language === 'HA' ? 'Mai Magani: Pharm. Halima' : 'Pharmacist: Pharm. Halima'}</span>
         </div>
       </div>
 
@@ -277,7 +358,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
             <div className="flex flex-col items-center justify-center py-12 text-[var(--text-muted)]">
               <CheckCircle2 className="w-10 h-10 mb-2 text-[var(--primary)]" />
               <p className="text-sm">
-                {language === 'EN' ? 'All prescriptions dispensed' : 'An bayar da duk magungunan'}
+                {language === 'HA' ? 'An bayar da duk magungunan' : 'All prescriptions dispensed'}
               </p>
             </div>
           ) : (
@@ -456,7 +537,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     <div className="flex items-center space-x-2 bg-orange-500/20 text-orange-500 px-3 py-1.5 rounded-lg">
                       <AlertTriangle className="w-5 h-5" />
                       <span className="text-sm font-bold">
-                        {language === 'EN' ? 'Insufficient stock' : 'Kaya bai isa ba'}
+                        {language === 'HA' ? 'Kaya bai isa ba' : 'Insufficient stock'}
                       </span>
                     </div>
                   )}
@@ -481,7 +562,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     {isMalariaBlocked ? (
                       <>
                         <ShieldAlert className="w-6 h-6" />
-                        <span>{language === 'EN' ? 'Blocked — Lab Required' : 'An hana — Ana buƙatar Gwaji'}</span>
+                        <span>{language === 'HA' ? 'An hana — Ana buƙatar Gwaji' : 'Blocked — Lab Required'}</span>
                       </>
                     ) : !activeStock || activeStock.units <= 0 ? (
                       <>
@@ -491,7 +572,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
                     ) : activeStock.units < activeRx.quantity ? (
                       <>
                         <AlertTriangle className="w-6 h-6" />
-                        <span>{language === 'EN' ? 'Insufficient Stock' : 'Kaya Bai Isa Ba'}</span>
+                        <span>{language === 'HA' ? 'Kaya Bai Isa Ba' : 'Insufficient Stock'}</span>
                       </>
                     ) : (
                       <>

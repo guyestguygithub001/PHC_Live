@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import {
   Send, ArrowUpRight, ArrowDownLeft, ClipboardList,
   AlertTriangle, Clock, CheckCircle2, RotateCcw,
-  Search, User, Building2, FileText
+  Search, User, Building2, FileText, Mic, Play, Pause, Volume2, Radio
 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 // ─── Props ─────────────────────────────────────────────────────
 interface ReferralProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -37,7 +37,7 @@ interface CounterReferralRecord {
 }
 
 // ─── Active View Tabs ──────────────────────────────────────────
-type ActiveView = 'form' | 'outgoing' | 'counter';
+type ActiveView = 'form' | 'outgoing' | 'counter' | 'telehealth';
 
 // ─── Component ─────────────────────────────────────────────────
 export default function Referral({ language, theme }: ReferralProps) {
@@ -49,6 +49,39 @@ export default function Referral({ language, theme }: ReferralProps) {
   const [reason, setReason] = useState('');
   const [clinicalSummary, setClinicalSummary] = useState('');
   const [urgency, setUrgency] = useState<UrgencyLevel | ''>('');
+  const [destinationSearch, setDestinationSearch] = useState('');
+  const [isDestinationOpen, setIsDestinationOpen] = useState(false);
+
+  // Telehealth / Specialist Consult state
+  const [telePatient, setTelePatient] = useState('');
+  const [teleSpecialty, setTeleSpecialty] = useState('');
+  const [teleQuery, setTeleQuery] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [hasAudioAttachment, setHasAudioAttachment] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
+  const [teleConsults, setTeleConsults] = useState<Array<{
+    id: string;
+    patient: string;
+    specialty: string;
+    query: string;
+    audio: boolean;
+    status: 'Pending Sync' | 'Uploaded' | 'Reviewed';
+    response?: string;
+    date: string;
+  }>>([
+    {
+      id: 'TEL-0982-1',
+      patient: 'Musa Garba',
+      specialty: 'Dermatology',
+      query: 'Patient presented with a severe maculopapular rash spreading on the lower back, unresponsive to standard antihistamines.',
+      audio: true,
+      status: 'Reviewed',
+      response: 'Voice response from Dr. Bello (Chief Dermatologist, JUTH): "Ina kwana, I reviewed the skin lesion notes. This looks like a drug-induced eruption rather than eczema. Stop all current meds, start hydrocortisone cream twice daily and monitor vitals. Keep us updated."',
+      date: 'Yesterday'
+    }
+  ]);
 
   // ─── Translations ──────────────────────────────────────────
   const t = {
@@ -62,7 +95,8 @@ export default function Referral({ language, theme }: ReferralProps) {
       selectPatient: "Select Patient",
       patientPlaceholder: "Choose a patient...",
       destination: "Destination Hospital",
-      destinationPlaceholder: "Select hospital...",
+      destinationPlaceholder: "Search hospital...",
+      recommended: "Recommended for this reason",
       reason: "Reason for Referral",
       reasonPlaceholder: "Select reason...",
       clinicalSummary: "Clinical Summary",
@@ -112,7 +146,8 @@ export default function Referral({ language, theme }: ReferralProps) {
       selectPatient: "Zaɓi Mara Lafiya",
       patientPlaceholder: "Zaɓi mara lafiya...",
       destination: "Babban Asibiti",
-      destinationPlaceholder: "Zaɓi asibiti...",
+      destinationPlaceholder: "Nemo asibiti...",
+      recommended: "An ba da shawarar ga wannan dalili",
       reason: "Dalilin Tura",
       reasonPlaceholder: "Zaɓi dalili...",
       clinicalSummary: "Bayanin Lafiya",
@@ -152,6 +187,138 @@ export default function Referral({ language, theme }: ReferralProps) {
       fillAllFields: "Da fatan za a cika dukkan filayen da ake bukata.",
       cho: "CHO: Dr. Ibrahim",
     },
+    YO: {
+      title: "Eto Ifiranṣẹ",
+      subtitle: "PHC → Ile-iwosan Gbogbogbo",
+      tabForm: "Ifiranṣẹ Tuntun",
+      tabOutgoing: "Awọn Ifiranṣẹ Ti A Firanṣẹ",
+      tabCounter: "Idahun Lati Ile-iwosan",
+      selectPatient: "Yan Alaisan",
+      patientPlaceholder: "Yan alaisan kan...",
+      destination: "Ile-iwosan Ti A Nlo",
+      destinationPlaceholder: "Wa ile-iwosan...",
+      recommended: "A gba ni niyanju fun idi eyi",
+      reason: "Idi Fun Ifiranṣẹ",
+      reasonPlaceholder: "Yan idi...",
+      clinicalSummary: "Akokari Ile-iwosan",
+      clinicalPlaceholder: "Alaisan wa pẹlu...",
+      urgency: "Ipele Kanju",
+      urgencyPlaceholder: "Yan ipele kanju...",
+      generateBtn: "Ṣẹda Ifiranṣẹ",
+      routine: "Deede",
+      urgent: "Ni Kanjukanju",
+      emergency: "Pajawiri",
+      obstructedLabour: "Iṣoro Ibimọ",
+      severeMalaria: "Iba Malaria Ti O Lagbara",
+      surgicalEmergency: "Iṣẹ-abẹ Pajawiri",
+      hypertensiveCrisis: "Ẹjẹ Riru Ti O Lagbara",
+      other: "Omiiran",
+      patient: "Alaisan",
+      destinationCol: "Ibi Ti A Nlo",
+      reasonCol: "Idi",
+      status: "Ipo",
+      date: "Ọjọ",
+      noReferrals: "Ko si ifiranṣẹ ti a firanṣẹ sibẹ.",
+      pendingSync: "Nduro Lati Sopọ",
+      sent: "Ti Firanṣẹ",
+      received: "Ti Gba",
+      counterReferred: "Ti Da Pada",
+      counterTitle: "Esi Lati Ile-iwosan Gbogbogbo",
+      fromHospital: "Lati Ile-iwosan",
+      diagnosis: "Aisan Ti A Ṣawari",
+      dischargeNotes: "Akiyesi Itusilẹ",
+      noCounterReferrals: "Ko si esi idahun kankan sibẹ.",
+      fillAllFields: "Jọwọ fọwọsi gbogbo awọn alafo ti a beere.",
+      cho: "CHO: Dr. Ibrahim",
+    },
+    IG: {
+      title: "Ngalaba Ntinye",
+      subtitle: "PHC → Ụlọ Ọgwụ Ọha",
+      tabForm: "Ntinye Ọhụrụ",
+      tabOutgoing: "Ntinye Ndị E Zipụrụ",
+      tabCounter: "Nzaghachi Ntinye",
+      selectPatient: "Họrọ Onye Ọrịa",
+      patientPlaceholder: "Họrọ onye ọrịa...",
+      destination: "Ụlọ Ọgwụ A Na-aga",
+      destinationPlaceholder: "Chọọ ụlọ ọgwụ...",
+      recommended: "Akwadoro maka ihe kpatara ya",
+      reason: "Ihe Mere E Ji Efe",
+      reasonPlaceholder: "Họrọ ihe kpatara ya...",
+      clinicalSummary: "Nchịkọta Ahụike",
+      clinicalPlaceholder: "Onye ọrịa bịara na...",
+      urgency: "Ọkwa Ngwa Ngwa",
+      urgencyPlaceholder: "Họrọ ọkwa ngwa ngwa...",
+      generateBtn: "Mepụta Ntinye",
+      routine: "Nke Oge Niile",
+      urgent: "Ngwa Ngwa",
+      emergency: "Mberede",
+      obstructedLabour: "Ihe Isi Ike Ịmụ Nwa",
+      severeMalaria: "Ịba Dị Ike",
+      surgicalEmergency: "Mberede Ịwa Ahụ",
+      hypertensiveCrisis: "Ọbara Mgbali Elu Dị Ike",
+      other: "Ọzọ",
+      patient: "Onye Ọrịa",
+      destinationCol: "Ebe A Na-aga",
+      reasonCol: "Ihe Kpatara",
+      status: "Ọnọdụ",
+      date: "Ụbọchị",
+      noReferrals: "Enweghị ntinye e zipụrụ ugbu a.",
+      pendingSync: "Na-echere Njikọ",
+      sent: "E Zipụla",
+      received: "Anatawo",
+      counterReferred: "E Weghachitela",
+      counterTitle: "Nzaghachi Site Na Ụlọ Ọgwụ Ọha",
+      fromHospital: "Site Na Ụlọ Ọgwụ",
+      diagnosis: "Ọrịa A Chọpụtara",
+      dischargeNotes: "Ihe Edeturu Maka Ịpụ",
+      noCounterReferrals: "Enweghị nzaghachi ntinye ọ bụla ugbu a.",
+      fillAllFields: "Biko dejupụta ebe niile achọrọ.",
+      cho: "CHO: Dr. Ibrahim",
+    },
+    PI: {
+      title: "Referral Module",
+      subtitle: "PHC → General Hospital",
+      tabForm: "New Referral",
+      tabOutgoing: "Referral Wey We Don Send",
+      tabCounter: "Reply From Hospital",
+      selectPatient: "Select Patient",
+      patientPlaceholder: "Choose patient...",
+      destination: "Where Dem Go",
+      destinationPlaceholder: "Search hospital...",
+      recommended: "Better for this matter",
+      reason: "Why We Dey Refer",
+      reasonPlaceholder: "Select why...",
+      clinicalSummary: "Wetin Do Di Patient",
+      clinicalPlaceholder: "Patient come with...",
+      urgency: "How Urgent E Be",
+      urgencyPlaceholder: "Select how urgent...",
+      generateBtn: "Make Referral",
+      routine: "Normal",
+      urgent: "Urgent",
+      emergency: "Emergency",
+      obstructedLabour: "Hard Labour",
+      severeMalaria: "Strong Malaria",
+      surgicalEmergency: "Emergency Surgery",
+      hypertensiveCrisis: "High BP",
+      other: "Other Matter",
+      patient: "Patient",
+      destinationCol: "Where Dem Go",
+      reasonCol: "Why",
+      status: "Status",
+      date: "Date",
+      noReferrals: "No referral don go outside yet.",
+      pendingSync: "E Never Send",
+      sent: "We Don Send Am",
+      received: "Dem Don Collect",
+      counterReferred: "Dem Don Reply",
+      counterTitle: "Reply From General Hospital",
+      fromHospital: "From Hospital",
+      diagnosis: "Wetin Dem See",
+      dischargeNotes: "Discharge Book",
+      noCounterReferrals: "No reply don come yet.",
+      fillAllFields: "Abeg fill all di spaces wey dem ask for.",
+      cho: "CHO: Dr. Ibrahim",
+    },
   };
 
   // ─── Mock Data ─────────────────────────────────────────────
@@ -164,11 +331,22 @@ export default function Referral({ language, theme }: ReferralProps) {
     { id: 'PHC-KAN-0824', name: 'Ibrahim Danladi' },
   ];
 
-  /** Destination hospitals in Kaduna State */
+  /** Destination hospitals with Smart Clinic / EMR capabilities */
   const hospitals = [
-    'General Hospital Kaduna',
-    'General Hospital Zaria',
-    'Barau Dikko Teaching Hospital',
+    // Kaduna
+    { name: 'Barau Dikko Teaching Hospital', state: 'Kaduna', specialties: ['Surgical Emergency', 'Obstructed Labour', 'Hypertensive Crisis'], capabilities: ['EMR Active'] },
+    { name: 'Ahmadu Bello University Teaching Hospital', state: 'Kaduna', specialties: ['Surgical Emergency', 'Severe Malaria (Cerebral)', 'Hypertensive Crisis'], capabilities: ['Smart Clinic'] },
+    { name: 'General Hospital Kaduna', state: 'Kaduna', specialties: ['Obstructed Labour', 'Severe Malaria (Cerebral)'], capabilities: ['EMR Active'] },
+    { name: 'General Hospital Zaria', state: 'Kaduna', specialties: ['Obstructed Labour'], capabilities: ['EMR Active'] },
+    { name: '44 Nigerian Army Reference Hospital', state: 'Kaduna', specialties: ['Surgical Emergency', 'Trauma'], capabilities: ['API Gateway'] },
+    { name: 'St. Gerard\'s Catholic Hospital Kaduna', state: 'Kaduna', specialties: ['Obstructed Labour'], capabilities: ['EMR Active'] },
+    // Plateau
+    { name: 'Jos University Teaching Hospital (JUTH)', state: 'Plateau', specialties: ['Surgical Emergency', 'Severe Malaria (Cerebral)', 'Hypertensive Crisis'], capabilities: ['Smart Clinic'] },
+    { name: 'Plateau State Specialist Hospital', state: 'Plateau', specialties: ['Obstructed Labour', 'Surgical Emergency'], capabilities: ['EMR Active'] },
+    { name: 'Bingham University Teaching Hospital', state: 'Plateau', specialties: ['Obstructed Labour', 'Hypertensive Crisis'], capabilities: ['EMR Active'] },
+    // Federal / Others
+    { name: 'National Hospital Abuja', state: 'FCT', specialties: ['Surgical Emergency', 'Severe Malaria (Cerebral)', 'Hypertensive Crisis', 'Obstructed Labour'], capabilities: ['API Gateway'] },
+    { name: 'Federal Medical Centre Katsina', state: 'Katsina', specialties: ['Severe Malaria (Cerebral)', 'Obstructed Labour'], capabilities: ['EMR Active'] }
   ];
 
   /** Reasons for referral — maps to both EN and HA labels */
@@ -426,6 +604,21 @@ export default function Referral({ language, theme }: ReferralProps) {
             {counterReferrals.length}
           </span>
         </button>
+        {/* Telehealth Tab */}
+        <button
+          onClick={() => setActiveView('telehealth')}
+          className={`flex items-center space-x-2 px-5 py-2.5 rounded-md font-semibold text-sm transition border ${
+            activeView === 'telehealth'
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+              : 'bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--border-default)] hover:bg-[var(--card-bg-hover)]'
+          }`}
+        >
+          <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <span>Specialist Consults</span>
+          <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-full">
+            {teleConsults.length}
+          </span>
+        </button>
       </div>
 
       {/* ── View Content ────────────────────────────────────── */}
@@ -456,19 +649,85 @@ export default function Referral({ language, theme }: ReferralProps) {
                   ))}
                 </select>
               </div>
-              <div>
+              <div className="relative">
                 <label className={labelClass}>{t[language].destination}</label>
-                <select
-                  required
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  className={selectClass}
+                <div 
+                  className="relative"
+                  onClick={() => setIsDestinationOpen(true)}
                 >
-                  <option value="" disabled>{t[language].destinationPlaceholder}</option>
-                  {hospitals.map(h => (
-                    <option key={h} value={h}>{h}</option>
-                  ))}
-                </select>
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
+                  <input
+                    type="text"
+                    required={!destination}
+                    value={destinationSearch || destination}
+                    onChange={(e) => {
+                      setDestinationSearch(e.target.value);
+                      setIsDestinationOpen(true);
+                      if (destination) setDestination('');
+                    }}
+                    onFocus={() => setIsDestinationOpen(true)}
+                    placeholder={t[language].destinationPlaceholder}
+                    className="w-full pl-9 pr-8 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition"
+                  />
+                  {destination && (
+                    <button 
+                      type="button" 
+                      onClick={(e) => { e.stopPropagation(); setDestination(''); setDestinationSearch(''); }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--danger)]"
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+                
+                {isDestinationOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-[var(--card-bg)] border border-[var(--border-default)] rounded-md max-h-60 overflow-auto" style={{ boxShadow: 'var(--shadow-elevated)' }}>
+                    {/* Dark background click-away overlay hack for simplicity in this demo */}
+                    <div className="fixed inset-0 z-[-1]" onClick={() => setIsDestinationOpen(false)}></div>
+                    
+                    {hospitals
+                      .filter(h => h.name.toLowerCase().includes(destinationSearch.toLowerCase()) || h.state.toLowerCase().includes(destinationSearch.toLowerCase()))
+                      .sort((a, b) => {
+                        // Sort recommended hospitals to the top if a reason is selected
+                        if (reason) {
+                          const aRec = a.specialties.includes(reason);
+                          const bRec = b.specialties.includes(reason);
+                          if (aRec && !bRec) return -1;
+                          if (!aRec && bRec) return 1;
+                        }
+                        return 0;
+                      })
+                      .map((h, i) => {
+                        const isRecommended = reason && h.specialties.includes(reason);
+                        return (
+                          <div 
+                            key={i}
+                            onClick={() => {
+                              setDestination(`${h.name} (${h.state})`);
+                              setDestinationSearch(`${h.name} (${h.state})`);
+                              setIsDestinationOpen(false);
+                            }}
+                            className="p-3 hover:bg-[var(--card-bg-hover)] cursor-pointer border-b border-[var(--border-default)] last:border-0 transition"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="font-medium text-[var(--text-primary)]">{h.name}</div>
+                                <div className="text-xs text-[var(--text-muted)] mt-0.5">{h.state} State • {h.capabilities.join(', ')}</div>
+                              </div>
+                              {isRecommended && (
+                                <span className="bg-green-500/10 text-green-600 dark:text-green-400 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-green-500/20 whitespace-nowrap ml-2">
+                                  {t[language].recommended || "Recommended"}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                    })}
+                    {hospitals.filter(h => h.name.toLowerCase().includes(destinationSearch.toLowerCase()) || h.state.toLowerCase().includes(destinationSearch.toLowerCase())).length === 0 && (
+                      <div className="p-3 text-[var(--text-muted)] text-sm text-center">No hospitals found</div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -707,6 +966,239 @@ export default function Referral({ language, theme }: ReferralProps) {
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════
+          VIEW 4: Specialist Consults (Telehealth)
+         ════════════════════════════════════════════════════════ */}
+      {activeView === 'telehealth' && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {/* New Consult Request Form */}
+          <div className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-xl p-5 space-y-4" style={{ boxShadow: 'var(--shadow-card)' }}>
+            <div>
+              <h3 className="text-md font-bold text-[var(--text-primary)]">New Specialist Consultation</h3>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Package clinical summaries and media attachments to forward to tertiary institutions asynchronously.</p>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Select Patient */}
+              <div>
+                <label className={labelClass}>Patient</label>
+                <select
+                  value={telePatient}
+                  onChange={(e) => setTelePatient(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">Choose a patient...</option>
+                  {mockPatients.map(p => (
+                    <option key={p.id} value={p.name}>{p.name} ({p.id})</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Select Specialty */}
+              <div>
+                <label className={labelClass}>Target Specialty Department</label>
+                <select
+                  value={teleSpecialty}
+                  onChange={(e) => setTeleSpecialty(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">Select specialty...</option>
+                  <option value="Dermatology">Dermatology (JUTH Reference)</option>
+                  <option value="Pediatrics">Pediatrics (ABUTH Reference)</option>
+                  <option value="Cardiology">Cardiology (National Hospital)</option>
+                  <option value="Obstetrics & Gynecology">Obstetrics & Gynecology (Maternity)</option>
+                </select>
+              </div>
+
+              {/* Case Query Notes */}
+              <div>
+                <label className={labelClass}>Clinical Query Notes</label>
+                <textarea
+                  rows={4}
+                  value={teleQuery}
+                  onChange={(e) => setTeleQuery(e.target.value)}
+                  placeholder="Describe symptoms, vital history, and what diagnostic input you need from the specialist..."
+                  className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition resize-none"
+                />
+              </div>
+
+              {/* Audio/Video Attachment Sandbox */}
+              <div className="border border-[var(--border-default)] rounded-lg p-4 bg-[var(--queue-bg)] space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-bold text-[var(--text-secondary)]">Voice Memo / Heart Sound Attachment</span>
+                  {hasAudioAttachment && (
+                    <span className="text-[10px] text-emerald-500 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Ready</span>
+                  )}
+                </div>
+
+                {!isRecording && !hasAudioAttachment && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRecording(true);
+                      setRecordingSeconds(0);
+                      const timer = setInterval(() => {
+                        setRecordingSeconds(s => {
+                          if (s >= 10) {
+                            clearInterval(timer);
+                            setIsRecording(false);
+                            setHasAudioAttachment(true);
+                            return 0;
+                          }
+                          return s + 1;
+                        });
+                      }, 1000);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 text-[var(--primary)] py-2.5 rounded-lg border border-[var(--primary)]/25 transition text-xs font-medium cursor-pointer"
+                  >
+                    <Mic className="w-4 h-4 text-[var(--primary)]" />
+                    Record Audio Attachment (Simulate)
+                  </button>
+                )}
+
+                {isRecording && (
+                  <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-3 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping" />
+                      <span className="text-xs font-bold text-red-500">Recording... 0:0{recordingSeconds}</span>
+                    </div>
+                    {/* Simulated Waveform animation */}
+                    <div className="flex items-center gap-1">
+                      {[15, 30, 20, 45, 10, 35, 15, 25, 40].map((h, i) => (
+                        <div 
+                          key={i} 
+                          className="w-1 bg-red-500 rounded-full animate-pulse" 
+                          style={{ height: `${h}px`, animationDelay: `${i * 100}ms` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {hasAudioAttachment && (
+                  <div className="bg-[var(--card-bg)] border border-[var(--border-default)] p-3 rounded-lg flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                        className="p-1.5 bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 text-[var(--primary)] rounded-full transition"
+                      >
+                        {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </button>
+                      <div>
+                        <div className="text-xs font-medium text-[var(--text-primary)]">clinical_attachment_01.wav</div>
+                        <div className="text-[10px] text-[var(--text-muted)]">Size: 180 KB • Duration: 0:10</div>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => { setHasAudioAttachment(false); setIsPlayingAudio(false); }}
+                      className="text-[var(--text-muted)] hover:text-red-500 text-xs font-bold px-2 py-1 hover:bg-red-500/10 rounded transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => {
+                  if (!telePatient || !teleSpecialty || !teleQuery) {
+                    alert('Please complete the consultation details.');
+                    return;
+                  }
+                  const newConsult = {
+                    id: `TEL-${Math.floor(1000 + Math.random() * 9000)}-${teleConsults.length + 1}`,
+                    patient: telePatient,
+                    specialty: teleSpecialty,
+                    query: teleQuery,
+                    audio: hasAudioAttachment,
+                    status: 'Pending Sync' as const,
+                    date: 'Just Now'
+                  };
+                  setTeleConsults([newConsult, ...teleConsults]);
+                  setTelePatient('');
+                  setTeleSpecialty('');
+                  setTeleQuery('');
+                  setHasAudioAttachment(false);
+                  setIsPlayingAudio(false);
+                }}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition text-xs flex justify-center items-center gap-2 cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                Queue Consult Request
+              </button>
+            </div>
+          </div>
+
+          {/* Outbox & Consultations History Queue */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-wider">Telehealth consult history</h3>
+            {teleConsults.map((consult) => {
+              const isReviewed = consult.status === 'Reviewed';
+              const isPending = consult.status === 'Pending Sync';
+              return (
+                <div 
+                  key={consult.id}
+                  className="bg-[var(--card-bg)] border border-[var(--border-default)] rounded-xl p-4 space-y-3"
+                  style={{ boxShadow: 'var(--shadow-card)' }}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-bold text-[var(--text-primary)] text-sm">{consult.patient}</div>
+                      <div className="text-[10px] text-[var(--text-muted)] mt-0.5">{consult.id} • {consult.specialty} Department</div>
+                    </div>
+                    <span 
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-bold border ${
+                        isReviewed 
+                          ? 'bg-green-500/10 text-green-600 border-green-500/20' 
+                          : isPending
+                            ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                            : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                      }`}
+                    >
+                      {consult.status}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic">"{consult.query}"</p>
+
+                  {isReviewed && consult.response && (
+                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Specialist Diagnosis & Directions</span>
+                        <button 
+                          onClick={() => {
+                            if (activePlaybackId === consult.id) {
+                              setActivePlaybackId(null);
+                            } else {
+                              setActivePlaybackId(consult.id);
+                            }
+                          }}
+                          className="flex items-center gap-1 text-[10px] text-emerald-600 hover:text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"
+                        >
+                          {activePlaybackId === consult.id ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                          {activePlaybackId === consult.id ? 'Stop Playing' : 'Listen Response'}
+                        </button>
+                      </div>
+                      
+                      {activePlaybackId === consult.id && (
+                        <div className="flex items-center gap-1.5 p-1 rounded bg-[var(--card-bg)] border border-emerald-500/30">
+                          <Volume2 className="w-3.5 h-3.5 text-emerald-500 animate-bounce" />
+                          <div className="h-1 flex-1 bg-emerald-100 rounded overflow-hidden">
+                            <div className="h-full bg-emerald-500 w-1/2 animate-[pulse_1.5s_infinite]" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      <p className="text-xs text-[var(--text-primary)] leading-relaxed">{consult.response}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

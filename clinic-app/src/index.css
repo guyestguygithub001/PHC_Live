@@ -77,6 +77,31 @@
   --header-bg: #272d3d;
 }
 
+/* --- Solar-Save Theme (High-Efficiency Pure OLED Black) --- */
+[data-theme="solar-save"] {
+  --page-bg: #000000;
+  --card-bg: #0a0a0c;
+  --card-bg-hover: #121216;
+  --card-bg-secondary: #000000;
+  --input-bg: #070709;
+  --input-border: #1f2937;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted: #4b5563;
+  --border-default: #1f2937;
+  --queue-bg: #000000;
+  --queue-item-bg: #0a0a0c;
+  --queue-item-hover: #121216;
+  --shadow-card: none;
+  --shadow-elevated: none;
+  --timeline-bg: #0a0806;
+  --timeline-border: #201a14;
+  --sidebar-bg: #000000;
+  --header-bg: #0a0a0c;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+}
+
 body {
   background: var(--page-bg);
   color: var(--text-primary);

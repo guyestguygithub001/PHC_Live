@@ -3,7 +3,7 @@ import { Activity, Stethoscope, AlertTriangle, Save, ShieldAlert, CheckCircle2 }
 import { v4 as uuidv4 } from 'uuid';
 
 interface TriageProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -51,6 +51,54 @@ export default function Triage({ language, theme }: TriageProps) {
       criticalAlert: "HATSARI: Hawan Jini Ya Hau",
       urgentTag: "GAGGAWA",
       validationErr: "Zafin Jiki Bai Inganta Ba"
+    },
+    YO: {
+      title: "Ayẹwo akọkọ & Awọn ami igbesi aye",
+      queue: "Nduro fun Ayẹwo",
+      unlock: "Tẹ PIN lati ṣii Terminal",
+      pinPlaceholder: "PIN onọmba mẹrin",
+      unlockBtn: "Ṣii & Gba Iṣẹ",
+      patient: "Alaisan",
+      bp: "Iwọn Ẹjẹ (mmHg)",
+      temp: "Iwọn otutu (°C)",
+      weight: "Iwuwo (kg)",
+      spo2: "SpO2 (%)",
+      submit: "Fipamọ & Firanṣẹ si Dọkita",
+      criticalAlert: "PATAKI: Iwọn Ẹjẹ Giga",
+      urgentTag: "AMOJUTO",
+      validationErr: "Iwọn otutu ti ko tọ"
+    },
+    IG: {
+      title: "Nnwale & Ihe mgbaàmà ndụ",
+      queue: "Na-eche Nnwale",
+      unlock: "Tinye PIN iji kpọghee Terminal",
+      pinPlaceholder: "PIN Nọmba anọ",
+      unlockBtn: "Kpọghee & Bido Ọrụ",
+      patient: "Onye Ọrịa",
+      bp: "Ọbara Mgbali (mmHg)",
+      temp: "Okpomọkụ (°C)",
+      weight: "Ibu (kg)",
+      spo2: "SpO2 (%)",
+      submit: "Chekwaa & Ziga na Dọkịta",
+      criticalAlert: "DỊ MKPA: Ọbara Mgbali Elu",
+      urgentTag: "MBEREDE",
+      validationErr: "Okpomọkụ adịghị mma"
+    },
+    PI: {
+      title: "Checkup & Vitals",
+      queue: "Waiting for Checkup",
+      unlock: "Put PIN to Open Terminal",
+      pinPlaceholder: "4-Digit PIN",
+      unlockBtn: "Open & Start Work",
+      patient: "Patient",
+      bp: "Blood Pressure (mmHg)",
+      temp: "Temp (°C)",
+      weight: "Weight (kg)",
+      spo2: "SpO2 (%)",
+      submit: "Save & Send to Doctor",
+      criticalAlert: "DANGER: Blood Pressure High",
+      urgentTag: "URGENT",
+      validationErr: "Wrong Temperature"
     }
   };
 

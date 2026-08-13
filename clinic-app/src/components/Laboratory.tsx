@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 // ============================================================
 
 interface LaboratoryProps {
-  language: 'EN' | 'HA';
+  language: 'EN' | 'HA' | 'YO' | 'IG' | 'PI';
   theme: 'light' | 'dark';
 }
 
@@ -111,6 +111,105 @@ const t = {
     call: 'Kira',
     slipGenerated: 'An fitar da takardar tura zuwa wani wuri!'
   },
+  YO: {
+    title: 'Yàrá Àyẹ̀wò',
+    queue: 'Tò Lẹ́sẹẹsẹ fún Àyẹ̀wò',
+    selectPatient: 'Yan aláìsàn láti inú àtòjọ láti fi èsì sínú',
+    resultEntry: 'Ìwọlé Èsì Àyẹ̀wò',
+    testResult: 'Èsì Àyẹ̀wò',
+    submit: 'Firanṣẹ Èsì',
+    notes: 'Àkọsílẹ̀ àfikún (tí ó bá wù ó)...',
+    orderedBy: 'Ẹni tí ó pàṣẹ',
+    mandatoryBadge: 'Kò gbọdọ̀ ṣàì ṣe kí a tó lọ sí ilé egbògi',
+    positive: 'Ó wà',
+    negative: 'Kò sí',
+    invalid: 'Kò wúlò',
+    malaria: 'Àyẹ̀wò Iba (RDT)',
+    widal: 'Àyẹ̀wò Widal',
+    fbc: 'Kíkà Ẹ̀jẹ̀ kíkún',
+    wbc: 'WBC (×10⁹/L)',
+    rbc: 'RBC (×10¹²/L)',
+    hemoglobin: 'Hemoglobin (g/dL)',
+    platelets: 'Platelets (×10⁹/L)',
+    selectResult: 'Yan èsì...',
+    successAlert: 'A ti fi èsì ránṣẹ́ láṣeyọrí!',
+    resultId: 'Nọ́mbà Èsì',
+    technician: 'Onímọ̀ Àyẹ̀wò',
+    enterResults: 'Tẹ Èsì',
+    externalReferral: 'Ríran Lọ Sí Ìta',
+    searchLab: 'Wá orúkọ tàbí àdírẹ́sì yàrá àyẹ̀wò',
+    viewTests: 'Wo àwọn àyẹ̀wò tí yàrá yìí ń ṣe',
+    generateSlip: 'Ṣèdá Ìwé',
+    direction: 'Ìtọ́sọ́nà',
+    call: 'Pè',
+    slipGenerated: 'A ti ṣèdá ìwé láti rán aláìsàn lọ sí ìta!'
+  },
+  IG: {
+    title: 'Ụlọ Nyocha',
+    queue: 'Ahịrị Nyocha',
+    selectPatient: 'Họrọ onye ọrịa n\'ahịrị iji tinye nsonaazụ',
+    resultEntry: 'Ntinye Nsonaazụ',
+    testResult: 'Nsonaazụ Nyocha',
+    submit: 'Nyefee Nsonaazụ',
+    notes: 'Ihe ndetu mgbakwunye (nhọrọ)...',
+    orderedBy: 'Onye nyere iwu',
+    mandatoryBadge: 'A chọrọ tupu ụlọ ọgwụ',
+    positive: 'Ọ dị',
+    negative: 'Ọ dighi',
+    invalid: 'A nabataghị',
+    malaria: 'Nyocha Ịba (RDT)',
+    widal: 'Nyocha Widal',
+    fbc: 'Nchịkọta Ọbara',
+    wbc: 'WBC (×10⁹/L)',
+    rbc: 'RBC (×10¹²/L)',
+    hemoglobin: 'Hemoglobin (g/dL)',
+    platelets: 'Platelets (×10⁹/L)',
+    selectResult: 'Họrọ nsonaazụ...',
+    successAlert: 'Enyefeela nsonaazụ nke ọma!',
+    resultId: 'ID Nsonaazụ',
+    technician: 'Onye Nyocha',
+    enterResults: 'Tinye Nsonaazụ',
+    externalReferral: 'Ntụgharị Mpụga',
+    searchLab: 'Chọọ aha ụlọ nyocha ma ọ bụ adreesị',
+    viewTests: 'Lelee nyocha ụlọ nyocha a na-enye',
+    generateSlip: 'Mepụta Akwụkwọ',
+    direction: 'Ntụziaka',
+    call: 'Kpọọ',
+    slipGenerated: 'Emepụtara Akwụkwọ Ntụgharị maka Ụlọ Nyocha Mpụga!'
+  },
+  PI: {
+    title: 'Lab',
+    queue: 'Lab Queue',
+    selectPatient: 'Select request from the queue to put result',
+    resultEntry: 'Test Result Entry',
+    testResult: 'Test Result',
+    submit: 'Submit Result',
+    notes: 'Extra notes (if you want)...',
+    orderedBy: 'Who order am',
+    mandatoryBadge: 'Must do before Pharmacy',
+    positive: 'Positive',
+    negative: 'Negative',
+    invalid: 'Invalid',
+    malaria: 'Malaria RDT',
+    widal: 'Widal Test',
+    fbc: 'Full Blood Count',
+    wbc: 'WBC (×10⁹/L)',
+    rbc: 'RBC (×10¹²/L)',
+    hemoglobin: 'Hemoglobin (g/dL)',
+    platelets: 'Platelets (×10⁹/L)',
+    selectResult: 'Choose result...',
+    successAlert: 'Result enter well well!',
+    resultId: 'Result ID',
+    technician: 'Lab Tech',
+    enterResults: 'Put Results',
+    externalReferral: 'Send go outside Lab',
+    searchLab: 'Find lab name or address',
+    viewTests: 'Check tests wey dis lab dey do',
+    generateSlip: 'Print Paper',
+    direction: 'Direction',
+    call: 'Call',
+    slipGenerated: 'Paper ready to send patient outside Lab!'
+  }
 };
 
 // ---- Mock lab request data ----
@@ -374,7 +473,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
   // ---- Translate test type name for display ----
   const getTestLabel = (testType: TestType): string => {
-    if (language === 'HA') {
+    if (language !== 'EN') {
       switch (testType) {
         case 'Malaria RDT':
           return lang.malaria;
@@ -521,7 +620,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
                   <div className="flex items-center space-x-2 mb-2">
                     <FileText className="w-4 h-4 text-[var(--text-muted)]" />
                     <label className="text-[var(--text-secondary)] text-sm font-semibold">
-                      {language === 'EN' ? 'Notes' : 'Bayani'}
+                      {language === 'HA' ? 'Bayani' : language === 'YO' ? 'Àkọsílẹ̀' : language === 'IG' ? 'Ihe ndetu' : 'Notes'}
                     </label>
                   </div>
                   <textarea
