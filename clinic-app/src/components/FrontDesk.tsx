@@ -405,7 +405,11 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
                 <div className="p-8 text-center text-[var(--text-muted)]">No patients found.</div>
               ) : (
                 patients.map((p) => (
-                  <div key={p.id} className="flex justify-between items-center bg-[var(--queue-item-bg)] p-3 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer group">
+                  <div 
+                    key={p.id} 
+                    onClick={() => window.location.hash = 'TRIAGE'}
+                    className="flex justify-between items-center bg-[var(--queue-item-bg)] p-3 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer group"
+                  >
                     <div>
                       <p className="text-[var(--text-primary)] font-medium group-hover:text-[var(--primary)] transition">{p.first_name} {p.last_name}</p>
                       <p className="text-[var(--text-muted)] text-xs mt-0.5">{p.phc_id} {p.phone ? `• ${p.phone}` : ''}</p>
