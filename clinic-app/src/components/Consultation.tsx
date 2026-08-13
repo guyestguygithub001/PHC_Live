@@ -15,6 +15,7 @@ interface ConsultationProps {
 export default function Consultation({ language, theme }: ConsultationProps) {
   const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   const [queue, setQueue] = useState<any[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   
   // ICD-11 Engine State
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<ICD11Code | null>(null);
@@ -58,6 +59,26 @@ export default function Consultation({ language, theme }: ConsultationProps) {
   useEffect(() => {
     fetchQueue();
   }, []);
+
+  const fetchHistory = async (patientId: string) => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`);
+      if (res.ok) {
+        const data = await res.json();
+        setHistory(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedPatient) {
+      fetchHistory(selectedPatient.id);
+    } else {
+      setHistory([]);
+    }
+  }, [selectedPatient]);
 
   // Fuse.js setup — highly typo-tolerant offline fuzzy search
   const fuse = useMemo(() => new Fuse(primaryCareICD11, {
@@ -322,33 +343,30 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                 </h3>
 
                 <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-                  {/* Timeline Item 1 */}
-                  <div className="relative flex items-center justify-between group">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
-                      <Pill className="w-4 h-4" />
-                    </div>
-                    <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                      <div className="flex items-center justify-between space-x-2 mb-1">
-                        <div className="font-bold text-slate-700 text-sm">Dispensary</div>
-                        <time className="text-xs font-medium text-[var(--primary)]">May 12</time>
-                      </div>
-                      <div className="text-sm text-slate-600">Artemether/Lumefantrine 20/120mg given.</div>
-                    </div>
-                  </div>
+                  {history.length === 0 ? (
+                    <div className="text-sm text-slate-500 text-center py-4">No previous history found.</div>
+                  ) : (
+                    history.map((item, idx) => {
+                      let Icon = FileText;
+                      if (item.type === 'lab') Icon = FlaskConical;
+                      if (item.type === 'dispensary') Icon = Pill;
 
-                  {/* Timeline Item 2 */}
-                  <div className="relative flex items-center justify-between group">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
-                      <FlaskConical className="w-4 h-4" />
-                    </div>
-                    <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
-                      <div className="flex items-center justify-between space-x-2 mb-1">
-                        <div className="font-bold text-slate-700 text-sm">Lab Result</div>
-                        <time className="text-xs font-medium text-slate-400">May 12</time>
-                      </div>
-                      <div className="text-sm text-slate-600">Malaria RDT: Positive</div>
-                    </div>
-                  </div>
+                      return (
+                        <div key={idx} className="relative flex items-center justify-between group">
+                          <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 z-10">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="w-[calc(100%-4rem)] bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                            <div className="flex items-center justify-between space-x-2 mb-1">
+                              <div className="font-bold text-slate-700 text-sm">{item.title}</div>
+                              <time className="text-xs font-medium text-[var(--primary)]">{new Date(item.date).toLocaleDateString()}</time>
+                            </div>
+                            <div className="text-sm text-slate-600">{item.description}</div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 

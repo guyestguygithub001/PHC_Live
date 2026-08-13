@@ -61,6 +61,7 @@ func main() {
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/patients", getPatients)
+		v1.GET("/patients/:id/history", getPatientHistory)
 		v1.POST("/patients", createPatient)
 		v1.POST("/dhis2/sync", dhis2SyncHandler)
 		

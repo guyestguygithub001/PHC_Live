@@ -914,3 +914,64 @@ func dispensePrescription(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
+func getPatientHistory(c *gin.Context) {
+	patientID := c.Param("id")
+
+	type HistoryItem struct {
+		Type        string    `json:"type"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		Date        time.Time `json:"date"`
+	}
+	history := []HistoryItem{}
+
+	if isOfflineMode {
+		for _, e := range inMemoryEncounters {
+			if e.PatientID == patientID {
+				history = append(history, HistoryItem{
+					Type: "encounter", Title: e.Type + " Encounter", Description: e.ClinicalNotes, Date: e.CreatedAt,
+				})
+			}
+		}
+		for _, lr := range inMemoryLabRequests {
+			if lr.PatientID == patientID {
+				history = append(history, HistoryItem{
+					Type: "lab", Title: "Lab Result", Description: lr.TestType + ": " + lr.Result, Date: lr.CreatedAt,
+				})
+			}
+		}
+		for _, pr := range inMemoryPrescriptions {
+			if pr.PatientID == patientID {
+				history = append(history, HistoryItem{
+					Type: "dispensary", Title: "Dispensary", Description: pr.DrugID + " " + pr.DosageInstructions + " given", Date: pr.CreatedAt,
+				})
+			}
+		}
+		c.JSON(http.StatusOK, history)
+		return
+	}
+
+	rows, err := db.Query(`
+		SELECT 'encounter' AS type, type || ' Encounter' AS title, clinical_notes AS description, created_at AS date FROM encounters WHERE patient_id = $1
+		UNION ALL
+		SELECT 'lab' AS type, 'Lab Result' AS title, test_type || ': ' || COALESCE(result, status) AS description, created_at AS date FROM lab_requests WHERE patient_id = $1
+		UNION ALL
+		SELECT 'dispensary' AS type, 'Dispensary' AS title, drug_id || ' ' || dosage_instructions || ' (' || status || ')' AS description, created_at AS date FROM prescriptions WHERE patient_id = $1
+		ORDER BY date DESC
+	`, patientID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error: " + err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item HistoryItem
+		if err := rows.Scan(&item.Type, &item.Title, &item.Description, &item.Date); err == nil {
+			history = append(history, item)
+		}
+	}
+	c.JSON(http.StatusOK, history)
+}
+
+
