@@ -178,3 +178,14 @@
 | D-012 | UI Normalization (De-AI Overhaul) across all 9 modules | Standardize UI to professional clinical standards; eliminate AI styling signatures to ensure human-crafted readability and high usability on PHC hardware | 2026-08-12 |
 | D-013 | Synchronize latest code release to GitHub repository | Ensure main branch contains production-ready, de-AI overhauled frontend and backend modules | 2026-08-12 |
 
+
+## Session 4 Update — AI Memory Architecture (2026-08-14)
+
+### Decisions Made (Session 4)
+
+| # | Decision | Rationale | Date |
+|---|---|---|---|
+| D-014 | Short-Term Memory Architecture (Conversation Buffer) | Implement a rolling context window for current sessions. Summarize older exchanges into compressed summaries while keeping recent turns verbatim to prevent context overflow. | 2026-08-14 |
+| D-015 | Long-Term Memory Architecture (Persistent Vector Store) | Use a persistent vector database (e.g., pgvector, Pinecone, Weaviate) to store user preferences, past decisions, and learned patterns. Retrieve per query based on semantic relevance. | 2026-08-14 |
+| D-016 | Strict Storage Policy (Quality over Volume) | Only store information that changes the agent's behavior or deployment preferences. Casual asides are discarded. Retrieval quality matters more than storage volume. Prioritize fixing broken retrieval pipelines over dumping excess data. | 2026-08-14 |
+

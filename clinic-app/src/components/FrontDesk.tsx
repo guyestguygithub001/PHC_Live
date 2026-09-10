@@ -10,9 +10,15 @@ interface FrontDeskProps {
 export default function FrontDesk({ language, theme }: FrontDeskProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [patients, setPatients] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  // Duplicate warning state — when the backend returns a 409, we show a modal
+  // so the clerk can decide whether this is genuinely a new person.
+  const [duplicateCandidates, setDuplicateCandidates] = useState<any[]>([]);
+  const [pendingPayload, setPendingPayload] = useState<any>(null);
+
   // Registration Form State — matches the Data Dictionary from field survey
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -189,7 +195,9 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('http://localhost:3001/api/v1/patients');
+      const res = await fetch('http://localhost:3001/api/v1/patients', {
+        cache: 'no-store'
+      });
       if (res.ok) {
         const data = await res.json();
         setPatients(data);
@@ -205,42 +213,92 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
     fetchPatients();
   }, []);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent, forceCreate = false) => {
     e.preventDefault();
-    
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     const payload = {
       first_name: firstName,
       last_name: lastName,
       gender,
-      date_of_birth: age ? new Date(new Date().setFullYear(new Date().getFullYear() - parseInt(age))).toISOString().split('T')[0] : null,
+      date_of_birth: age
+        ? new Date(new Date().setFullYear(new Date().getFullYear() - parseInt(age)))
+            .toISOString()
+            .split('T')[0]
+        : null,
       tribe,
       religion,
       occupation,
       address,
       phone,
       next_of_kin_name: nextOfKin,
-      next_of_kin_phone: nextOfKinPhone
+      next_of_kin_phone: nextOfKinPhone,
+      force_create: forceCreate,
+      created_by: 'FRONT_DESK',
     };
 
     try {
       const res = await fetch('http://localhost:3001/api/v1/patients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
-      
+
+      if (res.status === 409) {
+        // Backend found a possible duplicate — show the warning modal
+        const data = await res.json();
+        setDuplicateCandidates(data.candidates || []);
+        setPendingPayload(payload);
+        setIsSubmitting(false);
+        return;
+      }
+
       if (res.ok) {
         const newPatient = await res.json();
-        alert(`Patient Registered!\nPHC-ID: ${newPatient.phc_id}\nRouted to Triage Queue.`);
+        alert(`Patient Registered!\nPHC-ID: ${newPatient.phc_id}\nRecord completeness: ${newPatient.record_completeness}%\nRouted to Triage Queue.`);
         setIsRegistering(false);
         resetForm();
+        setDuplicateCandidates([]);
+        setPendingPayload(null);
         fetchPatients();
       } else {
-        alert("Registration failed!");
+        const errData = await res.json().catch(() => ({}));
+        alert('Registration failed: ' + (errData.error || 'Unknown error'));
       }
     } catch (err) {
       console.error(err);
-      alert("Network error. Could not register patient.");
+      alert('Network error. Could not register patient.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  /** Called when the clerk confirms the duplicate warning and wants to proceed */
+  const handleForceRegister = async () => {
+    if (!pendingPayload) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:3001/api/v1/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...pendingPayload, force_create: true }),
+      });
+      if (res.ok) {
+        const newPatient = await res.json();
+        alert(`New patient created.\nPHC-ID: ${newPatient.phc_id}`);
+        setIsRegistering(false);
+        resetForm();
+        setDuplicateCandidates([]);
+        setPendingPayload(null);
+        fetchPatients();
+      } else {
+        alert('Registration failed after override.');
+      }
+    } catch (err) {
+      alert('Network error.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -251,6 +309,47 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
 
   return (
     <div className="w-full h-full flex flex-col space-y-6">
+
+      {/* Duplicate Warning Modal */}
+      {duplicateCandidates.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-[var(--card-bg)] rounded-xl border border-orange-500/40 shadow-2xl w-full max-w-lg">
+            <div className="p-5 border-b border-[var(--border-default)]">
+              <h3 className="text-lg font-bold text-orange-500">Possible Duplicate Found</h3>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                A record with similar details already exists. Please check the list below before creating a new file.
+              </p>
+            </div>
+            <div className="p-5 space-y-3 max-h-64 overflow-y-auto">
+              {duplicateCandidates.map((c: any) => (
+                <div key={c.patient.id} className="p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+                  <p className="font-semibold text-[var(--text-primary)]">{c.patient.first_name} {c.patient.last_name}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                    {c.patient.phc_id} &bull; {c.patient.phone} &bull; {c.reason}
+                  </p>
+                  <p className="text-xs text-[var(--text-muted)]">Record completeness: {c.patient.record_completeness}%</p>
+                </div>
+              ))}
+            </div>
+            <div className="p-5 border-t border-[var(--border-default)] flex gap-3">
+              <button
+                onClick={() => { setDuplicateCandidates([]); setPendingPayload(null); }}
+                className="flex-1 py-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm hover:bg-[var(--queue-item-hover)] transition"
+              >
+                Cancel — pull up existing record
+              </button>
+              <button
+                onClick={handleForceRegister}
+                disabled={isSubmitting}
+                className="flex-1 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating...' : 'Yes, this is a new person'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Page Header (No Box) */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-start md:items-center mb-2">
         <div>
@@ -260,6 +359,7 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
             <span className="text-sm font-medium">{t[language].offlineMode}</span>
           </div>
         </div>
+
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <button className="flex-1 md:flex-none flex items-center justify-center space-x-2 bg-[var(--primary)]/10 hover:bg-[var(--primary)]/20 text-[var(--primary)] px-4 py-2.5 rounded-lg transition font-medium">
             <QrCode className="w-5 h-5" />
@@ -368,10 +468,11 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
               </button>
               <button 
                 type="submit"
-                className="w-2/3 bg-[var(--primary)] text-white font-medium py-2.5 rounded-md flex justify-center items-center space-x-2 hover:shadow-sm transition"
+                disabled={isSubmitting}
+                className={`w-2/3 ${isSubmitting ? 'bg-gray-400' : 'bg-[var(--primary)] hover:shadow-sm'} text-white font-medium py-2.5 rounded-md flex justify-center items-center space-x-2 transition`}
               >
-                <span>{t[language].registerBtn}</span>
-                <Activity className="w-5 h-5" />
+                <span>{isSubmitting ? 'Registering...' : t[language].registerBtn}</span>
+                {!isSubmitting && <Activity className="w-5 h-5" />}
               </button>
             </div>
           </form>
@@ -404,21 +505,52 @@ export default function FrontDesk({ language, theme }: FrontDeskProps) {
               ) : patients.length === 0 ? (
                 <div className="p-8 text-center text-[var(--text-muted)]">No patients found.</div>
               ) : (
-                patients.map((p) => (
-                  <div 
-                    key={p.id} 
-                    onClick={() => window.location.hash = 'TRIAGE'}
-                    className="flex justify-between items-center bg-[var(--queue-item-bg)] p-3 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer group"
-                  >
-                    <div>
-                      <p className="text-[var(--text-primary)] font-medium group-hover:text-[var(--primary)] transition">{p.first_name} {p.last_name}</p>
-                      <p className="text-[var(--text-muted)] text-xs mt-0.5">{p.phc_id} {p.phone ? `• ${p.phone}` : ''}</p>
+                patients
+                  .filter(p => {
+                    if (!searchQuery) return true;
+                    const q = searchQuery.toLowerCase();
+                    return (
+                      (p.first_name && p.first_name.toLowerCase().includes(q)) ||
+                      (p.last_name && p.last_name.toLowerCase().includes(q)) ||
+                      (p.phc_id && p.phc_id.toLowerCase().includes(q)) ||
+                      (p.phone && p.phone.includes(q))
+                    );
+                  })
+                  .map((p) => {
+                    // Colour-code the completeness score so staff can see at a glance
+                    // which patient files still need work.
+                    const pct = p.record_completeness ?? 0;
+                    const completenessColor =
+                      pct >= 80 ? 'text-green-500 bg-green-500/10' :
+                      pct >= 50 ? 'text-amber-500 bg-amber-500/10' :
+                      'text-red-500 bg-red-500/10';
+
+                    return (
+                    <div
+                      key={p.id}
+                      onClick={() => window.location.hash = 'TRIAGE'}
+                      className="flex justify-between items-center bg-[var(--queue-item-bg)] p-3 rounded-lg hover:bg-[var(--queue-item-hover)] transition cursor-pointer group"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 flex-wrap gap-1">
+                          <p className="text-[var(--text-primary)] font-medium group-hover:text-[var(--primary)] transition truncate">{p.first_name} {p.last_name}</p>
+                          {p.is_anc && (
+                            <span className="bg-pink-500/10 text-pink-500 text-[10px] font-bold px-2 py-0.5 rounded-full border border-pink-500/20 shrink-0">
+                              ANC {p.anc_id ? `• ${p.anc_id}` : ''}
+                            </span>
+                          )}
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${completenessColor}`}>
+                            {pct}%
+                          </span>
+                        </div>
+                        <p className="text-[var(--text-muted)] text-xs mt-0.5 truncate">{p.phc_id}{p.phone ? ` • ${p.phone}` : ''}</p>
+                      </div>
+                      <button className="text-[var(--text-muted)] group-hover:text-[var(--primary)] transition p-1 shrink-0">
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
                     </div>
-                    <button className="text-[var(--text-muted)] group-hover:text-[var(--primary)] transition p-1">
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                ))
+                  )})
+
               )}
             </div>
           </div>

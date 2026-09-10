@@ -46,7 +46,7 @@ export default function Consultation({ language, theme }: ConsultationProps) {
 
   const fetchQueue = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/v1/queues/consultation');
+      const res = await fetch('http://localhost:3001/api/v1/queues/consultation', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setQueue(data);
@@ -62,7 +62,7 @@ export default function Consultation({ language, theme }: ConsultationProps) {
 
   const fetchHistory = async (patientId: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`);
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setHistory(data);
@@ -109,7 +109,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       hiv: "HIV/AIDS",
       tb: "Tuberculosis",
       hypertension: "Hypertension",
-      diabetes: "Diabetes"
+      diabetes: "Diabetes",
+      enrollANC: "Enroll in ANC",
+      ancEnrolled: "Enrolled in ANC with ID:"
     },
     HA: {
       title: "Duba Marasa Lafiya (OPD)",
@@ -128,7 +130,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       hiv: "Kan-jamau (HIV/AIDS)",
       tb: "Tari (TB)",
       hypertension: "Hawan Jini (Hypertension)",
-      diabetes: "Ciwon Sukari (Diabetes)"
+      diabetes: "Ciwon Sukari (Diabetes)",
+      enrollANC: "Sanya a Tsarin Awo (ANC)",
+      ancEnrolled: "An sanya a tsarin awo mai lamba:"
     },
     YO: {
       title: "Ifọrọwanilẹnuwo OPD",
@@ -147,7 +151,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       hiv: "Arun Kogboogun (HIV/AIDS)",
       tb: "Ikọ (TB)",
       hypertension: "Ẹjẹ Riru (Hypertension)",
-      diabetes: "Atọgbẹ (Diabetes)"
+      diabetes: "Atọgbẹ (Diabetes)",
+      enrollANC: "Forukosilẹ fun ANC",
+      ancEnrolled: "A ti forukosilẹ fun ANC pẹlu ID:"
     },
     IG: {
       title: "Nlele OPD",
@@ -166,7 +172,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       hiv: "HIV/AIDS",
       tb: "Ụkwara Nta (TB)",
       hypertension: "Ọbara Mgbali Elu (Hypertension)",
-      diabetes: "Ọrịa Shuga (Diabetes)"
+      diabetes: "Ọrịa Shuga (Diabetes)",
+      enrollANC: "Debanye maka ANC",
+      ancEnrolled: "E debanyere maka ANC na ID:"
     },
     PI: {
       title: "OPD Consultation",
@@ -185,7 +193,9 @@ export default function Consultation({ language, theme }: ConsultationProps) {
       hiv: "HIV/AIDS",
       tb: "Tuberculosis",
       hypertension: "Hypertension",
-      diabetes: "Diabetes"
+      diabetes: "Diabetes",
+      enrollANC: "Put am for ANC",
+      ancEnrolled: "We don put am for ANC with ID:"
     }
   };
 
@@ -247,6 +257,26 @@ export default function Consultation({ language, theme }: ConsultationProps) {
     } catch (err) {
       console.error(err);
       alert("Failed to submit consultation.");
+    }
+  };
+
+  const handleEnrollANC = async () => {
+    if (!selectedPatient) return;
+    try {
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${selectedPatient.id}/enroll-anc`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`${t[language].ancEnrolled} ${data.anc_id}`);
+        // Refresh queue to potentially show the new status or just keep them selected
+        fetchQueue();
+      } else {
+        alert("Failed to enroll in ANC.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error.");
     }
   };
 
@@ -528,7 +558,7 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                 </div>
 
                 {/* Action Center */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0">
+                <div className={`grid grid-cols-1 ${selectedPatient.gender === 'Female' ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-4 shrink-0`}>
                   <button 
                     onClick={() => setOrderLab(!orderLab)}
                     className={`${orderLab ? 'bg-indigo-500/25 border-indigo-500/50' : 'bg-indigo-500/15 border-indigo-500/25'} hover:bg-indigo-500/25 border text-indigo-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition`}
@@ -547,6 +577,15 @@ export default function Consultation({ language, theme }: ConsultationProps) {
                     <Activity className="w-6 h-6" />
                     <span className="text-sm">{t[language].actionAdmit}</span>
                   </button>
+                  {selectedPatient.gender === 'Female' && (
+                    <button 
+                      onClick={handleEnrollANC}
+                      className="bg-pink-500/15 hover:bg-pink-500/25 border border-pink-500/25 text-pink-500 font-medium py-2.5 rounded-md flex flex-col items-center justify-center space-y-2 transition"
+                    >
+                      <User className="w-6 h-6" />
+                      <span className="text-sm text-center">{t[language].enrollANC}</span>
+                    </button>
+                  )}
                 </div>
 
                 {orderLab && (

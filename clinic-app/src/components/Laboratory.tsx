@@ -253,7 +253,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
   const fetchQueue = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/v1/queues/lab');
+      const res = await fetch('http://localhost:3001/api/v1/queues/lab', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setQueue(data);
@@ -265,7 +265,7 @@ export default function Laboratory({ language }: LaboratoryProps) {
 
   const fetchHistory = async (patientId: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`);
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setHistory(data);

@@ -200,7 +200,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
 
   const fetchQueue = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/v1/queues/pharmacy');
+      const res = await fetch('http://localhost:3001/api/v1/queues/pharmacy', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setQueue(data);
@@ -212,7 +212,7 @@ export default function Pharmacy({ language, theme }: PharmacyProps) {
 
   const fetchHistory = async (patientId: string) => {
     try {
-      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`);
+      const res = await fetch(`http://localhost:3001/api/v1/patients/${patientId}/history`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setHistory(data);

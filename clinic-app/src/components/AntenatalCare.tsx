@@ -62,6 +62,8 @@ const translations = {
     complications: 'Complications (if any)',
     recordPostnatal: 'Record Postnatal Care',
     successPostnatal: 'Postnatal care recorded successfully',
+    updateBabyName: "Update Baby's Name",
+    babyName: "Baby's Name",
   },
   HA: {
     title: 'Awo & Haihuwa (ANC & Delivery)',
@@ -108,6 +110,8 @@ const translations = {
     complications: 'Matsaloli (Idan Akwai)',
     recordPostnatal: 'Yi Rikodin Mai Jego',
     successPostnatal: 'An yi rikodin Mai Jego cikin nasara',
+    updateBabyName: "Canza Sunan Jariri",
+    babyName: "Sunan Jariri",
   },
   YO: {
     title: 'Itọju Aboyun & Ibimọ',
@@ -154,6 +158,8 @@ const translations = {
     complications: 'Awọn ilolu (ti o ba wa)',
     recordPostnatal: 'Ṣe igbasilẹ Itọju Lẹhin Ibimọ',
     successPostnatal: 'Itọju Lẹhin Ibimọ gbasilẹ ni aṣeyọri',
+    updateBabyName: "Yi orukọ ọmọ pada",
+    babyName: "Orukọ Ọmọ",
   },
   IG: {
     title: 'Nlekọta Afọ Ime na Ọmụmụ',
@@ -200,6 +206,8 @@ const translations = {
     complications: 'Nsogbu (ma ọ bụrụ na ọ dị)',
     recordPostnatal: 'Dekọọ Nlekọta Mgbe Ọmụmụ gasịrị',
     successPostnatal: 'Ndekọ nlekọta mgbe ọmụmụ gasịrị gara nke ọma',
+    updateBabyName: "Mmelite Aha Nwa",
+    babyName: "Aha Nwa",
   },
   PI: {
     title: 'Antenatal Care & Delivery',
@@ -246,6 +254,8 @@ const translations = {
     complications: 'Wahala (if any)',
     recordPostnatal: 'Record Postnatal Care',
     successPostnatal: 'Postnatal care record well',
+    updateBabyName: "Change Pikin Name",
+    babyName: "Pikin Name",
   }
 };
 
@@ -268,7 +278,7 @@ export default function AntenatalCare({ language, theme }: AntenatalCareProps) {
   const [ancForm, setAncForm] = useState({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
   const [deliveryForm, setDeliveryForm] = useState({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
   const [immunizationForm, setImmunizationForm] = useState({ vaccine: '', dose: '', batch: '', nextAppt: '' });
-  const [postnatalForm, setPostnatalForm] = useState({ motherAssessment: '', newbornAssessment: '', complications: '' });
+  const [postnatalForm, setPostnatalForm] = useState({ motherAssessment: '', newbornAssessment: '', complications: '', babyName: '' });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Initialize data - easily swappable for real data fetching later
@@ -283,7 +293,7 @@ export default function AntenatalCare({ language, theme }: AntenatalCareProps) {
     setAncForm({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
     setDeliveryForm({ liveBirth: 'Yes', stillbirthType: '', apgar: '', birthWeight: '', gender: 'Male' });
     setImmunizationForm({ vaccine: '', dose: '', batch: '', nextAppt: '' });
-    setPostnatalForm({ motherAssessment: '', newbornAssessment: '', complications: '' });
+    setPostnatalForm({ motherAssessment: '', newbornAssessment: '', complications: '', babyName: '' });
     setToastMessage(null);
   };
 
@@ -297,12 +307,25 @@ export default function AntenatalCare({ language, theme }: AntenatalCareProps) {
     setAncForm({ weight: '', bpSys: '', bpDia: '', fhr: '', presentation: '', notes: '' });
   };
 
-  const handleDeliverySubmit = (e: React.FormEvent) => {
+  const handleDeliverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const recordId = uuidv4();
     
-    // TODO: Replace with actual save to DB/API
-    console.log('Submitting Delivery:', deliveryForm, 'Record ID:', recordId, 'for Patient:', selectedPatient?.id);
+    if (deliveryForm.liveBirth === 'Yes') {
+      try {
+        await fetch('http://localhost:3001/api/v1/patients/newborn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mother_id: selectedPatient?.id,
+            gender: deliveryForm.gender,
+            birth_weight: deliveryForm.birthWeight
+          })
+        });
+      } catch (err) {
+        console.error("Failed to register newborn", err);
+      }
+    }
     
     setToastMessage(`${t.successDelivery} ${recordId.split('-')[0]}`);
     setTimeout(() => setToastMessage(null), 4000);
@@ -319,10 +342,14 @@ export default function AntenatalCare({ language, theme }: AntenatalCareProps) {
 
   const handlePostnatalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting Postnatal:', postnatalForm);
+    // If babyName is provided, we would ideally find the newborn patient ID and PUT to /api/v1/patients/:id
+    // Since this is mock UI, we'll just log it.
+    if (postnatalForm.babyName) {
+      console.log('Updating baby name to:', postnatalForm.babyName);
+    }
     setToastMessage(t.successPostnatal);
     setTimeout(() => setToastMessage(null), 3000);
-    setPostnatalForm({ motherAssessment: '', newbornAssessment: '', complications: '' });
+    setPostnatalForm({ motherAssessment: '', newbornAssessment: '', complications: '', babyName: '' });
   };
 
   const getStatusColor = (status: Patient['status']) => {
@@ -691,6 +718,15 @@ export default function AntenatalCare({ language, theme }: AntenatalCareProps) {
                             rows={2} placeholder="Leave blank if none"
                             value={postnatalForm.complications} onChange={e => setPostnatalForm({...postnatalForm, complications: e.target.value})}
                             className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none resize-none"
+                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>{t.updateBabyName}</label>
+                          <input 
+                            type="text" placeholder={t.babyName}
+                            value={postnatalForm.babyName} onChange={e => setPostnatalForm({...postnatalForm, babyName: e.target.value})}
+                            className="w-full px-3 py-2.5 rounded-md border focus:ring-1 focus:ring-[var(--primary)] focus:border-[var(--primary)] outline-none"
                             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}
                           />
                         </div>

@@ -84,7 +84,7 @@ export default function Billing({ language, theme }: BillingProps) {
 
   const fetchQueue = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/v1/queues/billing');
+      const res = await fetch('http://localhost:3001/api/v1/queues/billing', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setQueue(data);
